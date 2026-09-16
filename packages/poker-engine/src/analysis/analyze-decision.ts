@@ -15,13 +15,20 @@ export function analyzeDecision(
       );
     }
 
-    const result = analyzeHand({
-      heroCards: input.heroCards,
-      villainRange: input.villainRange,
-      board: input.board,
-      pot: input.pot,
-      callAmount: input.callAmount,
-    });
+    const result =
+      analyzeHand({
+        heroCards: input.heroCards,
+        villainRange: input.villainRange,
+        board: input.board,
+        pot: input.pot,
+        callAmount: input.callAmount,
+        ...(input.iterationsPerCombo !== undefined
+          ? {
+            iterationsPerCombo:
+            input.iterationsPerCombo
+          }
+          : {})
+      });
 
     return {
       action: result.action,

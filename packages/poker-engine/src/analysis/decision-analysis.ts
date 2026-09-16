@@ -25,6 +25,7 @@ export interface DecisionAnalysisInput {
   betAmount?: number;
   raiseAmount?: number;
   effectiveStack?: number;
+  iterationsPerCombo?: number;
 }
 
 export interface DecisionAnalysisResult {
