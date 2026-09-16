@@ -67,9 +67,12 @@ export function findDecisionPoints(
 
     decisionPoints.push({
       actionIndex,
-      playerId: action.playerId,
-      street: action.street,
-      action: toEngineAction(action)
+      playerId:
+      action.playerId,
+      street:
+      action.street,
+      action:
+        toEngineAction(action)
     });
   }
 
@@ -77,12 +80,20 @@ export function findDecisionPoints(
 }
 
 function toEngineAction(
-  action: HandHistory["streets"][number]["actions"][number]
+  action:
+  HandHistory["streets"][number]["actions"][number]
 ): PlayerAction {
   return {
-    playerId: action.playerId,
-    type: action.type,
-    amount: action.amount,
-    street: action.street
+    playerId:
+    action.playerId,
+
+    type:
+    action.type,
+
+    amount:
+    action.amount,
+
+    street:
+    action.street
   };
 }

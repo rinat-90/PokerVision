@@ -381,6 +381,29 @@ function orderPostflopPlayers(
     return players;
   }
 
+  /**
+   * Heads-up:
+   * The Button is also the Small Blind
+   * and acts first postflop.
+   */
+  if (players.length === 2) {
+    return [
+      players[buttonIndex],
+      ...players.filter(
+        (_, index) =>
+          index !== buttonIndex
+      )
+    ].filter(
+      (player): player is Player =>
+        player !== undefined
+    );
+  }
+
+  /**
+   * Multiway:
+   * The first player left of the Button
+   * acts first postflop.
+   */
   return [
     ...players.slice(
       buttonIndex + 1

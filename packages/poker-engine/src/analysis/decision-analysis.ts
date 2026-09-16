@@ -26,6 +26,7 @@ export interface DecisionAnalysisInput {
   raiseAmount?: number;
   effectiveStack?: number;
   iterationsPerCombo?: number;
+  foldProbability?: number;
 }
 
 export interface DecisionAnalysisResult {

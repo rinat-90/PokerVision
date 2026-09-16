@@ -30,6 +30,7 @@ export interface AnalyzeHandHistoryOptions {
   heroPlayerId: string;
   villainRange: Range;
   iterationsPerCombo?: number;
+  foldProbability?: number;
 }
 
 export interface HandHistoryAnalysisSummary {
@@ -69,14 +70,20 @@ export function analyzeHandHistory(
       callDecisions += 1;
     }
 
-    /**
-     * The current analysis engine
-     * only produces numerical analysis
-     * for call decisions.
-     */
     if (
       decisionPoint.action.type !==
-      "call"
+      "call" &&
+      decisionPoint.action.type !==
+      "bet"
+    ) {
+      continue;
+    }
+
+    if (
+      decisionPoint.action.type ===
+      "bet" &&
+      options.foldProbability ===
+      undefined
     ) {
       continue;
     }
@@ -88,10 +95,18 @@ export function analyzeHandHistory(
         {
           villainRange:
           options.villainRange,
+
           ...(options.iterationsPerCombo !== undefined
             ? {
               iterationsPerCombo:
               options.iterationsPerCombo
+            }
+            : {}),
+
+          ...(options.foldProbability !== undefined
+            ? {
+              foldProbability:
+              options.foldProbability
             }
             : {})
         }
@@ -113,13 +128,14 @@ export function analyzeHandHistory(
   }
 
   const totalDecisionPoints =
-    decisionPoints.length;
+    decisions.length;
 
   const analyzedDecisionPoints =
     decisions.length;
 
   return {
-    handId: hand.id,
+    handId:
+    hand.id,
 
     summary: {
       totalDecisionPoints,

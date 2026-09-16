@@ -14,6 +14,7 @@ import type {
 export interface AnalyzeDecisionOptions {
   villainRange: Range;
   iterationsPerCombo?: number;
+  foldProbability?: number;
 }
 
 export function analyzeDecision(
@@ -21,16 +22,47 @@ export function analyzeDecision(
   options: AnalyzeDecisionOptions
 ): DecisionAnalysisResult {
   return analyzeEngineDecision({
-    action: context.targetAction.type,
-    heroCards: context.heroCards,
-    villainRange: options.villainRange,
-    board: context.board,
-    pot: context.pot,
+    action:
+    context.targetAction.type,
+
+    heroCards:
+    context.heroCards,
+
+    villainRange:
+    options.villainRange,
+
+    board:
+    context.board,
+
+    pot:
+    context.pot,
+
     ...(context.callAmount !== undefined
       ? {
         callAmount:
         context.callAmount
       }
       : {}),
+
+    ...(context.targetAction.type === "bet"
+      ? {
+        betAmount:
+        context.targetAction.amount
+      }
+      : {}),
+
+    ...(options.foldProbability !== undefined
+      ? {
+        foldProbability:
+        options.foldProbability
+      }
+      : {}),
+
+    ...(options.iterationsPerCombo !== undefined
+      ? {
+        iterationsPerCombo:
+        options.iterationsPerCombo
+      }
+      : {})
   });
 }

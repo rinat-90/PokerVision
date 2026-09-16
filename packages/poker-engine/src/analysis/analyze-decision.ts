@@ -3,7 +3,17 @@ import type {
   DecisionAnalysisResult,
 } from "./decision-analysis.js";
 
-import { analyzeHand } from "./analyze-hand.js";
+import {
+  analyzeHand
+} from "./analyze-hand.js";
+
+import {
+  analyzeBet
+} from "./analyze-bet.js";
+
+import {
+  calculateRangeEquity
+} from "../equity/range-equity.js";
 
 export function analyzeDecision(
   input: DecisionAnalysisInput,
@@ -36,7 +46,65 @@ export function analyzeDecision(
       expectedValue: result.expectedValue.ev,
       potOdds: result.potOdds.requiredEquity,
       decision: result.decision,
-      validVillainCombos: result.validVillainCombos,
+      validVillainCombos:
+      result.validVillainCombos,
+    };
+  }
+
+  if (input.action === "bet") {
+    if (input.betAmount === undefined) {
+      throw new Error(
+        "betAmount is required when analyzing a bet decision",
+      );
+    }
+
+    if (input.foldProbability === undefined) {
+      throw new Error(
+        "foldProbability is required when analyzing a bet decision",
+      );
+    }
+
+    const equityResult =
+      calculateRangeEquity({
+        heroCards: input.heroCards,
+        villainRange: input.villainRange,
+        board: input.board,
+        ...(input.iterationsPerCombo !== undefined
+          ? {
+            iterationsPerCombo:
+            input.iterationsPerCombo
+          }
+          : {})
+      });
+
+    const result =
+      analyzeBet({
+        equity:
+        equityResult.equity,
+
+        pot:
+        input.pot,
+
+        betAmount:
+        input.betAmount,
+
+        foldProbability:
+        input.foldProbability
+      });
+
+    const decision =
+      getDecision(
+        result.expectedValue
+      );
+
+    return {
+      action: "bet",
+      equity: result.equity,
+      expectedValue:
+      result.expectedValue,
+      decision,
+      validVillainCombos:
+      equityResult.combos
     };
   }
 
@@ -46,4 +114,18 @@ export function analyzeDecision(
     decision: "not_applicable",
     validVillainCombos: 0,
   };
+}
+
+function getDecision(
+  ev: number
+): "profitable" | "unprofitable" | "break_even" {
+  if (ev > 0) {
+    return "profitable";
+  }
+
+  if (ev < 0) {
+    return "unprofitable";
+  }
+
+  return "break_even";
 }

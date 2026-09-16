@@ -26,6 +26,7 @@ import type {
 export interface AnalyzeDecisionPointOptions {
   villainRange: Range;
   iterationsPerCombo?: number;
+  foldProbability?: number;
 }
 
 export interface DecisionPointAnalysis {
@@ -52,7 +53,24 @@ export function analyzeDecisionPoint(
   const analysis =
     analyzeDecision(
       context,
-      options
+      {
+        villainRange:
+        options.villainRange,
+
+        ...(options.iterationsPerCombo !== undefined
+          ? {
+            iterationsPerCombo:
+            options.iterationsPerCombo
+          }
+          : {}),
+
+        ...(options.foldProbability !== undefined
+          ? {
+            foldProbability:
+            options.foldProbability
+          }
+          : {})
+      }
     );
 
   return {

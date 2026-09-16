@@ -14,7 +14,8 @@ import {
   analyzeHandHistory,
   createDecisionContext,
   handHistoryToState,
-  replayHandToAction
+  replayHandToAction,
+  findDecisionPoints,
 } from "@poker-vision/hand-history";
 
 import {
@@ -453,6 +454,81 @@ Villain: shows [Qc Qs]
     expect(
       result.analysis.validVillainCombos
     ).toBeGreaterThan(0);
+  });
+
+  it("finds a bet decision from parsed hand history", () => {
+    const input = `
+PokerStars Hand #999999997: Hold'em No Limit ($1/$2 USD)
+Table 'Test' 2-max Seat #1 is the button
+Seat 1: Hero (200 in chips)
+Seat 2: Villain (200 in chips)
+
+*** HOLE CARDS ***
+Hero: posts small blind 1
+Villain: posts big blind 2
+Dealt to Hero [Ah Ad]
+Hero: raises 6 to 6
+Villain: calls 4
+
+*** FLOP *** [2c 7d Ks]
+Hero: bets 10
+Villain: calls 10
+
+*** TURN *** [2c 7d Ks] [3h]
+Hero: checks
+Villain: checks
+
+*** RIVER *** [2c 7d Ks 3h] [9s]
+Hero: bets 20
+Villain: folds
+`;
+
+    const hand =
+      parsePokerStarsHand(input);
+
+    const hero =
+      hand.players.find(
+        (player) =>
+          player.name === "Hero"
+      );
+
+    expect(hero).toBeDefined();
+
+    if (hero === undefined) {
+      throw new Error(
+        "Expected Hero"
+      );
+    }
+
+    const decisionPoints =
+      findDecisionPoints(
+        hand,
+        {
+          playerId:
+          hero.id
+        }
+      );
+
+    console.log(
+      "DECISION POINTS:",
+      decisionPoints
+    );
+
+    console.log(
+      "ALL ACTIONS:",
+    );
+
+    expect(
+      decisionPoints.length
+    ).toBeGreaterThan(0);
+
+    expect(
+      decisionPoints.some(
+        (decisionPoint) =>
+          decisionPoint.action.type ===
+          "bet"
+      )
+    ).toBe(true);
   });
 
   it("analyzes all Hero decision points", () => {
