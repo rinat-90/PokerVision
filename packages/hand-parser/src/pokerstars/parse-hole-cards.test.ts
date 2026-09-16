@@ -21,19 +21,21 @@ describe(
           parsePokerStarsHoleCards(
             input
           )
-        ).toEqual({
-          playerName: "Hero",
-          holeCards: [
-            {
-              rank: "A",
-              suit: "spades"
-            },
-            {
-              rank: "K",
-              suit: "hearts"
-            }
-          ]
-        });
+        ).toEqual([
+          {
+            playerName: "Hero",
+            holeCards: [
+              {
+                rank: "A",
+                suit: "spades"
+              },
+              {
+                rank: "K",
+                suit: "hearts"
+              }
+            ]
+          }
+        ]);
       }
     );
 
@@ -47,19 +49,21 @@ describe(
           parsePokerStarsHoleCards(
             input
           )
-        ).toEqual({
-          playerName: "Villain",
-          holeCards: [
-            {
-              rank: "2",
-              suit: "clubs"
-            },
-            {
-              rank: "7",
-              suit: "diamonds"
-            }
-          ]
-        });
+        ).toEqual([
+          {
+            playerName: "Villain",
+            holeCards: [
+              {
+                rank: "2",
+                suit: "clubs"
+              },
+              {
+                rank: "7",
+                suit: "diamonds"
+              }
+            ]
+          }
+        ]);
       }
     );
 
@@ -73,19 +77,21 @@ describe(
           parsePokerStarsHoleCards(
             input
           )
-        ).toEqual({
-          playerName: "Hero",
-          holeCards: [
-            {
-              rank: "A",
-              suit: "spades"
-            },
-            {
-              rank: "K",
-              suit: "hearts"
-            }
-          ]
-        });
+        ).toEqual([
+          {
+            playerName: "Hero",
+            holeCards: [
+              {
+                rank: "A",
+                suit: "spades"
+              },
+              {
+                rank: "K",
+                suit: "hearts"
+              }
+            ]
+          }
+        ]);
       }
     );
 
@@ -104,30 +110,131 @@ describe(
           parsePokerStarsHoleCards(
             input
           )
-        ).toEqual({
-          playerName: "Hero",
-          holeCards: [
-            {
-              rank: "Q",
-              suit: "spades"
-            },
-            {
-              rank: "J",
-              suit: "diamonds"
-            }
-          ]
-        });
+        ).toEqual([
+          {
+            playerName: "Hero",
+            holeCards: [
+              {
+                rank: "Q",
+                suit: "spades"
+              },
+              {
+                rank: "J",
+                suit: "diamonds"
+              }
+            ]
+          }
+        ]);
       }
     );
 
     it(
-      "returns null when hole cards are absent",
+      "parses hole cards for multiple players",
+      () => {
+        const input = `
+          Dealt to MrPink [8d 8s]
+          Dealt to MrBrown [2h Kc]
+          Dealt to Pluribus [4s 9s]
+          Dealt to MrBlue [Kh Qh]
+          Dealt to MrBlonde [2s 7d]
+          Dealt to MrWhite [7h Jh]
+        `;
+
+        expect(
+          parsePokerStarsHoleCards(
+            input
+          )
+        ).toEqual([
+          {
+            playerName: "MrPink",
+            holeCards: [
+              {
+                rank: "8",
+                suit: "diamonds"
+              },
+              {
+                rank: "8",
+                suit: "spades"
+              }
+            ]
+          },
+          {
+            playerName: "MrBrown",
+            holeCards: [
+              {
+                rank: "2",
+                suit: "hearts"
+              },
+              {
+                rank: "K",
+                suit: "clubs"
+              }
+            ]
+          },
+          {
+            playerName: "Pluribus",
+            holeCards: [
+              {
+                rank: "4",
+                suit: "spades"
+              },
+              {
+                rank: "9",
+                suit: "spades"
+              }
+            ]
+          },
+          {
+            playerName: "MrBlue",
+            holeCards: [
+              {
+                rank: "K",
+                suit: "hearts"
+              },
+              {
+                rank: "Q",
+                suit: "hearts"
+              }
+            ]
+          },
+          {
+            playerName: "MrBlonde",
+            holeCards: [
+              {
+                rank: "2",
+                suit: "spades"
+              },
+              {
+                rank: "7",
+                suit: "diamonds"
+              }
+            ]
+          },
+          {
+            playerName: "MrWhite",
+            holeCards: [
+              {
+                rank: "7",
+                suit: "hearts"
+              },
+              {
+                rank: "J",
+                suit: "hearts"
+              }
+            ]
+          }
+        ]);
+      }
+    );
+
+    it(
+      "returns an empty array when hole cards are absent",
       () => {
         expect(
           parsePokerStarsHoleCards(
             "PokerStars Hand #123456789"
           )
-        ).toBeNull();
+        ).toEqual([]);
       }
     );
   }

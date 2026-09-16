@@ -193,7 +193,7 @@ describe("createAnalysisReport", () => {
 
     expect(report.summary)
       .toEqual({
-        totalDecisionPoints: 1,
+        totalDecisionPoints: 3,
         analyzedDecisionPoints: 1,
         callDecisions: 1
       });

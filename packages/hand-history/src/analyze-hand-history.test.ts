@@ -188,7 +188,7 @@ describe("analyzeHandHistory", () => {
 
     expect(result.summary)
       .toEqual({
-        totalDecisionPoints: 1,
+        totalDecisionPoints: 3,
         analyzedDecisionPoints: 1,
         callDecisions: 1
       });
@@ -452,7 +452,7 @@ describe("analyzeHandHistory", () => {
 
     expect(result.summary)
       .toEqual({
-        totalDecisionPoints: 1,
+        totalDecisionPoints: 3,
         analyzedDecisionPoints: 1,
         callDecisions: 1
       });

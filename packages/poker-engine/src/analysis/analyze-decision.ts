@@ -12,6 +12,10 @@ import {
 } from "./analyze-bet.js";
 
 import {
+  analyzeRaise
+} from "./analyze-raise.js";
+
+import {
   calculateRangeEquity
 } from "../equity/range-equity.js";
 
@@ -99,6 +103,72 @@ export function analyzeDecision(
 
     return {
       action: "bet",
+      equity: result.equity,
+      expectedValue:
+      result.expectedValue,
+      decision,
+      validVillainCombos:
+      equityResult.combos
+    };
+  }
+
+  if (input.action === "raise") {
+    if (input.raiseAmount === undefined) {
+      throw new Error(
+        "raiseAmount is required when analyzing a raise decision",
+      );
+    }
+
+    if (input.foldProbability === undefined) {
+      throw new Error(
+        "foldProbability is required when analyzing a raise decision",
+      );
+    }
+
+    if (input.opponentCallAmount === undefined) {
+      throw new Error(
+        "opponentCallAmount is required when analyzing a raise decision",
+      );
+    }
+
+    const equityResult =
+      calculateRangeEquity({
+        heroCards: input.heroCards,
+        villainRange: input.villainRange,
+        board: input.board,
+        ...(input.iterationsPerCombo !== undefined
+          ? {
+            iterationsPerCombo:
+            input.iterationsPerCombo
+          }
+          : {})
+      });
+
+    const result =
+      analyzeRaise({
+        equity:
+        equityResult.equity,
+
+        pot:
+        input.pot,
+
+        raiseAmount:
+        input.raiseAmount,
+
+        opponentCallAmount:
+        input.opponentCallAmount,
+
+        foldProbability:
+        input.foldProbability
+      });
+
+    const decision =
+      getDecision(
+        result.expectedValue
+      );
+
+    return {
+      action: "raise",
       equity: result.equity,
       expectedValue:
       result.expectedValue,

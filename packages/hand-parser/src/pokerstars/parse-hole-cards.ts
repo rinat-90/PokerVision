@@ -40,9 +40,12 @@ const SUITS: Record<
 
 export function parsePokerStarsHoleCards(
   input: string
-): PokerStarsHoleCards | null {
+): PokerStarsHoleCards[] {
   const lines =
     input.split(/\r?\n/);
+
+  const holeCards: PokerStarsHoleCards[] =
+    [];
 
   for (
     let index = 0;
@@ -88,7 +91,7 @@ export function parsePokerStarsHoleCards(
       );
     }
 
-    return {
+    holeCards.push({
       playerName,
       holeCards: [
         parseCard(
@@ -100,10 +103,10 @@ export function parsePokerStarsHoleCards(
           index + 1
         )
       ]
-    };
+    });
   }
 
-  return null;
+  return holeCards;
 }
 
 function parseCard(

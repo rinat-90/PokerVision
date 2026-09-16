@@ -86,7 +86,7 @@ export function parsePokerStarsHand(
       players
     );
 
-  const heroHoleCards =
+  const holeCards =
     parsePokerStarsHoleCards(
       input
     );
@@ -99,7 +99,7 @@ export function parsePokerStarsHand(
   const playersWithCards =
     attachHoleCards(
       players,
-      heroHoleCards,
+      holeCards,
       showdownCards
     );
 
@@ -210,7 +210,9 @@ function getPosition(
     const position =
       positions[index];
 
-    if (position === undefined) {
+    if (
+      position === undefined
+    ) {
       throw new HandHistoryParserError(
         "INVALID_PLAYER",
         `Unable to assign position to player ${index + 1}`
@@ -228,7 +230,7 @@ function getPosition(
 
 function attachHoleCards(
   players: HandHistoryPlayer[],
-  heroHoleCards:
+  holeCards:
   ReturnType<
     typeof parsePokerStarsHoleCards
   >,
@@ -243,12 +245,12 @@ function attachHoleCards(
       [Card, Card]
     >();
 
-  if (
-    heroHoleCards !== null
-  ) {
+  for (
+    const holeCardData of holeCards
+    ) {
     cardsByPlayerName.set(
-      heroHoleCards.playerName,
-      heroHoleCards.holeCards
+      holeCardData.playerName,
+      holeCardData.holeCards
     );
   }
 

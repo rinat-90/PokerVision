@@ -62,7 +62,9 @@ export function analyzeHandHistory(
 
   let callDecisions = 0;
 
-  for (const decisionPoint of decisionPoints) {
+  for (
+    const decisionPoint of decisionPoints
+    ) {
     if (
       decisionPoint.action.type ===
       "call"
@@ -74,14 +76,20 @@ export function analyzeHandHistory(
       decisionPoint.action.type !==
       "call" &&
       decisionPoint.action.type !==
-      "bet"
+      "bet" &&
+      decisionPoint.action.type !==
+      "raise"
     ) {
       continue;
     }
 
     if (
-      decisionPoint.action.type ===
-      "bet" &&
+      (
+        decisionPoint.action.type ===
+        "bet" ||
+        decisionPoint.action.type ===
+        "raise"
+      ) &&
       options.foldProbability ===
       undefined
     ) {
@@ -128,7 +136,7 @@ export function analyzeHandHistory(
   }
 
   const totalDecisionPoints =
-    decisions.length;
+    decisionPoints.length;
 
   const analyzedDecisionPoints =
     decisions.length;

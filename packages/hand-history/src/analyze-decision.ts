@@ -37,7 +37,8 @@ export function analyzeDecision(
     pot:
     context.pot,
 
-    ...(context.callAmount !== undefined
+    ...(context.targetAction.type === "call" &&
+    context.callAmount !== undefined
       ? {
         callAmount:
         context.callAmount
@@ -48,6 +49,22 @@ export function analyzeDecision(
       ? {
         betAmount:
         context.targetAction.amount
+      }
+      : {}),
+
+    ...(context.targetAction.type === "raise" &&
+    context.raiseAmount !== undefined
+      ? {
+        raiseAmount:
+        context.raiseAmount
+      }
+      : {}),
+
+    ...(context.targetAction.type === "raise" &&
+    context.opponentCallAmount !== undefined
+      ? {
+        opponentCallAmount:
+        context.opponentCallAmount
       }
       : {}),
 

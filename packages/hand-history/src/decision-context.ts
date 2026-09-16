@@ -18,25 +18,17 @@ import type {
 
 export interface DecisionContext {
   actionIndex: number;
-
   playerId: string;
-
   street: Street;
-
   heroCards: Card[];
-
   board: Card[];
-
   pot: number;
-
   currentBet: number;
-
   playerContribution: number;
-
   callAmount: number;
-
+  raiseAmount?: number;
+  opponentCallAmount?: number;
   decisionOptions: DecisionOptions;
-
   targetAction: PlayerAction;
 }
 
@@ -82,7 +74,7 @@ export function createDecisionContext(
       snapshot.minimumRaise
     );
 
-  return {
+  const baseContext: DecisionContext = {
     actionIndex:
     snapshot.actionIndex,
 
@@ -111,5 +103,50 @@ export function createDecisionContext(
 
     targetAction:
     snapshot.targetAction
+  };
+
+  if (
+    snapshot.targetAction.type !==
+    "raise"
+  ) {
+    return baseContext;
+  }
+
+  const raiseAmount =
+    snapshot.targetAction.amount;
+
+  const raiseTotal =
+    playerContribution +
+    raiseAmount;
+
+  const opponent =
+    snapshot.players.find(
+      (currentPlayer) =>
+        currentPlayer.id !== playerId &&
+        currentPlayer.status === "active"
+    );
+
+  if (opponent === undefined) {
+    throw new Error(
+      "No active opponent found for raise decision"
+    );
+  }
+
+  const opponentContribution =
+    snapshot.playerContributions[
+      opponent.id
+      ] ?? 0;
+
+  const opponentCallAmount =
+    Math.max(
+      0,
+      raiseTotal -
+      opponentContribution
+    );
+
+  return {
+    ...baseContext,
+    raiseAmount,
+    opponentCallAmount
   };
 }

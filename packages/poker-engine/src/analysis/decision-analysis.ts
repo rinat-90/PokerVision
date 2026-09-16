@@ -1,5 +1,10 @@
-import type { Card } from "../types.js";
-import type { Range } from "../range/types.js";
+import type {
+  Card
+} from "../types.js";
+
+import type {
+  Range
+} from "../range/types.js";
 
 export type DecisionAction =
   | "fold"
@@ -17,23 +22,40 @@ export type DecisionClassification =
 
 export interface DecisionAnalysisInput {
   action: DecisionAction;
+
   heroCards: Card[];
+
   villainRange: Range;
+
   board: Card[];
+
   pot: number;
+
   callAmount?: number;
+
   betAmount?: number;
+
   raiseAmount?: number;
+
+  opponentCallAmount?: number;
+
   effectiveStack?: number;
+
   iterationsPerCombo?: number;
+
   foldProbability?: number;
 }
 
 export interface DecisionAnalysisResult {
   action: DecisionAction;
+
   equity: number;
+
   expectedValue?: number;
+
   potOdds?: number;
+
   decision: DecisionClassification;
+
   validVillainCombos: number;
 }

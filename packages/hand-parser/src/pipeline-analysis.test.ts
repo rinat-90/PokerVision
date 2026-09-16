@@ -74,7 +74,7 @@ describe("PokerStars analysis pipeline", () => {
 
     expect(result.summary)
       .toEqual({
-        totalDecisionPoints: 2,
+        totalDecisionPoints: 5,
         analyzedDecisionPoints: 2,
         callDecisions: 2
       });
