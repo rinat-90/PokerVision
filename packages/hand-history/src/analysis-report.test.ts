@@ -88,6 +88,7 @@ describe("createAnalysisReport", () => {
             }
           ]
         },
+
         {
           street: "flop",
           board: [
@@ -121,6 +122,7 @@ describe("createAnalysisReport", () => {
             }
           ]
         },
+
         {
           street: "turn",
           board: [
@@ -195,24 +197,82 @@ describe("createAnalysisReport", () => {
       .toEqual({
         totalDecisionPoints: 3,
         analyzedDecisionPoints: 1,
+        skippedDecisionPoints: 2,
         callDecisions: 1
       });
 
     expect(report.decisions)
-      .toHaveLength(1);
+      .toHaveLength(3);
 
-    expect(report.decisions[0])
+    const analyzedDecision =
+      report.decisions.find(
+        (decision) =>
+          decision.status === "analyzed"
+      );
+
+    expect(analyzedDecision)
       .toMatchObject({
         actionIndex: 6,
         street: "turn",
         action: "call",
         amount: 20,
         pot: 52,
-        callAmount: 20
+        callAmount: 20,
+        status: "analyzed"
       });
 
     expect(
-      report.decisions[0]?.equity
+      analyzedDecision?.equity
     ).toBeGreaterThan(0);
+
+    expect(
+      analyzedDecision?.potOdds
+    ).toBeDefined();
+
+    expect(
+      analyzedDecision?.expectedValue
+    ).toBeDefined();
+
+    const skippedDecisions =
+      report.decisions.filter(
+        (decision) =>
+          decision.status === "skipped"
+      );
+
+    expect(skippedDecisions)
+      .toHaveLength(2);
+
+    expect(
+      skippedDecisions.map(
+        (decision) =>
+          decision.action
+      )
+    )
+      .toEqual([
+        "bet",
+        "check"
+      ]);
+
+    expect(
+      skippedDecisions.map(
+        (decision) =>
+          decision.skipReason
+      )
+    )
+      .toEqual([
+        "fold_probability_required",
+        "action_not_supported"
+      ]);
+
+    expect(
+      skippedDecisions.every(
+        (decision) =>
+          decision.equity === undefined &&
+          decision.potOdds === undefined &&
+          decision.expectedValue === undefined &&
+          decision.decision === undefined
+      )
+    )
+      .toBe(true);
   });
 });

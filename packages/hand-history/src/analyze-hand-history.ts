@@ -11,6 +11,14 @@ import {
   findDecisionPoints
 } from "./decision-points.js";
 
+import {
+  createDecisionContext
+} from "./decision-context.js";
+
+import {
+  replayHandToAction
+} from "./replay-hand.js";
+
 import type {
   DecisionContext
 } from "./decision-context.js";
@@ -19,11 +27,21 @@ import type {
   HandHistory
 } from "./types.js";
 
+export type DecisionAnalysisStatus =
+  | "analyzed"
+  | "skipped";
+
+export type DecisionSkipReason =
+  | "action_not_supported"
+  | "fold_probability_required";
+
 export interface HandDecisionAnalysis {
   actionIndex: number;
   action: DecisionContext["targetAction"];
   context: DecisionContext;
-  analysis: DecisionAnalysisResult;
+  status: DecisionAnalysisStatus;
+  skipReason?: DecisionSkipReason;
+  analysis?: DecisionAnalysisResult;
 }
 
 export interface AnalyzeHandHistoryOptions {
@@ -36,6 +54,7 @@ export interface AnalyzeHandHistoryOptions {
 export interface HandHistoryAnalysisSummary {
   totalDecisionPoints: number;
   analyzedDecisionPoints: number;
+  skippedDecisionPoints: number;
   callDecisions: number;
 }
 
@@ -65,34 +84,74 @@ export function analyzeHandHistory(
   for (
     const decisionPoint of decisionPoints
     ) {
+    const action =
+      decisionPoint.action;
+
     if (
-      decisionPoint.action.type ===
-      "call"
+      action.type === "call"
     ) {
       callDecisions += 1;
     }
 
+    const snapshot =
+      replayHandToAction(
+        hand,
+        decisionPoint.actionIndex
+      );
+
+    const context =
+      createDecisionContext(
+        snapshot
+      );
+
     if (
-      decisionPoint.action.type !==
-      "call" &&
-      decisionPoint.action.type !==
-      "bet" &&
-      decisionPoint.action.type !==
-      "raise"
+      action.type !== "call" &&
+      action.type !== "bet" &&
+      action.type !== "raise"
     ) {
+      decisions.push({
+        actionIndex:
+        decisionPoint.actionIndex,
+
+        action:
+        context.targetAction,
+
+        context,
+
+        status:
+          "skipped",
+
+        skipReason:
+          "action_not_supported"
+      });
+
       continue;
     }
 
     if (
       (
-        decisionPoint.action.type ===
-        "bet" ||
-        decisionPoint.action.type ===
-        "raise"
+        action.type === "bet" ||
+        action.type === "raise"
       ) &&
       options.foldProbability ===
       undefined
     ) {
+      decisions.push({
+        actionIndex:
+        decisionPoint.actionIndex,
+
+        action:
+        context.targetAction,
+
+        context,
+
+        status:
+          "skipped",
+
+        skipReason:
+          "fold_probability_required"
+      });
+
       continue;
     }
 
@@ -130,6 +189,9 @@ export function analyzeHandHistory(
       context:
       result.context,
 
+      status:
+        "analyzed",
+
       analysis:
       result.analysis
     });
@@ -139,7 +201,18 @@ export function analyzeHandHistory(
     decisionPoints.length;
 
   const analyzedDecisionPoints =
-    decisions.length;
+    decisions.filter(
+      (decision) =>
+        decision.status ===
+        "analyzed"
+    ).length;
+
+  const skippedDecisionPoints =
+    decisions.filter(
+      (decision) =>
+        decision.status ===
+        "skipped"
+    ).length;
 
   return {
     handId:
@@ -147,7 +220,11 @@ export function analyzeHandHistory(
 
     summary: {
       totalDecisionPoints,
+
       analyzedDecisionPoints,
+
+      skippedDecisionPoints,
+
       callDecisions
     },
 

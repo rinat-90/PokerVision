@@ -50,24 +50,29 @@ Villain: shows [Qc Qs]
 
 describe("PokerStars analysis pipeline", () => {
   it("parses and analyzes Hero decisions end-to-end", () => {
-    const hand = parsePokerStarsHand(
-      POKERSTARS_HAND
-    );
+    const hand =
+      parsePokerStarsHand(
+        POKERSTARS_HAND
+      );
 
-    const villainRange = createRange([
-      "QQ",
-      "JJ",
-      "TT",
-      "AK"
-    ]);
+    const villainRange =
+      createRange([
+        "QQ",
+        "JJ",
+        "TT",
+        "AK"
+      ]);
 
-    const result = analyzeHandHistory(
-      hand,
-      {
-        heroPlayerId: "seat-1",
-        villainRange
-      }
-    );
+    const result =
+      analyzeHandHistory(
+        hand,
+        {
+          heroPlayerId:
+            "seat-1",
+
+          villainRange
+        }
+      );
 
     expect(result.handId)
       .toBeDefined();
@@ -76,14 +81,35 @@ describe("PokerStars analysis pipeline", () => {
       .toEqual({
         totalDecisionPoints: 5,
         analyzedDecisionPoints: 2,
+        skippedDecisionPoints: 3,
         callDecisions: 2
       });
 
     expect(result.decisions)
+      .toHaveLength(5);
+
+    const analyzedDecisions =
+      result.decisions.filter(
+        (decision) =>
+          decision.status ===
+          "analyzed"
+      );
+
+    expect(analyzedDecisions)
       .toHaveLength(2);
 
+    const skippedDecisions =
+      result.decisions.filter(
+        (decision) =>
+          decision.status ===
+          "skipped"
+      );
+
+    expect(skippedDecisions)
+      .toHaveLength(3);
+
     expect(
-      result.decisions[0]?.action
+      analyzedDecisions[0]?.action
     ).toEqual({
       playerId: "seat-1",
       type: "call",
@@ -92,15 +118,15 @@ describe("PokerStars analysis pipeline", () => {
     });
 
     expect(
-      result.decisions[0]?.context.pot
+      analyzedDecisions[0]?.context.pot
     ).toBe(52);
 
     expect(
-      result.decisions[0]?.context.callAmount
+      analyzedDecisions[0]?.context.callAmount
     ).toBe(20);
 
     expect(
-      result.decisions[1]?.action
+      analyzedDecisions[1]?.action
     ).toEqual({
       playerId: "seat-1",
       type: "call",
@@ -109,21 +135,39 @@ describe("PokerStars analysis pipeline", () => {
     });
 
     expect(
-      result.decisions[1]?.context.pot
+      analyzedDecisions[1]?.context.pot
     ).toBe(92);
 
     expect(
-      result.decisions[1]?.context.callAmount
+      analyzedDecisions[1]?.context.callAmount
     ).toBe(20);
 
-    for (const decision of result.decisions) {
+    for (
+      const decision of analyzedDecisions
+      ) {
       expect(
-        decision.analysis.equity
+        decision.analysis
+      ).toBeDefined();
+
+      expect(
+        decision.analysis?.equity
       ).toBeGreaterThan(0);
 
       expect(
-        decision.analysis.validVillainCombos
+        decision.analysis?.validVillainCombos
       ).toBeGreaterThan(0);
+    }
+
+    for (
+      const decision of skippedDecisions
+      ) {
+      expect(
+        decision.analysis
+      ).toBeUndefined();
+
+      expect(
+        decision.skipReason
+      ).toBeDefined();
     }
   });
 });

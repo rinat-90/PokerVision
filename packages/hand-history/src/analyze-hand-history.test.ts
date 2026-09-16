@@ -17,7 +17,7 @@ import type {
 } from "./types.js";
 
 describe("analyzeHandHistory", () => {
-  it("analyzes Hero call decisions using the state before the action", () => {
+  it("analyzes call decisions and preserves skipped decision points", () => {
     const hand: HandHistory = {
       id: "test-hand",
       gameFormat: "cash",
@@ -190,14 +190,63 @@ describe("analyzeHandHistory", () => {
       .toEqual({
         totalDecisionPoints: 3,
         analyzedDecisionPoints: 1,
+        skippedDecisionPoints: 2,
         callDecisions: 1
       });
 
     expect(result.decisions)
+      .toHaveLength(3);
+
+    const skippedDecisions =
+      result.decisions.filter(
+        (decision) =>
+          decision.status === "skipped"
+      );
+
+    expect(skippedDecisions)
+      .toHaveLength(2);
+
+    expect(
+      skippedDecisions.every(
+        (decision) =>
+          decision.analysis === undefined
+      )
+    )
+      .toBe(true);
+
+    expect(
+      skippedDecisions.map(
+        (decision) =>
+          decision.skipReason
+      )
+    )
+      .toEqual([
+        "fold_probability_required",
+        "action_not_supported"
+      ]);
+
+    expect(
+      skippedDecisions.map(
+        (decision) =>
+          decision.action.type
+      )
+    )
+      .toEqual([
+        "bet",
+        "check"
+      ]);
+
+    const analyzedDecisions =
+      result.decisions.filter(
+        (decision) =>
+          decision.status === "analyzed"
+      );
+
+    expect(analyzedDecisions)
       .toHaveLength(1);
 
     const decision =
-      result.decisions[0];
+      analyzedDecisions[0];
 
     expect(decision)
       .toBeDefined();
@@ -271,20 +320,23 @@ describe("analyzeHandHistory", () => {
         street: "turn"
       });
 
-    expect(decision?.analysis.potOdds)
+    expect(decision?.analysis)
       .toBeDefined();
 
-    expect(decision?.analysis.expectedValue)
+    expect(decision?.analysis?.potOdds)
       .toBeDefined();
 
-    expect(decision?.analysis.equity)
+    expect(decision?.analysis?.expectedValue)
+      .toBeDefined();
+
+    expect(decision?.analysis?.equity)
       .toBeGreaterThan(0);
 
-    expect(decision?.analysis.validVillainCombos)
+    expect(decision?.analysis?.validVillainCombos)
       .toBeGreaterThan(0);
   });
 
-  it("reports analyzed call decisions in the summary", () => {
+  it("reports analyzed and skipped decisions in the summary", () => {
     const hand: HandHistory = {
       id: "summary-test-hand",
       gameFormat: "cash",
@@ -454,13 +506,66 @@ describe("analyzeHandHistory", () => {
       .toEqual({
         totalDecisionPoints: 3,
         analyzedDecisionPoints: 1,
+        skippedDecisionPoints: 2,
         callDecisions: 1
       });
 
     expect(result.decisions)
+      .toHaveLength(3);
+
+    const analyzedDecisions =
+      result.decisions.filter(
+        (decision) =>
+          decision.status === "analyzed"
+      );
+
+    expect(analyzedDecisions)
       .toHaveLength(1);
 
-    expect(result.decisions[0]?.action.type)
+    const skippedDecisions =
+      result.decisions.filter(
+        (decision) =>
+          decision.status === "skipped"
+      );
+
+    expect(skippedDecisions)
+      .toHaveLength(2);
+
+    expect(
+      skippedDecisions.map(
+        (decision) =>
+          decision.skipReason
+      )
+    )
+      .toEqual([
+        "fold_probability_required",
+        "action_not_supported"
+      ]);
+
+    expect(
+      skippedDecisions.map(
+        (decision) =>
+          decision.action.type
+      )
+    )
+      .toEqual([
+        "bet",
+        "check"
+      ]);
+
+    const analyzedDecision =
+      analyzedDecisions[0];
+
+    expect(analyzedDecision)
+      .toBeDefined();
+
+    expect(analyzedDecision?.action.type)
       .toBe("call");
+
+    expect(analyzedDecision?.actionIndex)
+      .toBe(6);
+
+    expect(analyzedDecision?.analysis)
+      .toBeDefined();
   });
 });

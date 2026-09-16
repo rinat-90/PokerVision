@@ -601,9 +601,19 @@ Villain: shows [Qc Qs]
       )
     ).toBe(true);
 
-    expect(
-      result.decisions.every(
+    const analyzedDecisions =
+      result.decisions.filter(
         (decision) =>
+          decision.status === "analyzed"
+      );
+
+    expect(analyzedDecisions)
+      .toHaveLength(2);
+
+    expect(
+      analyzedDecisions.every(
+        (decision) =>
+          decision.analysis !== undefined &&
           decision.analysis.equity >= 0 &&
           decision.analysis.equity <= 1
       )

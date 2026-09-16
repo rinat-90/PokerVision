@@ -15,8 +15,11 @@ import {
 } from "@poker-vision/poker-engine";
 
 async function main(): Promise<void> {
-  const filePath = process.argv[2];
-  const heroName = process.argv[3];
+  const filePath =
+    process.argv[2];
+
+  const heroName =
+    process.argv[3];
 
   if (filePath === undefined) {
     console.error(
@@ -47,45 +50,63 @@ async function main(): Promise<void> {
   const hands =
     parsePokerStarsHands(input);
 
+  const villainRange =
+    createRange([
+      "QQ",
+      "JJ",
+      "TT",
+      "AK"
+    ]);
+
   console.log("");
   console.log("PokerVision Analysis");
   console.log("====================");
   console.log("");
-  console.log(`Hands: ${hands.length}`);
-  console.log(`Player: ${heroName}`);
+  console.log(
+    `Hands: ${hands.length}`
+  );
+  console.log(
+    `Player: ${heroName}`
+  );
   console.log("");
 
+  let analyzedHands = 0;
+  let skippedHands = 0;
+
   for (
-    const hand of hands
-    ) {
+    let handIndex = 0;
+    handIndex < hands.length;
+    handIndex++
+  ) {
+    const hand =
+      hands[handIndex];
+
+    if (hand === undefined) {
+      continue;
+    }
+
+    console.log("");
+    console.log(
+      `Hand ${handIndex + 1}: ${hand.id}`
+    );
+    console.log(
+      "--------------------"
+    );
+
     const hero =
       hand.players.find(
         (player) =>
           player.name === heroName
       );
 
-    console.log(
-      `Hand #${hand.id}`
-    );
-    console.log(
-      "----------------"
-    );
-
     if (hero === undefined) {
       console.log(
-        `Player "${heroName}" was not found.`
+        `Player "${heroName}" not found.`
       );
-      console.log("");
+
+      skippedHands += 1;
       continue;
     }
-
-    const villainRange =
-      createRange([
-        "QQ",
-        "JJ",
-        "TT",
-        "AK"
-      ]);
 
     const analysis =
       analyzeHandHistory(
@@ -93,100 +114,159 @@ async function main(): Promise<void> {
         {
           heroPlayerId:
           hero.id,
+
           villainRange
         }
       );
 
     console.log(
-      `Player: ${hero.name}`
+      `Decision points: ${
+        analysis.summary.totalDecisionPoints
+      }`
     );
+
     console.log(
-      `Decision points: ${analysis.summary.totalDecisionPoints}`
+      `Analyzed: ${
+        analysis.summary.analyzedDecisionPoints
+      }`
     );
+
     console.log(
-      `Analyzed: ${analysis.summary.analyzedDecisionPoints}`
+      `Skipped: ${
+        analysis.summary.skippedDecisionPoints
+      }`
     );
+
     console.log(
-      `Call decisions: ${analysis.summary.callDecisions}`
+      `Calls: ${
+        analysis.summary.callDecisions
+      }`
     );
 
     if (
       analysis.decisions.length === 0
     ) {
       console.log(
-        "No call decisions to analyze."
+        "No decision points found."
       );
-      console.log("");
+
+      skippedHands += 1;
       continue;
     }
 
-    console.log("");
+    analyzedHands += 1;
 
     for (
-      const [
-        index,
-        decision
-      ] of analysis.decisions.entries()
+      const decision of analysis.decisions
       ) {
+      console.log("");
+
       console.log(
-        `Decision #${index + 1}`
+        `Action #${decision.actionIndex}`
       );
 
       console.log(
-        `Street: ${decision.context.street.toUpperCase()}`
+        `Street: ${decision.context.street}`
       );
 
       console.log(
-        `Action: ${decision.action.type.toUpperCase()} $${decision.action.amount}`
+        `Action: ${decision.action.type} ${decision.action.amount}`
       );
 
       console.log(
-        `Pot: $${decision.context.pot}`
+        `Pot: $${decision.context.pot.toFixed(2)}`
       );
 
       console.log(
-        `Call: $${decision.context.callAmount}`
+        `Call amount: $${decision.context.callAmount.toFixed(2)}`
+      );
+
+      if (
+        decision.status === "skipped"
+      ) {
+        console.log(
+          `Status: skipped${
+            decision.skipReason !== undefined
+              ? ` (${decision.skipReason})`
+              : ""
+          }`
+        );
+
+        continue;
+      }
+
+      const decisionAnalysis =
+        decision.analysis;
+
+      if (
+        decisionAnalysis === undefined
+      ) {
+        console.log(
+          "Status: analyzed, but no analysis result."
+        );
+
+        continue;
+      }
+
+      console.log(
+        `Status: analyzed`
       );
 
       console.log(
         `Equity: ${formatPercent(
-          decision.analysis.equity
+          decisionAnalysis.equity
         )}`
       );
 
       if (
-        decision.analysis.potOdds !== undefined
+        decisionAnalysis.potOdds !== undefined
       ) {
         console.log(
-          `Pot Odds: ${formatPercent(
-            decision.analysis.potOdds
+          `Pot odds: ${formatPercent(
+            decisionAnalysis.potOdds
           )}`
         );
       }
 
       if (
-        decision.analysis.expectedValue !== undefined
+        decisionAnalysis.expectedValue !== undefined
       ) {
         console.log(
-          `EV: ${formatCurrency(
-            decision.analysis.expectedValue
+          `Expected value: ${formatCurrency(
+            decisionAnalysis.expectedValue
           )}`
         );
       }
 
       console.log(
-        `Decision: ${decision.analysis.decision}`
+        `Decision: ${decisionAnalysis.decision}`
       );
 
-      console.log("");
+      console.log(
+        `Valid villain combos: ${
+          decisionAnalysis.validVillainCombos
+        }`
+      );
     }
   }
+
+  console.log("");
+  console.log("====================");
+  console.log(
+    `Analyzed hands: ${analyzedHands}`
+  );
+  console.log(
+    `Skipped hands: ${skippedHands}`
+  );
+  console.log("");
 }
 
 function formatPercent(
   value: number
 ): string {
-  return `${(value * 100).toFixed(1)}%`;
+  return `${(
+    value * 100
+  ).toFixed(1)}%`;
 }
 
 function formatCurrency(
@@ -197,7 +277,9 @@ function formatCurrency(
       ? "+"
       : "-";
 
-  return `${sign}$${Math.abs(value).toFixed(2)}`;
+  return `${sign}$${Math.abs(
+    value
+  ).toFixed(2)}`;
 }
 
 main().catch(
