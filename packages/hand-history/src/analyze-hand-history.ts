@@ -1,5 +1,5 @@
 import type {
-  HandAnalysisResult,
+  DecisionAnalysisResult,
   Range
 } from "@poker-vision/poker-engine";
 
@@ -23,7 +23,7 @@ export interface HandDecisionAnalysis {
   actionIndex: number;
   action: DecisionContext["targetAction"];
   context: DecisionContext;
-  analysis: HandAnalysisResult;
+  analysis: DecisionAnalysisResult;
 }
 
 export interface AnalyzeHandHistoryOptions {
@@ -70,9 +70,9 @@ export function analyzeHandHistory(
     }
 
     /**
-     * The current analysis engine calculates
-     * call EV, so only analyze Hero call
-     * decisions for now.
+     * The current analysis engine
+     * only produces numerical analysis
+     * for call decisions.
      */
     if (
       decisionPoint.action.type !==
@@ -100,10 +100,13 @@ export function analyzeHandHistory(
     decisions.push({
       actionIndex:
       decisionPoint.actionIndex,
+
       action:
       result.context.targetAction,
+
       context:
       result.context,
+
       analysis:
       result.analysis
     });
@@ -117,11 +120,13 @@ export function analyzeHandHistory(
 
   return {
     handId: hand.id,
+
     summary: {
       totalDecisionPoints,
       analyzedDecisionPoints,
       callDecisions
     },
+
     decisions
   };
 }

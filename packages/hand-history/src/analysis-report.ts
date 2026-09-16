@@ -59,10 +59,10 @@ export function createAnalysisReport(
         decision.analysis.equity,
 
         potOdds:
-        decision.analysis.potOdds.requiredEquity,
+          decision.analysis.potOdds ?? 0,
 
         expectedValue:
-        decision.analysis.expectedValue.ev,
+          decision.analysis.expectedValue ?? 0,
 
         decision:
         decision.analysis.decision

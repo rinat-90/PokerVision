@@ -1,10 +1,10 @@
 import type {
-  HandAnalysisResult,
+  DecisionAnalysisResult,
   Range
 } from "@poker-vision/poker-engine";
 
 import {
-  analyzeHand
+  analyzeDecision as analyzeEngineDecision
 } from "@poker-vision/poker-engine";
 
 import type {
@@ -19,18 +19,18 @@ export interface AnalyzeDecisionOptions {
 export function analyzeDecision(
   context: DecisionContext,
   options: AnalyzeDecisionOptions
-): HandAnalysisResult {
-  return analyzeHand({
+): DecisionAnalysisResult {
+  return analyzeEngineDecision({
+    action: context.targetAction.type,
     heroCards: context.heroCards,
     villainRange: options.villainRange,
     board: context.board,
     pot: context.pot,
-    callAmount: context.callAmount,
-    ...(options.iterationsPerCombo !== undefined
+    ...(context.callAmount !== undefined
       ? {
-        iterationsPerCombo:
-        options.iterationsPerCombo
+        callAmount:
+        context.callAmount
       }
-      : {})
+      : {}),
   });
 }

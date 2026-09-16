@@ -154,17 +154,25 @@ async function main(): Promise<void> {
         )}`
       );
 
-      console.log(
-        `Pot Odds: ${formatPercent(
-          decision.analysis.potOdds.requiredEquity
-        )}`
-      );
+      if (
+        decision.analysis.potOdds !== undefined
+      ) {
+        console.log(
+          `Pot Odds: ${formatPercent(
+            decision.analysis.potOdds
+          )}`
+        );
+      }
 
-      console.log(
-        `EV: ${formatCurrency(
-          decision.analysis.expectedValue.ev
-        )}`
-      );
+      if (
+        decision.analysis.expectedValue !== undefined
+      ) {
+        console.log(
+          `EV: ${formatCurrency(
+            decision.analysis.expectedValue
+          )}`
+        );
+      }
 
       console.log(
         `Decision: ${decision.analysis.decision}`

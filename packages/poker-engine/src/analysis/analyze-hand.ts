@@ -55,6 +55,7 @@ export function analyzeHand(
     getDecision(expectedValue.ev);
 
   return {
+    action: "call",
     equity: equityResult.equity,
 
     potOdds,

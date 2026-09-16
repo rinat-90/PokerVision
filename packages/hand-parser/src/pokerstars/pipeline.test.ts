@@ -344,13 +344,17 @@ Villain: shows [Qc Qs]
     expect(analysis.equity).toBeLessThan(1);
 
     expect(
-      analysis.potOdds.requiredEquity
+      analysis.potOdds
+    ).toBeDefined();
+
+    expect(
+      analysis.potOdds
     ).toBeCloseTo(
       20 / (52 + 20)
     );
 
     expect(
-      analysis.expectedValue.ev
+      analysis.expectedValue
     ).toBeDefined();
 
     expect([

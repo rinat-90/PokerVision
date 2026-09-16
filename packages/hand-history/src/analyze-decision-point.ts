@@ -1,5 +1,5 @@
 import type {
-  HandAnalysisResult,
+  DecisionAnalysisResult,
   Range
 } from "@poker-vision/poker-engine";
 
@@ -30,7 +30,7 @@ export interface AnalyzeDecisionPointOptions {
 
 export interface DecisionPointAnalysis {
   context: DecisionContext;
-  analysis: HandAnalysisResult;
+  analysis: DecisionAnalysisResult;
 }
 
 export function analyzeDecisionPoint(

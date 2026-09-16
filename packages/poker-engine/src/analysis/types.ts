@@ -20,6 +20,8 @@ export interface HandAnalysisInput {
 }
 
 export interface HandAnalysisResult {
+  action: "call";
+
   equity: number;
 
   potOdds: PotOdds;
