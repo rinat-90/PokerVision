@@ -8,7 +8,8 @@
     "dev": "turbo dev",
     "test": "turbo test",
     "lint": "turbo lint",
-    "typecheck": "turbo typecheck"
+    "typecheck": "turbo typecheck",
+    "poker": "pnpm --filter @poker-vision/cli exec tsx src/index.ts"
   },
   "devDependencies": {
     "@types/node": "^22.20.3",
