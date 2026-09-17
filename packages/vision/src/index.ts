@@ -44,3 +44,20 @@ export type {
   TableDetectionFrame,
   TableDetectionPipelineOptions
 } from "./table/table-detection-pipeline.js";
+
+export type {
+  CardRegion,
+  CardDetection
+} from "./card/types.js";
+
+export type {
+  CardDetector
+} from "./card/card-detector.js";
+
+export {
+  WhiteCardDetector
+} from "./card/white-card-detector.js";
+
+export type {
+  WhiteCardDetectorOptions
+} from "./card/white-card-detector.js";
