@@ -493,6 +493,204 @@ describe(
     );
 
     it(
+      "analyzes an all-in decision",
+      () => {
+        const heroCards: Card[] = [
+          {
+            rank: "A",
+            suit: "spades"
+          },
+          {
+            rank: "K",
+            suit: "spades"
+          },
+        ];
+
+        const board: Card[] = [
+          {
+            rank: "Q",
+            suit: "spades"
+          },
+          {
+            rank: "7",
+            suit: "diamonds"
+          },
+          {
+            rank: "2",
+            suit: "clubs"
+          },
+        ];
+
+        const villainRange =
+          createRange([
+            "QQ",
+            "KK",
+            "AA",
+            "AK",
+            "AQ",
+          ]);
+
+        const result =
+          analyzeDecision({
+            action: "all_in",
+            heroCards,
+            villainRange,
+            board,
+            pot: 100,
+            allInAmount: 200,
+            opponentCallAmount: 200,
+            foldProbability: 0.3,
+            iterationsPerCombo: 100,
+          });
+
+        expect(
+          result.action
+        ).toBe("all_in");
+
+        expect(
+          result.equity
+        ).toBeGreaterThanOrEqual(0);
+
+        expect(
+          result.equity
+        ).toBeLessThanOrEqual(1);
+
+        expect(
+          result.expectedValue
+        ).toBeDefined();
+
+        expect([
+          "profitable",
+          "unprofitable",
+          "break_even",
+        ]).toContain(
+          result.decision
+        );
+
+        expect(
+          result.validVillainCombos
+        ).toBeGreaterThan(0);
+      }
+    );
+
+    it(
+      "requires allInAmount for an all-in decision",
+      () => {
+        const heroCards: Card[] = [
+          {
+            rank: "A",
+            suit: "spades"
+          },
+          {
+            rank: "K",
+            suit: "spades"
+          },
+        ];
+
+        const villainRange =
+          createRange([
+            "QQ",
+            "KK",
+            "AA",
+            "AK",
+            "AQ",
+          ]);
+
+        expect(() =>
+          analyzeDecision({
+            action: "all_in",
+            heroCards,
+            villainRange,
+            board: [],
+            pot: 100,
+            opponentCallAmount: 200,
+            foldProbability: 0.3,
+          })
+        ).toThrow(
+          "allInAmount is required when analyzing an all-in decision"
+        );
+      }
+    );
+
+    it(
+      "requires opponentCallAmount for an all-in decision",
+      () => {
+        const heroCards: Card[] = [
+          {
+            rank: "A",
+            suit: "spades"
+          },
+          {
+            rank: "K",
+            suit: "spades"
+          },
+        ];
+
+        const villainRange =
+          createRange([
+            "QQ",
+            "KK",
+            "AA",
+            "AK",
+            "AQ",
+          ]);
+
+        expect(() =>
+          analyzeDecision({
+            action: "all_in",
+            heroCards,
+            villainRange,
+            board: [],
+            pot: 100,
+            allInAmount: 200,
+            foldProbability: 0.3,
+          })
+        ).toThrow(
+          "opponentCallAmount is required when analyzing an all-in decision"
+        );
+      }
+    );
+
+    it(
+      "requires foldProbability for an all-in decision",
+      () => {
+        const heroCards: Card[] = [
+          {
+            rank: "A",
+            suit: "spades"
+          },
+          {
+            rank: "K",
+            suit: "spades"
+          },
+        ];
+
+        const villainRange =
+          createRange([
+            "QQ",
+            "KK",
+            "AA",
+            "AK",
+            "AQ",
+          ]);
+
+        expect(() =>
+          analyzeDecision({
+            action: "all_in",
+            heroCards,
+            villainRange,
+            board: [],
+            pot: 100,
+            allInAmount: 200,
+            opponentCallAmount: 200,
+          })
+        ).toThrow(
+          "foldProbability is required when analyzing an all-in decision"
+        );
+      }
+    );
+
+    it(
       "returns not_applicable for unsupported actions",
       () => {
         const heroCards: Card[] = [
@@ -548,6 +746,71 @@ describe(
         expect(
           result.potOdds
         ).toBeUndefined();
+      }
+    );
+
+    it(
+      "analyzes a check decision",
+      () => {
+        const result =
+          analyzeDecision({
+            action: "check",
+
+            heroCards: [
+              {
+                rank: "A",
+                suit: "hearts"
+              },
+              {
+                rank: "K",
+                suit: "hearts"
+              }
+            ],
+
+            villainRange:
+              createRange([
+                "QQ",
+                "JJ",
+                "AK"
+              ]),
+
+            board: [
+              {
+                rank: "2",
+                suit: "clubs"
+              },
+              {
+                rank: "7",
+                suit: "diamonds"
+              },
+              {
+                rank: "Q",
+                suit: "spades"
+              }
+            ],
+
+            pot: 100
+          });
+
+        expect(
+          result.action
+        ).toBe("check");
+
+        expect(
+          result.equity
+        ).toBeGreaterThan(0);
+
+        expect(
+          result.expectedValue
+        ).toBe(0);
+
+        expect(
+          result.decision
+        ).toBe("break_even");
+
+        expect(
+          result.validVillainCombos
+        ).toBeGreaterThan(0);
       }
     );
   }

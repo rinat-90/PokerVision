@@ -152,19 +152,24 @@ export function createDecisionContext(
     snapshot.targetAction
   };
 
-  if (
-    snapshot.targetAction.type !==
-    "raise"
-  ) {
+  const isRaise =
+    snapshot.targetAction.type ===
+    "raise";
+
+  const isAllIn =
+    snapshot.targetAction.type ===
+    "all_in";
+
+  if (!isRaise && !isAllIn) {
     return baseContext;
   }
 
-  const raiseAmount =
+  const actionAmount =
     snapshot.targetAction.amount;
 
-  const raiseTotal =
+  const actionTotal =
     playerContribution +
-    raiseAmount;
+    actionAmount;
 
   const opponent =
     snapshot.players.find(
@@ -175,7 +180,7 @@ export function createDecisionContext(
 
   if (opponent === undefined) {
     throw new Error(
-      "No active opponent found for raise decision"
+      "No active opponent found for raise or all-in decision"
     );
   }
 
@@ -187,14 +192,23 @@ export function createDecisionContext(
   const opponentCallAmount =
     Math.max(
       0,
-      raiseTotal -
+      actionTotal -
       opponentContribution
     );
+
+  if (isAllIn) {
+    return {
+      ...baseContext,
+
+      opponentCallAmount
+    };
+  }
 
   return {
     ...baseContext,
 
-    raiseAmount,
+    raiseAmount:
+    actionAmount,
 
     opponentCallAmount
   };

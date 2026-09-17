@@ -16,26 +16,35 @@ import {
 } from "./analyze-raise.js";
 
 import {
+  analyzeAllIn
+} from "./analyze-all-in.js";
+
+import {
+  analyzeCheck
+} from "./analyze-check.js";
+
+import {
   calculateRangeEquity
 } from "../equity/range-equity.js";
 
 export function analyzeDecision(
   input: DecisionAnalysisInput,
 ): DecisionAnalysisResult {
-  if (input.action === "call") {
-    if (input.callAmount === undefined) {
-      throw new Error(
-        "callAmount is required when analyzing a call decision",
-      );
-    }
-
+  if (input.action === "check") {
     const result =
-      analyzeHand({
-        heroCards: input.heroCards,
-        villainRange: input.villainRange,
-        board: input.board,
-        pot: input.pot,
-        callAmount: input.callAmount,
+      analyzeCheck();
+
+    const equityResult =
+      calculateRangeEquity({
+        heroCards:
+        input.heroCards,
+
+        villainRange:
+        input.villainRange,
+
+        board:
+        input.board,
+
         ...(input.iterationsPerCombo !== undefined
           ? {
             iterationsPerCombo:
@@ -46,10 +55,138 @@ export function analyzeDecision(
 
     return {
       action: result.action,
-      equity: result.equity,
-      expectedValue: result.expectedValue.ev,
-      potOdds: result.potOdds.requiredEquity,
-      decision: result.decision,
+      equity:
+      equityResult.equity,
+      expectedValue:
+      result.expectedValue,
+      decision:
+      result.decision,
+      validVillainCombos:
+      equityResult.combos
+    };
+  }
+
+  if (input.action === "all_in") {
+    if (input.allInAmount === undefined) {
+      throw new Error(
+        "allInAmount is required when analyzing an all-in decision",
+      );
+    }
+
+    if (input.opponentCallAmount === undefined) {
+      throw new Error(
+        "opponentCallAmount is required when analyzing an all-in decision",
+      );
+    }
+
+    if (input.foldProbability === undefined) {
+      throw new Error(
+        "foldProbability is required when analyzing an all-in decision",
+      );
+    }
+
+    const equityResult =
+      calculateRangeEquity({
+        heroCards:
+        input.heroCards,
+
+        villainRange:
+        input.villainRange,
+
+        board:
+        input.board,
+
+        ...(input.iterationsPerCombo !== undefined
+          ? {
+            iterationsPerCombo:
+            input.iterationsPerCombo
+          }
+          : {})
+      });
+
+    const result =
+      analyzeAllIn({
+        equity:
+        equityResult.equity,
+
+        pot:
+        input.pot,
+
+        allInAmount:
+        input.allInAmount,
+
+        opponentCallAmount:
+        input.opponentCallAmount,
+
+        foldProbability:
+        input.foldProbability
+      });
+
+    const decision =
+      getDecision(
+        result.expectedValue
+      );
+
+    return {
+      action: "all_in",
+      equity:
+      result.equity,
+      expectedValue:
+      result.expectedValue,
+      decision,
+      validVillainCombos:
+      equityResult.combos
+    };
+  }
+
+  if (input.action === "call") {
+    if (input.callAmount === undefined) {
+      throw new Error(
+        "callAmount is required when analyzing a call decision",
+      );
+    }
+
+    const result =
+      analyzeHand({
+        heroCards:
+        input.heroCards,
+
+        villainRange:
+        input.villainRange,
+
+        board:
+        input.board,
+
+        pot:
+        input.pot,
+
+        callAmount:
+        input.callAmount,
+
+        ...(input.iterationsPerCombo !== undefined
+          ? {
+            iterationsPerCombo:
+            input.iterationsPerCombo
+          }
+          : {})
+      });
+
+    return {
+      action:
+      result.action,
+
+      equity:
+      result.equity,
+
+      expectedValue:
+      result.expectedValue.ev,
+
+      potOdds:
+      result.potOdds.requiredEquity,
+
+      decision:
+      result.decision,
+
       validVillainCombos:
       result.validVillainCombos,
     };
@@ -70,9 +207,15 @@ export function analyzeDecision(
 
     const equityResult =
       calculateRangeEquity({
-        heroCards: input.heroCards,
-        villainRange: input.villainRange,
-        board: input.board,
+        heroCards:
+        input.heroCards,
+
+        villainRange:
+        input.villainRange,
+
+        board:
+        input.board,
+
         ...(input.iterationsPerCombo !== undefined
           ? {
             iterationsPerCombo:
@@ -103,10 +246,15 @@ export function analyzeDecision(
 
     return {
       action: "bet",
-      equity: result.equity,
+
+      equity:
+      result.equity,
+
       expectedValue:
       result.expectedValue,
+
       decision,
+
       validVillainCombos:
       equityResult.combos
     };
@@ -133,9 +281,15 @@ export function analyzeDecision(
 
     const equityResult =
       calculateRangeEquity({
-        heroCards: input.heroCards,
-        villainRange: input.villainRange,
-        board: input.board,
+        heroCards:
+        input.heroCards,
+
+        villainRange:
+        input.villainRange,
+
+        board:
+        input.board,
+
         ...(input.iterationsPerCombo !== undefined
           ? {
             iterationsPerCombo:
@@ -169,20 +323,32 @@ export function analyzeDecision(
 
     return {
       action: "raise",
-      equity: result.equity,
+
+      equity:
+      result.equity,
+
       expectedValue:
       result.expectedValue,
+
       decision,
+
       validVillainCombos:
       equityResult.combos
     };
   }
 
   return {
-    action: input.action,
-    equity: 0,
-    decision: "not_applicable",
-    validVillainCombos: 0,
+    action:
+    input.action,
+
+    equity:
+      0,
+
+    decision:
+      "not_applicable",
+
+    validVillainCombos:
+      0,
   };
 }
 

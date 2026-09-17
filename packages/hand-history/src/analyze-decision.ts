@@ -33,13 +33,20 @@ export function analyzeDecision(
       analyzeFold();
 
     return {
-      action: result.action,
-      equity: 0,
+      action:
+      result.action,
+
+      equity:
+        0,
+
       expectedValue:
       result.expectedValue,
+
       decision:
       result.decision,
-      validVillainCombos: 0
+
+      validVillainCombos:
+        0
     };
   }
 
@@ -97,7 +104,17 @@ export function analyzeDecision(
       }
       : {}),
 
-    ...(context.targetAction.type === "raise" &&
+    ...(context.targetAction.type === "all_in"
+      ? {
+        allInAmount:
+        context.targetAction.amount
+      }
+      : {}),
+
+    ...((
+      context.targetAction.type === "raise" ||
+      context.targetAction.type === "all_in"
+    ) &&
     context.opponentCallAmount !== undefined
       ? {
         opponentCallAmount:
@@ -106,7 +123,8 @@ export function analyzeDecision(
       : {}),
 
     ...(context.targetAction.type === "bet" ||
-    context.targetAction.type === "raise"
+    context.targetAction.type === "raise" ||
+    context.targetAction.type === "all_in"
       ? {
         foldProbability
       }

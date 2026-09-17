@@ -37,6 +37,8 @@ export interface DecisionAnalysisInput {
 
   raiseAmount?: number;
 
+  allInAmount?: number;
+
   opponentCallAmount?: number;
 
   effectiveStack?: number;

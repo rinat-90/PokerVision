@@ -283,5 +283,157 @@ describe(
         );
       }
     );
+
+    it(
+      "uses the computed opponent call amount for an all-in",
+      () => {
+        const heroCards: Card[] = [
+          {
+            rank: "A",
+            suit: "hearts"
+          },
+          {
+            rank: "K",
+            suit: "hearts"
+          }
+        ];
+
+        const board: Card[] = [
+          {
+            rank: "2",
+            suit: "clubs"
+          },
+          {
+            rank: "7",
+            suit: "diamonds"
+          },
+          {
+            rank: "Q",
+            suit: "spades"
+          }
+        ];
+
+        const targetAction: PlayerAction = {
+          playerId: "hero",
+          type: "all_in",
+          amount: 170,
+          street: "flop"
+        };
+
+        const snapshot: HandStateSnapshot = {
+          actionIndex: 1,
+          targetAction,
+          street: "flop",
+          board,
+          players: [
+            {
+              id: "hero",
+              name: "Hero",
+              position: "BTN",
+              stack: 170,
+              status: "active",
+              holeCards: [
+                heroCards[0]!,
+                heroCards[1]!
+              ]
+            },
+            {
+              id: "villain",
+              name: "Villain",
+              position: "BB",
+              stack: 150,
+              status: "active"
+            }
+          ],
+          playersToAct: ["hero"],
+          currentPlayerId: "hero",
+          bettingRoundComplete: false,
+          pot: 60,
+          currentBet: 20,
+          minimumRaise: 20,
+          playerContributions: {
+            hero: 0,
+            villain: 20
+          },
+          totalContributions: {
+            hero: 0,
+            villain: 20
+          },
+          actions: []
+        };
+
+        const villainRange =
+          createRange([
+            "QQ",
+            "JJ",
+            "AK"
+          ]);
+
+        const context =
+          createDecisionContext(
+            snapshot,
+            {
+              villainRange
+            }
+          );
+
+        expect(
+          context.opponentCallAmount
+        ).toBe(170 - 20);
+
+        const opponent =
+          context.opponentContext.opponents[0];
+
+        expect(
+          opponent
+        ).toBeDefined();
+
+        expect(
+          opponent?.response.foldProbability
+        ).toBe(0.33);
+
+        const result =
+          analyzeDecision(
+            context,
+            {
+              villainRange
+            }
+          );
+
+        expect(
+          result.action
+        ).toBe("all_in");
+
+        expect(
+          result.equity
+        ).toBeGreaterThanOrEqual(0);
+
+        expect(
+          result.equity
+        ).toBeLessThanOrEqual(1);
+
+        expect(
+          result.expectedValue
+        ).toBeDefined();
+
+        expect([
+          "profitable",
+          "unprofitable",
+          "break_even",
+        ]).toContain(
+          result.decision
+        );
+
+        expect(
+          result.validVillainCombos
+        ).toBe(
+          opponent?.opponent.range.combos.length
+        );
+
+        expect(
+          result.validVillainCombos
+        ).toBeGreaterThan(0);
+      }
+    );
   }
 );
