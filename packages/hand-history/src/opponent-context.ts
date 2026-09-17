@@ -1,5 +1,6 @@
 import type {
   OpponentContext as EngineOpponentContext,
+  OpponentResponseModel,
   Range
 } from "@poker-vision/poker-engine";
 
@@ -20,9 +21,14 @@ export interface CreateOpponentContextOptions {
   villainRange: Range;
 }
 
+export interface HandOpponent {
+  opponent: EngineOpponentContext;
+  response: OpponentResponseModel;
+}
+
 export interface HandOpponentContext {
   heroPlayerId: string;
-  opponents: EngineOpponentContext[];
+  opponents: HandOpponent[];
 }
 
 export function createOpponentContext(
@@ -92,7 +98,11 @@ export function createOpponentContext(
                 : {})
             });
 
-          return rangedModel.opponent;
+          return {
+            opponent:
+            rangedModel.opponent,
+            response
+          };
         }
       );
 

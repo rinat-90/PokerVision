@@ -112,8 +112,13 @@ describe(
           result.opponents
         ).toHaveLength(1);
 
+        const opponent =
+          result.opponents[0];
+
+        expect(opponent).toBeDefined();
+
         expect(
-          result.opponents[0]
+          opponent?.opponent
         ).toEqual({
           playerId: "villain",
           playerName: "Villain",
@@ -121,6 +126,14 @@ describe(
           stack: 900,
           status: "active",
           range
+        });
+
+        expect(
+          opponent?.response
+        ).toEqual({
+          foldProbability: 0.33,
+          callProbability: 0.67,
+          raiseProbability: 0
         });
       }
     );
