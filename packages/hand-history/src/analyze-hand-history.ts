@@ -108,57 +108,6 @@ export function analyzeHandHistory(
         }
       );
 
-    if (
-      action.type !== "call" &&
-      action.type !== "bet" &&
-      action.type !== "raise"
-    ) {
-      decisions.push({
-        actionIndex:
-        decisionPoint.actionIndex,
-
-        action:
-        context.targetAction,
-
-        context,
-
-        status:
-          "skipped",
-
-        skipReason:
-          "action_not_supported"
-      });
-
-      continue;
-    }
-
-    if (
-      (
-        action.type === "bet" ||
-        action.type === "raise"
-      ) &&
-      options.foldProbability ===
-      undefined
-    ) {
-      decisions.push({
-        actionIndex:
-        decisionPoint.actionIndex,
-
-        action:
-        context.targetAction,
-
-        context,
-
-        status:
-          "skipped",
-
-        skipReason:
-          "fold_probability_required"
-      });
-
-      continue;
-    }
-
     const result =
       analyzeDecisionPoint(
         hand,
@@ -188,10 +137,9 @@ export function analyzeHandHistory(
       decisionPoint.actionIndex,
 
       action:
-      result.context.targetAction,
+      context.targetAction,
 
-      context:
-      result.context,
+      context,
 
       status:
         "analyzed",

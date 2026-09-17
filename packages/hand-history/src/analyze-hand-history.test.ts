@@ -16,556 +16,466 @@ import type {
   HandHistory
 } from "./types.js";
 
-describe("analyzeHandHistory", () => {
-  it("analyzes call decisions and preserves skipped decision points", () => {
-    const hand: HandHistory = {
-      id: "test-hand",
-      gameFormat: "cash",
-      smallBlind: 1,
-      bigBlind: 2,
-      ante: 0,
+describe(
+  "analyzeHandHistory",
+  () => {
+    it(
+      "analyzes all supported decision types",
+      () => {
+        const hand: HandHistory = {
+          id: "all-actions-hand",
+          gameFormat: "cash",
+          smallBlind: 1,
+          bigBlind: 2,
+          ante: 0,
 
-      players: [
-        {
-          id: "hero",
-          name: "Hero",
-          position: "BTN",
-          startingStack: 200,
-          holeCards: [
+          players: [
             {
-              rank: "A",
-              suit: "hearts"
+              id: "hero",
+              name: "Hero",
+              position: "BTN",
+              startingStack: 500,
+              holeCards: [
+                {
+                  rank: "A",
+                  suit: "hearts"
+                },
+                {
+                  rank: "A",
+                  suit: "diamonds"
+                }
+              ]
             },
             {
-              rank: "A",
-              suit: "diamonds"
-            }
-          ]
-        },
-        {
-          id: "villain",
-          name: "Villain",
-          position: "BB",
-          startingStack: 200
-        }
-      ],
-
-      forcedBets: [
-        {
-          playerId: "hero",
-          type: "small_blind",
-          amount: 1
-        },
-        {
-          playerId: "villain",
-          type: "big_blind",
-          amount: 2
-        }
-      ],
-
-      streets: [
-        {
-          street: "preflop",
-          board: [],
-          actions: [
-            {
-              playerId: "hero",
-              type: "raise",
-              amount: 5,
-              amountType: "contribution",
-              street: "preflop"
-            },
-            {
-              playerId: "villain",
-              type: "call",
-              amount: 4,
-              amountType: "contribution",
-              street: "preflop"
-            }
-          ]
-        },
-
-        {
-          street: "flop",
-          board: [
-            {
-              rank: "2",
-              suit: "clubs"
-            },
-            {
-              rank: "7",
-              suit: "diamonds"
-            },
-            {
-              rank: "K",
-              suit: "spades"
+              id: "villain",
+              name: "Villain",
+              position: "BB",
+              startingStack: 500
             }
           ],
-          actions: [
+
+          forcedBets: [
             {
               playerId: "hero",
-              type: "bet",
-              amount: 10,
-              amountType: "contribution",
-              street: "flop"
+              type: "small_blind",
+              amount: 1
             },
             {
               playerId: "villain",
-              type: "call",
-              amount: 10,
-              amountType: "contribution",
-              street: "flop"
-            }
-          ]
-        },
-
-        {
-          street: "turn",
-          board: [
-            {
-              rank: "2",
-              suit: "clubs"
-            },
-            {
-              rank: "7",
-              suit: "diamonds"
-            },
-            {
-              rank: "K",
-              suit: "spades"
-            },
-            {
-              rank: "3",
-              suit: "hearts"
+              type: "big_blind",
+              amount: 2
             }
           ],
-          actions: [
+
+          streets: [
             {
-              playerId: "hero",
-              type: "check",
-              amount: 0,
-              amountType: "contribution",
-              street: "turn"
+              street: "preflop",
+              board: [],
+              actions: [
+                {
+                  playerId: "villain",
+                  type: "check",
+                  amount: 0,
+                  amountType: "contribution",
+                  street: "preflop"
+                },
+                {
+                  playerId: "hero",
+                  type: "call",
+                  amount: 1,
+                  amountType: "contribution",
+                  street: "preflop"
+                }
+              ]
             },
+
             {
-              playerId: "villain",
-              type: "bet",
-              amount: 20,
-              amountType: "contribution",
-              street: "turn"
+              street: "flop",
+              board: [
+                {
+                  rank: "2",
+                  suit: "clubs"
+                },
+                {
+                  rank: "7",
+                  suit: "diamonds"
+                },
+                {
+                  rank: "K",
+                  suit: "spades"
+                }
+              ],
+              actions: [
+                {
+                  playerId: "hero",
+                  type: "bet",
+                  amount: 10,
+                  amountType: "contribution",
+                  street: "flop"
+                },
+                {
+                  playerId: "villain",
+                  type: "call",
+                  amount: 10,
+                  amountType: "contribution",
+                  street: "flop"
+                }
+              ]
             },
+
             {
-              playerId: "hero",
-              type: "call",
-              amount: 20,
-              amountType: "contribution",
-              street: "turn"
+              street: "turn",
+              board: [
+                {
+                  rank: "2",
+                  suit: "clubs"
+                },
+                {
+                  rank: "7",
+                  suit: "diamonds"
+                },
+                {
+                  rank: "K",
+                  suit: "spades"
+                },
+                {
+                  rank: "3",
+                  suit: "hearts"
+                }
+              ],
+              actions: [
+                {
+                  playerId: "villain",
+                  type: "check",
+                  amount: 0,
+                  amountType: "contribution",
+                  street: "turn"
+                },
+                {
+                  playerId: "hero",
+                  type: "raise",
+                  amount: 20,
+                  amountType: "contribution",
+                  street: "turn"
+                },
+                {
+                  playerId: "villain",
+                  type: "call",
+                  amount: 20,
+                  amountType: "contribution",
+                  street: "turn"
+                }
+              ]
             }
           ]
-        }
-      ]
-    };
+        };
 
-    const villainRange =
-      createRange([
-        "QQ",
-        "JJ",
-        "TT",
-        "AK"
-      ]);
+        const villainRange =
+          createRange([
+            "QQ",
+            "JJ",
+            "TT",
+            "AK"
+          ]);
 
-    const result =
-      analyzeHandHistory(
-        hand,
-        {
-          heroPlayerId: "hero",
-          villainRange
-        }
-      );
-
-    expect(result.handId)
-      .toBe("test-hand");
-
-    expect(result.summary)
-      .toEqual({
-        totalDecisionPoints: 3,
-        analyzedDecisionPoints: 1,
-        skippedDecisionPoints: 2,
-        callDecisions: 1
-      });
-
-    expect(result.decisions)
-      .toHaveLength(3);
-
-    const skippedDecisions =
-      result.decisions.filter(
-        (decision) =>
-          decision.status === "skipped"
-      );
-
-    expect(skippedDecisions)
-      .toHaveLength(2);
-
-    expect(
-      skippedDecisions.every(
-        (decision) =>
-          decision.analysis === undefined
-      )
-    )
-      .toBe(true);
-
-    expect(
-      skippedDecisions.map(
-        (decision) =>
-          decision.skipReason
-      )
-    )
-      .toEqual([
-        "fold_probability_required",
-        "action_not_supported"
-      ]);
-
-    expect(
-      skippedDecisions.map(
-        (decision) =>
-          decision.action.type
-      )
-    )
-      .toEqual([
-        "bet",
-        "check"
-      ]);
-
-    const analyzedDecisions =
-      result.decisions.filter(
-        (decision) =>
-          decision.status === "analyzed"
-      );
-
-    expect(analyzedDecisions)
-      .toHaveLength(1);
-
-    const decision =
-      analyzedDecisions[0];
-
-    expect(decision)
-      .toBeDefined();
-
-    expect(decision?.actionIndex)
-      .toBe(6);
-
-    expect(decision?.action)
-      .toEqual({
-        playerId: "hero",
-        type: "call",
-        amount: 20,
-        street: "turn"
-      });
-
-    expect(decision?.context.playerId)
-      .toBe("hero");
-
-    expect(decision?.context.street)
-      .toBe("turn");
-
-    expect(decision?.context.heroCards)
-      .toEqual([
-        {
-          rank: "A",
-          suit: "hearts"
-        },
-        {
-          rank: "A",
-          suit: "diamonds"
-        }
-      ]);
-
-    expect(decision?.context.board)
-      .toEqual([
-        {
-          rank: "2",
-          suit: "clubs"
-        },
-        {
-          rank: "7",
-          suit: "diamonds"
-        },
-        {
-          rank: "K",
-          suit: "spades"
-        },
-        {
-          rank: "3",
-          suit: "hearts"
-        }
-      ]);
-
-    expect(decision?.context.pot)
-      .toBe(52);
-
-    expect(decision?.context.currentBet)
-      .toBe(20);
-
-    expect(decision?.context.playerContribution)
-      .toBe(0);
-
-    expect(decision?.context.callAmount)
-      .toBe(20);
-
-    expect(decision?.context.targetAction)
-      .toEqual({
-        playerId: "hero",
-        type: "call",
-        amount: 20,
-        street: "turn"
-      });
-
-    expect(decision?.analysis)
-      .toBeDefined();
-
-    expect(decision?.analysis?.potOdds)
-      .toBeDefined();
-
-    expect(decision?.analysis?.expectedValue)
-      .toBeDefined();
-
-    expect(decision?.analysis?.equity)
-      .toBeGreaterThan(0);
-
-    expect(decision?.analysis?.validVillainCombos)
-      .toBeGreaterThan(0);
-  });
-
-  it("reports analyzed and skipped decisions in the summary", () => {
-    const hand: HandHistory = {
-      id: "summary-test-hand",
-      gameFormat: "cash",
-      smallBlind: 1,
-      bigBlind: 2,
-      ante: 0,
-
-      players: [
-        {
-          id: "hero",
-          name: "Hero",
-          position: "BTN",
-          startingStack: 200,
-          holeCards: [
+        const result =
+          analyzeHandHistory(
+            hand,
             {
-              rank: "A",
-              suit: "hearts"
-            },
-            {
-              rank: "A",
-              suit: "diamonds"
+              heroPlayerId: "hero",
+              villainRange
             }
-          ]
-        },
-        {
-          id: "villain",
-          name: "Villain",
-          position: "BB",
-          startingStack: 200
-        }
-      ],
+          );
 
-      forcedBets: [
-        {
-          playerId: "hero",
-          type: "small_blind",
-          amount: 1
-        },
-        {
-          playerId: "villain",
-          type: "big_blind",
-          amount: 2
-        }
-      ],
+        expect(
+          result.handId
+        ).toBe(
+          "all-actions-hand"
+        );
 
-      streets: [
-        {
-          street: "preflop",
-          board: [],
-          actions: [
+        expect(
+          result.decisions
+        ).toHaveLength(
+          3
+        );
+
+        expect(
+          result.summary.totalDecisionPoints
+        ).toBe(
+          3
+        );
+
+        expect(
+          result.summary.analyzedDecisionPoints
+        ).toBe(
+          3
+        );
+
+        expect(
+          result.summary.skippedDecisionPoints
+        ).toBe(
+          0
+        );
+
+        expect(
+          result.summary.callDecisions
+        ).toBe(
+          1
+        );
+
+        expect(
+          result.decisions.every(
+            (decision) =>
+              decision.status ===
+              "analyzed"
+          )
+        ).toBe(
+          true
+        );
+
+        expect(
+          result.decisions.map(
+            (decision) =>
+              decision.action.type
+          )
+        ).toEqual([
+          "call",
+          "bet",
+          "raise"
+        ]);
+
+        expect(
+          result.decisions.every(
+            (decision) =>
+              decision.analysis !==
+              undefined
+          )
+        ).toBe(
+          true
+        );
+
+        expect(
+          result.decisions.every(
+            (decision) =>
+              decision.analysis?.equity !==
+              undefined
+          )
+        ).toBe(
+          true
+        );
+
+        expect(
+          result.decisions.every(
+            (decision) =>
+              decision.analysis?.validVillainCombos !==
+              undefined
+          )
+        ).toBe(
+          true
+        );
+      }
+    );
+
+    it(
+      "analyzes an all-in decision",
+      () => {
+        const hand: HandHistory = {
+          id: "all-in-hand",
+          gameFormat: "cash",
+          smallBlind: 1,
+          bigBlind: 2,
+          ante: 0,
+
+          players: [
             {
-              playerId: "hero",
-              type: "raise",
-              amount: 5,
-              amountType: "contribution",
-              street: "preflop"
+              id: "hero",
+              name: "Hero",
+              position: "BTN",
+              startingStack: 200,
+              holeCards: [
+                {
+                  rank: "A",
+                  suit: "hearts"
+                },
+                {
+                  rank: "K",
+                  suit: "hearts"
+                }
+              ]
             },
             {
-              playerId: "villain",
-              type: "call",
-              amount: 4,
-              amountType: "contribution",
-              street: "preflop"
-            }
-          ]
-        },
-
-        {
-          street: "flop",
-          board: [
-            {
-              rank: "2",
-              suit: "clubs"
-            },
-            {
-              rank: "7",
-              suit: "diamonds"
-            },
-            {
-              rank: "K",
-              suit: "spades"
+              id: "villain",
+              name: "Villain",
+              position: "BB",
+              startingStack: 200
             }
           ],
-          actions: [
+
+          forcedBets: [
             {
               playerId: "hero",
-              type: "bet",
-              amount: 10,
-              amountType: "contribution",
-              street: "flop"
+              type: "small_blind",
+              amount: 1
             },
             {
               playerId: "villain",
-              type: "call",
-              amount: 10,
-              amountType: "contribution",
-              street: "flop"
-            }
-          ]
-        },
-
-        {
-          street: "turn",
-          board: [
-            {
-              rank: "2",
-              suit: "clubs"
-            },
-            {
-              rank: "7",
-              suit: "diamonds"
-            },
-            {
-              rank: "K",
-              suit: "spades"
-            },
-            {
-              rank: "3",
-              suit: "hearts"
+              type: "big_blind",
+              amount: 2
             }
           ],
-          actions: [
+
+          streets: [
             {
-              playerId: "hero",
-              type: "check",
-              amount: 0,
-              amountType: "contribution",
-              street: "turn"
+              street: "preflop",
+              board: [],
+              actions: [
+                {
+                  playerId: "villain",
+                  type: "check",
+                  amount: 0,
+                  amountType: "contribution",
+                  street: "preflop"
+                },
+                {
+                  playerId: "hero",
+                  type: "raise",
+                  amount: 10,
+                  amountType: "contribution",
+                  street: "preflop"
+                },
+                {
+                  playerId: "villain",
+                  type: "call",
+                  amount: 8,
+                  amountType: "contribution",
+                  street: "preflop"
+                }
+              ]
             },
+
             {
-              playerId: "villain",
-              type: "bet",
-              amount: 20,
-              amountType: "contribution",
-              street: "turn"
-            },
-            {
-              playerId: "hero",
-              type: "call",
-              amount: 20,
-              amountType: "contribution",
-              street: "turn"
+              street: "flop",
+              board: [
+                {
+                  rank: "2",
+                  suit: "clubs"
+                },
+                {
+                  rank: "7",
+                  suit: "diamonds"
+                },
+                {
+                  rank: "Q",
+                  suit: "spades"
+                }
+              ],
+              actions: [
+                {
+                  playerId: "hero",
+                  type: "all_in",
+                  amount: 189,
+                  amountType: "contribution",
+                  street: "flop"
+                }
+              ]
             }
           ]
-        }
-      ]
-    };
+        };
 
-    const villainRange =
-      createRange([
-        "QQ",
-        "JJ",
-        "TT",
-        "AK"
-      ]);
+        const villainRange =
+          createRange([
+            "QQ",
+            "JJ",
+            "TT",
+            "AK"
+          ]);
 
-    const result =
-      analyzeHandHistory(
-        hand,
-        {
-          heroPlayerId: "hero",
-          villainRange
-        }
-      );
+        const result =
+          analyzeHandHistory(
+            hand,
+            {
+              heroPlayerId: "hero",
+              villainRange
+            }
+          );
 
-    expect(result.summary)
-      .toEqual({
-        totalDecisionPoints: 3,
-        analyzedDecisionPoints: 1,
-        skippedDecisionPoints: 2,
-        callDecisions: 1
-      });
+        expect(
+          result.summary.totalDecisionPoints
+        ).toBe(
+          2
+        );
 
-    expect(result.decisions)
-      .toHaveLength(3);
+        expect(
+          result.summary.analyzedDecisionPoints
+        ).toBe(
+          2
+        );
 
-    const analyzedDecisions =
-      result.decisions.filter(
-        (decision) =>
-          decision.status === "analyzed"
-      );
+        expect(
+          result.summary.skippedDecisionPoints
+        ).toBe(
+          0
+        );
 
-    expect(analyzedDecisions)
-      .toHaveLength(1);
+        expect(
+          result.decisions.map(
+            (decision) =>
+              decision.action.type
+          )
+        ).toEqual([
+          "raise",
+          "all_in"
+        ]);
 
-    const skippedDecisions =
-      result.decisions.filter(
-        (decision) =>
-          decision.status === "skipped"
-      );
+        const allInDecision =
+          result.decisions.find(
+            (decision) =>
+              decision.action.type ===
+              "all_in"
+          );
 
-    expect(skippedDecisions)
-      .toHaveLength(2);
+        expect(
+          allInDecision
+        ).toBeDefined();
 
-    expect(
-      skippedDecisions.map(
-        (decision) =>
-          decision.skipReason
-      )
-    )
-      .toEqual([
-        "fold_probability_required",
-        "action_not_supported"
-      ]);
+        expect(
+          allInDecision?.status
+        ).toBe(
+          "analyzed"
+        );
 
-    expect(
-      skippedDecisions.map(
-        (decision) =>
-          decision.action.type
-      )
-    )
-      .toEqual([
-        "bet",
-        "check"
-      ]);
+        expect(
+          allInDecision?.context.opponentCallAmount
+        ).toBeGreaterThan(
+          0
+        );
 
-    const analyzedDecision =
-      analyzedDecisions[0];
+        expect(
+          allInDecision?.analysis
+        ).toBeDefined();
 
-    expect(analyzedDecision)
-      .toBeDefined();
+        expect(
+          allInDecision?.analysis?.action
+        ).toBe(
+          "all_in"
+        );
 
-    expect(analyzedDecision?.action.type)
-      .toBe("call");
+        expect(
+          allInDecision?.analysis?.equity
+        ).toBeGreaterThanOrEqual(
+          0
+        );
 
-    expect(analyzedDecision?.actionIndex)
-      .toBe(6);
+        expect(
+          allInDecision?.analysis?.equity
+        ).toBeLessThanOrEqual(
+          1
+        );
 
-    expect(analyzedDecision?.analysis)
-      .toBeDefined();
-  });
-});
+        expect(
+          allInDecision?.analysis?.expectedValue
+        ).toBeDefined();
+      }
+    );
+  }
+);

@@ -196,81 +196,142 @@ describe("createAnalysisReport", () => {
     expect(report.summary)
       .toEqual({
         totalDecisionPoints: 3,
-        analyzedDecisionPoints: 1,
-        skippedDecisionPoints: 2,
+        analyzedDecisionPoints: 3,
+        skippedDecisionPoints: 0,
         callDecisions: 1
       });
 
     expect(report.decisions)
       .toHaveLength(3);
 
-    const analyzedDecision =
-      report.decisions.find(
-        (decision) =>
-          decision.status === "analyzed"
-      );
-
-    expect(analyzedDecision)
-      .toMatchObject({
-        actionIndex: 6,
-        street: "turn",
-        action: "call",
-        amount: 20,
-        pot: 52,
-        callAmount: 20,
-        status: "analyzed"
-      });
-
     expect(
-      analyzedDecision?.equity
-    ).toBeGreaterThan(0);
-
-    expect(
-      analyzedDecision?.potOdds
-    ).toBeDefined();
-
-    expect(
-      analyzedDecision?.expectedValue
-    ).toBeDefined();
-
-    const skippedDecisions =
-      report.decisions.filter(
-        (decision) =>
-          decision.status === "skipped"
-      );
-
-    expect(skippedDecisions)
-      .toHaveLength(2);
-
-    expect(
-      skippedDecisions.map(
+      report.decisions.map(
         (decision) =>
           decision.action
       )
     )
       .toEqual([
         "bet",
-        "check"
+        "check",
+        "call"
       ]);
 
     expect(
-      skippedDecisions.map(
+      report.decisions.every(
         (decision) =>
-          decision.skipReason
+          decision.status ===
+          "analyzed"
       )
     )
-      .toEqual([
-        "fold_probability_required",
-        "action_not_supported"
-      ]);
+      .toBe(true);
 
     expect(
-      skippedDecisions.every(
+      report.decisions.every(
         (decision) =>
-          decision.equity === undefined &&
-          decision.potOdds === undefined &&
-          decision.expectedValue === undefined &&
-          decision.decision === undefined
+          decision.equity !==
+          undefined
+      )
+    )
+      .toBe(true);
+
+    expect(
+      report.decisions.every(
+        (decision) =>
+          decision.decision !==
+          undefined
+      )
+    )
+      .toBe(true);
+
+    const betDecision =
+      report.decisions.find(
+        (decision) =>
+          decision.action ===
+          "bet"
+      );
+
+    expect(betDecision)
+      .toMatchObject({
+        actionIndex: 2,
+        street: "flop",
+        action: "bet",
+        amount: 10,
+        status: "analyzed"
+      });
+
+    expect(
+      betDecision?.equity
+    ).toBeGreaterThan(0);
+
+    expect(
+      betDecision?.expectedValue
+    ).toBeDefined();
+
+    const checkDecision =
+      report.decisions.find(
+        (decision) =>
+          decision.action ===
+          "check"
+      );
+
+    expect(checkDecision)
+      .toMatchObject({
+        actionIndex: 4,
+        street: "turn",
+        action: "check",
+        amount: 0,
+        status: "analyzed"
+      });
+
+    expect(
+      checkDecision?.equity
+    ).toBeGreaterThan(0);
+
+    expect(
+      checkDecision?.expectedValue
+    ).toBeDefined();
+
+    expect(
+      checkDecision?.pot
+    ).toBe(32);
+
+    expect(
+      checkDecision?.callAmount
+    ).toBe(0);
+
+    const callDecision =
+      report.decisions.find(
+        (decision) =>
+          decision.action ===
+          "call"
+      );
+
+    expect(callDecision)
+      .toMatchObject({
+        actionIndex: 6,
+        street: "turn",
+        action: "call",
+        amount: 20,
+        status: "analyzed"
+      });
+
+    expect(
+      callDecision?.equity
+    ).toBeGreaterThan(0);
+
+    expect(
+      callDecision?.potOdds
+    ).toBeDefined();
+
+    expect(
+      callDecision?.expectedValue
+    ).toBeDefined();
+
+    expect(
+      report.decisions.every(
+        (decision) =>
+          decision.skipReason ===
+          undefined
       )
     )
       .toBe(true);
