@@ -10,6 +10,10 @@ import type {
 } from "@poker-vision/poker-engine";
 
 import {
+  createRange
+} from "@poker-vision/poker-engine";
+
+import {
   createDecisionContext
 } from "./decision-context.js";
 
@@ -98,8 +102,20 @@ describe("createDecisionContext", () => {
       actions: []
     };
 
+    const villainRange =
+      createRange([
+        "QQ",
+        "JJ",
+        "AK"
+      ]);
+
     const context =
-      createDecisionContext(snapshot);
+      createDecisionContext(
+        snapshot,
+        {
+          villainRange
+        }
+      );
 
     expect(context).toEqual({
       actionIndex: 6,
@@ -120,6 +136,19 @@ describe("createDecisionContext", () => {
         minimumBet: 0,
         canRaise: true,
         minimumRaise: 22
+      },
+      opponentContext: {
+        heroPlayerId: "seat-1",
+        opponents: [
+          {
+            playerId: "seat-2",
+            playerName: "Villain",
+            position: "BB",
+            stack: 164,
+            status: "active",
+            range: villainRange
+          }
+        ]
       },
       targetAction
     });

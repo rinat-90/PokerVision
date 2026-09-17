@@ -47,7 +47,11 @@ export function analyzeDecisionPoint(
 
   const context =
     createDecisionContext(
-      snapshot
+      snapshot,
+      {
+        villainRange:
+        options.villainRange
+      }
     );
 
   const analysis =

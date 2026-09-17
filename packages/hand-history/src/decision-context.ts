@@ -1,7 +1,12 @@
 import type {
   Card,
   PlayerAction,
-  Street
+  Street,
+  Range
+} from "@poker-vision/poker-engine";
+
+import {
+  createRange
 } from "@poker-vision/poker-engine";
 
 import type {
@@ -16,24 +21,49 @@ import type {
   DecisionOptions
 } from "./decision-options.js";
 
+import {
+  createOpponentContext
+} from "./opponent-context.js";
+
+import type {
+  HandOpponentContext
+} from "./opponent-context.js";
+
 export interface DecisionContext {
   actionIndex: number;
   playerId: string;
   street: Street;
+
   heroCards: Card[];
+
   board: Card[];
+
   pot: number;
+
   currentBet: number;
+
   playerContribution: number;
+
   callAmount: number;
+
   raiseAmount?: number;
+
   opponentCallAmount?: number;
+
   decisionOptions: DecisionOptions;
+
+  opponentContext: HandOpponentContext;
+
   targetAction: PlayerAction;
 }
 
+export interface CreateDecisionContextOptions {
+  villainRange: Range;
+}
+
 export function createDecisionContext(
-  snapshot: HandStateSnapshot
+  snapshot: HandStateSnapshot,
+  options?: CreateDecisionContextOptions
 ): DecisionContext {
   const playerId =
     snapshot.targetAction.playerId;
@@ -74,6 +104,21 @@ export function createDecisionContext(
       snapshot.minimumRaise
     );
 
+  const villainRange =
+    options?.villainRange ??
+    createRange([]);
+
+  const opponentContext =
+    createOpponentContext(
+      snapshot,
+      {
+        heroPlayerId:
+        playerId,
+
+        villainRange
+      }
+    );
+
   const baseContext: DecisionContext = {
     actionIndex:
     snapshot.actionIndex,
@@ -100,6 +145,8 @@ export function createDecisionContext(
     callAmount,
 
     decisionOptions,
+
+    opponentContext,
 
     targetAction:
     snapshot.targetAction
@@ -146,7 +193,9 @@ export function createDecisionContext(
 
   return {
     ...baseContext,
+
     raiseAmount,
+
     opponentCallAmount
   };
 }

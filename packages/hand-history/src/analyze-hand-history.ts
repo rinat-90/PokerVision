@@ -101,7 +101,11 @@ export function analyzeHandHistory(
 
     const context =
       createDecisionContext(
-        snapshot
+        snapshot,
+        {
+          villainRange:
+          options.villainRange
+        }
       );
 
     if (

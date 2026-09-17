@@ -14,3 +14,4 @@ export * from "./pot-odds.js";
 export * from "./ev.js";
 export * from "./analysis/index.js";
 export * from "./game-state/index.js";
+export * from "./opponent/index.js";
