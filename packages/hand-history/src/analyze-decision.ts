@@ -7,6 +7,10 @@ import {
   analyzeDecision as analyzeEngineDecision
 } from "@poker-vision/poker-engine";
 
+import {
+  analyzeFold
+} from "@poker-vision/poker-engine";
+
 import type {
   DecisionContext
 } from "./decision-context.js";
@@ -21,6 +25,24 @@ export function analyzeDecision(
   context: DecisionContext,
   options: AnalyzeDecisionOptions
 ): DecisionAnalysisResult {
+  if (
+    context.targetAction.type ===
+    "fold"
+  ) {
+    const result =
+      analyzeFold();
+
+    return {
+      action: result.action,
+      equity: 0,
+      expectedValue:
+      result.expectedValue,
+      decision:
+      result.decision,
+      validVillainCombos: 0
+    };
+  }
+
   const opponent =
     context.opponentContext.opponents[0];
 
