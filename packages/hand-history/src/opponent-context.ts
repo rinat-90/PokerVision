@@ -7,7 +7,8 @@ import {
   buildOpponentModelRange,
   createActionRangeWeightModel,
   createOpponentActionHistory,
-  createOpponentModel
+  createOpponentModel,
+  createOpponentResponseModelFromHistory
 } from "@poker-vision/poker-engine";
 
 import type {
@@ -51,18 +52,6 @@ export function createOpponentContext(
       )
       .map(
         (player) => {
-          const opponentModel =
-            createOpponentModel({
-              player,
-              range:
-              options.villainRange,
-              response: {
-                foldProbability: 0,
-                callProbability: 1,
-                raiseProbability: 0
-              }
-            });
-
           const actionHistory =
             createOpponentActionHistory({
               playerId:
@@ -71,6 +60,19 @@ export function createOpponentContext(
               snapshot.actions,
               currentActionIndex:
               snapshot.actionIndex
+            });
+
+          const response =
+            createOpponentResponseModelFromHistory({
+              actionHistory
+            });
+
+          const opponentModel =
+            createOpponentModel({
+              player,
+              range:
+              options.villainRange,
+              response
             });
 
           const rangedModel =
@@ -97,7 +99,6 @@ export function createOpponentContext(
   return {
     heroPlayerId:
     options.heroPlayerId,
-
     opponents
   };
 }

@@ -117,41 +117,91 @@ describe("createDecisionContext", () => {
         }
       );
 
-    expect(context).toEqual({
-      actionIndex: 6,
-      playerId: "seat-1",
-      street: "turn",
-      heroCards,
-      board,
-      pot: 52,
-      currentBet: 20,
-      playerContribution: 0,
+    expect(context.actionIndex).toBe(6);
+    expect(context.playerId).toBe("seat-1");
+    expect(context.street).toBe("turn");
+    expect(context.heroCards).toEqual(heroCards);
+    expect(context.board).toEqual(board);
+    expect(context.pot).toBe(52);
+    expect(context.currentBet).toBe(20);
+    expect(context.playerContribution).toBe(0);
+    expect(context.callAmount).toBe(20);
+
+    expect(context.decisionOptions).toEqual({
+      canFold: true,
+      canCheck: false,
+      canCall: true,
       callAmount: 20,
-      decisionOptions: {
-        canFold: true,
-        canCheck: false,
-        canCall: true,
-        callAmount: 20,
-        canBet: false,
-        minimumBet: 0,
-        canRaise: true,
-        minimumRaise: 22
-      },
-      opponentContext: {
-        heroPlayerId: "seat-1",
-        opponents: [
-          {
-            playerId: "seat-2",
-            playerName: "Villain",
-            position: "BB",
-            stack: 164,
-            status: "active",
-            range: villainRange
-          }
-        ]
-      },
-      targetAction
+      canBet: false,
+      minimumBet: 0,
+      canRaise: true,
+      minimumRaise: 22
     });
+
+    expect(context.opponentContext.heroPlayerId)
+      .toBe("seat-1");
+
+    expect(context.opponentContext.opponents)
+      .toHaveLength(1);
+
+    const opponent =
+      context.opponentContext.opponents[0];
+
+    expect(opponent).toBeDefined();
+
+    expect(opponent?.playerId)
+      .toBe("seat-2");
+
+    expect(opponent?.playerName)
+      .toBe("Villain");
+
+    expect(opponent?.position)
+      .toBe("BB");
+
+    expect(opponent?.stack)
+      .toBe(164);
+
+    expect(opponent?.status)
+      .toBe("active");
+
+    expect(opponent?.range.combos.length)
+      .toBeLessThan(
+        villainRange.combos.length
+      );
+
+    expect(opponent?.range.combos.length)
+      .toBeGreaterThan(0);
+
+    expect(
+      opponent?.range.combos.every(
+        (combo) =>
+          !combo.cards.some(
+            (card) =>
+              board.some(
+                (boardCard) =>
+                  boardCard.rank === card.rank &&
+                  boardCard.suit === card.suit
+              )
+          )
+      )
+    ).toBe(true);
+
+    expect(
+      opponent?.range.combos.every(
+        (combo) =>
+          !combo.cards.some(
+            (card) =>
+              heroCards.some(
+                (heroCard) =>
+                  heroCard.rank === card.rank &&
+                  heroCard.suit === card.suit
+              )
+          )
+      )
+    ).toBe(true);
+
+    expect(context.targetAction)
+      .toEqual(targetAction);
   });
 
   it("calculates call amount from current bet and contribution", () => {
