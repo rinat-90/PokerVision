@@ -21,6 +21,22 @@ export function analyzeDecision(
   context: DecisionContext,
   options: AnalyzeDecisionOptions
 ): DecisionAnalysisResult {
+  const opponent =
+    context.opponentContext.opponents[0];
+
+  if (opponent === undefined) {
+    throw new Error(
+      "No active opponent found for decision analysis"
+    );
+  }
+
+  const villainRange =
+    opponent.opponent.range;
+
+  const foldProbability =
+    options.foldProbability ??
+    opponent.response.foldProbability;
+
   return analyzeEngineDecision({
     action:
     context.targetAction.type,
@@ -28,8 +44,7 @@ export function analyzeDecision(
     heroCards:
     context.heroCards,
 
-    villainRange:
-    options.villainRange,
+    villainRange,
 
     board:
     context.board,
@@ -68,10 +83,10 @@ export function analyzeDecision(
       }
       : {}),
 
-    ...(options.foldProbability !== undefined
+    ...(context.targetAction.type === "bet" ||
+    context.targetAction.type === "raise"
       ? {
-        foldProbability:
-        options.foldProbability
+        foldProbability
       }
       : {}),
 
