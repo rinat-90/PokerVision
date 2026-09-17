@@ -8,7 +8,7 @@ describe("parsePluribusHand", () => {
   it("parses Pluribus Hand #100000", () => {
     const filePath = resolve(
       process.cwd(),
-      "packages/hand-history/fixtures/pluribus/pluribus_100.txt"
+      "fixtures/pluribus/pluribus_100.txt",
     );
 
     const input = readFileSync(filePath, "utf8");

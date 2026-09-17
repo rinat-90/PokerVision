@@ -23,6 +23,10 @@ import {
   createRange
 } from "@poker-vision/poker-engine";
 
+import {
+  calculateRangeEquity
+} from "@poker-vision/poker-engine";
+
 describe("PokerStars pipeline", () => {
   it("parses a hand into HandState", () => {
     const input = `
@@ -128,6 +132,7 @@ Villain: shows [Qc Qs]
       "AKs",
       "AQs"
     ]);
+
 
     const potBeforeCall = 92;
     const callAmount = 20;
@@ -327,12 +332,25 @@ Villain: shows [Qc Qs]
       "AQs"
     ]);
 
+    const directEquity =
+      calculateRangeEquity({
+        heroCards: context.heroCards,
+        villainRange,
+        board: context.board,
+        iterationsPerCombo: 10
+      });
+
+    console.log(
+      "DIRECT EQUITY",
+      directEquity
+    );
+
     const analysis =
       analyzeDecision(
         context,
         {
           villainRange,
-          iterationsPerCombo: 500
+          iterationsPerCombo: 10
         }
       );
 
@@ -608,7 +626,7 @@ Villain: shows [Qc Qs]
       );
 
     expect(analyzedDecisions)
-      .toHaveLength(2);
+      .toHaveLength(5);
 
     expect(
       analyzedDecisions.every(

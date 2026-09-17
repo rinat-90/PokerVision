@@ -11,7 +11,7 @@ describe("Pluribus hand replay", () => {
   it("replays concrete states of Pluribus Hand #100000", () => {
     const fixturePath = resolve(
       process.cwd(),
-      "packages/hand-history/fixtures/pluribus/pluribus_100.txt"
+      "fixtures/pluribus/pluribus_100.txt",
     );
 
     const input = readFileSync(fixturePath, "utf8");

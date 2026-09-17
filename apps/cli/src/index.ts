@@ -2,6 +2,9 @@
 
 import { readFile } from "node:fs/promises";
 import { resolve } from "node:path";
+import { createInterface } from "node:readline/promises";
+import { stdin as input, stdout as output } from "node:process";
+
 import {
   parsePluribusHand,
   replayHandToAction,
@@ -17,6 +20,8 @@ Usage:
   poker parse <file>
 
   poker replay <file> --hand <handId>
+
+  poker replay <file> --hand <handId> --interactive
 `);
 }
 
@@ -25,11 +30,6 @@ if (command === undefined || filePath === undefined) {
   process.exit(1);
 }
 
-/**
- * pnpm --filter executes the CLI from apps/cli.
- *
- * Resolve relative file paths from the PokerVision repository root.
- */
 const repoRoot = resolve(import.meta.dirname, "../../..");
 const resolvedFilePath = resolve(repoRoot, filePath);
 
@@ -46,7 +46,6 @@ if (command === "parse") {
   for (const handText of handTexts) {
     try {
       const hand = parsePluribusHand(handText);
-
       validateHandHistory(hand);
 
       console.log(`Hand #${hand.id}`);
@@ -90,6 +89,8 @@ if (command === "replay") {
     process.exit(1);
   }
 
+  const interactive = args.includes("--interactive");
+
   const handText = handTexts.find((text) => {
     const match = text.match(/^PokerStars Hand #(\d+)/);
 
@@ -102,17 +103,138 @@ if (command === "replay") {
   }
 
   const hand = parsePluribusHand(handText);
-
   validateHandHistory(hand);
+
+  const actions = hand.streets.flatMap((street) => street.actions);
+
+  if (interactive) {
+    await runInteractiveReplay(hand);
+    process.exit(0);
+  }
+
+  printReplay(hand, actions.length - 1);
+
+  process.exit(0);
+}
+
+console.error(`Unknown command: ${command}`);
+printUsage();
+process.exit(1);
+
+async function runInteractiveReplay(
+  hand: Parameters<typeof replayHandToAction>[0],
+): Promise<void> {
+  const actions = hand.streets.flatMap((street) => street.actions);
+
+  if (actions.length === 0) {
+    console.log(`Hand #${hand.id} has no actions.`);
+    return;
+  }
+
+  let actionIndex = 0;
+
+  const readline = createInterface({
+    input,
+    output,
+  });
+
+  try {
+    while (true) {
+      console.clear();
+
+      printReplay(hand, actionIndex);
+
+      console.log();
+      console.log("Controls");
+      console.log("────────────────────────────────────────");
+      console.log("[n] next action");
+      console.log("[p] previous action");
+      console.log("[r] reset");
+      console.log("[q] quit");
+
+      const command = (
+        await readline.question("\n> ")
+      ).trim().toLowerCase();
+
+      if (command === "n") {
+        if (actionIndex < actions.length - 1) {
+          actionIndex += 1;
+        } else {
+          console.log("\nAlready at the last action.");
+          await waitForEnter(readline);
+        }
+
+        continue;
+      }
+
+      if (command === "p") {
+        if (actionIndex > 0) {
+          actionIndex -= 1;
+        } else {
+          console.log("\nAlready at the first action.");
+          await waitForEnter(readline);
+        }
+
+        continue;
+      }
+
+      if (command === "r") {
+        actionIndex = 0;
+        continue;
+      }
+
+      if (command === "q") {
+        return;
+      }
+
+      console.log("\nUnknown command.");
+      await waitForEnter(readline);
+    }
+  } finally {
+    readline.close();
+  }
+}
+
+function printReplay(
+  hand: Parameters<typeof replayHandToAction>[0],
+  actionIndex: number,
+): void {
+  const actions = hand.streets.flatMap((street) => street.actions);
+  const action = actions[actionIndex];
+
+  if (action === undefined) {
+    return;
+  }
+
+  const snapshot = replayHandToAction(hand, actionIndex);
 
   console.log(`PokerVision — Hand #${hand.id}`);
   console.log("════════════════════════════════════════");
   console.log();
 
+  console.log(
+    `Action ${actionIndex + 1}/${actions.length} — ${action.street.toUpperCase()}`,
+  );
+  console.log("────────────────────────────────────────");
+
+  const street = hand.streets.find(
+    (value) => value.street === action.street,
+  );
+
+  if (street !== undefined && street.board.length > 0) {
+    console.log(
+      `Board: ${street.board
+        .map((card) => `${card.rank}${card.suit[0]}`)
+        .join(" ")}`,
+    );
+  }
+
+  console.log();
+
   console.log("Players");
   console.log("────────────────────────────────────────");
 
-  for (const player of hand.players) {
+  for (const player of snapshot.players) {
     const holeCards =
       player.holeCards === undefined
         ? ""
@@ -125,56 +247,40 @@ if (command === "replay") {
 
   console.log();
 
-  const actions = hand.streets.flatMap((street) => street.actions);
+  console.log("State");
+  console.log("────────────────────────────────────────");
+  console.log(`Pot:          ${snapshot.pot}`);
+  console.log(`Current bet:  ${snapshot.currentBet}`);
+  console.log(`Min raise:    ${snapshot.minimumRaise}`);
 
-  for (let actionIndex = 0; actionIndex < actions.length; actionIndex += 1) {
-    const action = actions[actionIndex];
+  console.log();
 
-    if (action === undefined) {
-      continue;
-    }
+  console.log("Action");
+  console.log("────────────────────────────────────────");
 
-    const street = hand.streets.find(
-      (value) => value.street === action.street,
-    );
+  const amount =
+    action.type === "fold" || action.type === "check"
+      ? ""
+      : ` ${action.amount}`;
 
-    if (street === undefined) {
-      continue;
-    }
+  console.log(
+    `${action.playerId} ${action.type}${amount}`,
+  );
 
-    const isFirstActionOnStreet = street.actions[0] === action;
+  console.log();
 
-    if (isFirstActionOnStreet) {
-      console.log(action.street.toUpperCase());
-      console.log("────────────────────────────────────────");
+  console.log("Players to act");
+  console.log("────────────────────────────────────────");
 
-      if (street.board.length > 0) {
-        console.log(
-          `Board: ${street.board
-            .map((card) => `${card.rank}${card.suit[0]}`)
-            .join(" ")}`,
-        );
-      }
-    }
-
-    const amount =
-      action.type === "fold" || action.type === "check"
-        ? ""
-        : ` ${action.amount}`;
-
-    console.log(
-      `${actionIndex + 1}. ${action.playerId} ${action.type}${amount}`,
-    );
-
-    const snapshot = replayHandToAction(hand, actionIndex);
-
-    console.log(`   Pot: ${snapshot.pot}`);
-    console.log();
+  if (snapshot.playersToAct.length === 0) {
+    console.log("None");
+  } else {
+    console.log(snapshot.playersToAct.join(", "));
   }
-
-  process.exit(0);
 }
 
-console.error(`Unknown command: ${command}`);
-printUsage();
-process.exit(1);
+async function waitForEnter(
+  readline: ReturnType<typeof createInterface>,
+): Promise<void> {
+  await readline.question("\nPress Enter to continue...");
+}

@@ -10,7 +10,7 @@ describe("Pluribus hand validation", () => {
   it("parses and validates Pluribus Hand #100000", () => {
     const fixturePath = resolve(
       process.cwd(),
-      "packages/hand-history/fixtures/pluribus/pluribus_100.txt"
+      "fixtures/pluribus/pluribus_100.txt",
     );
 
     const input = readFileSync(fixturePath, "utf8");

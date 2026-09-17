@@ -60,7 +60,7 @@ export function analyzeDecision(
   }
 
   const villainRange =
-    opponent.opponent.range;
+    options.villainRange;
 
   const foldProbability =
     options.foldProbability ??

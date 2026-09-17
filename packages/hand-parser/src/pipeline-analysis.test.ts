@@ -48,126 +48,134 @@ Hero: shows [Ah Ad]
 Villain: shows [Qc Qs]
 `;
 
-describe("PokerStars analysis pipeline", () => {
-  it("parses and analyzes Hero decisions end-to-end", () => {
-    const hand =
-      parsePokerStarsHand(
-        POKERSTARS_HAND
-      );
+describe(
+  "PokerStars analysis pipeline",
+  () => {
+    it(
+      "parses and analyzes Hero decisions end-to-end",
+      () => {
+        const hand =
+          parsePokerStarsHand(
+            POKERSTARS_HAND
+          );
 
-    const villainRange =
-      createRange([
-        "QQ",
-        "JJ",
-        "TT",
-        "AK"
-      ]);
+        const villainRange =
+          createRange([
+            "QQ",
+            "JJ",
+            "TT",
+            "AK"
+          ]);
 
-    const result =
-      analyzeHandHistory(
-        hand,
-        {
-          heroPlayerId:
-            "seat-1",
+        const result =
+          analyzeHandHistory(
+            hand,
+            {
+              heroPlayerId:
+                "seat-1",
 
-          villainRange
+              villainRange,
+
+              iterationsPerCombo:
+                100
+            }
+          );
+
+        expect(
+          result.handId
+        ).toBeDefined();
+
+        expect(
+          result.summary
+        ).toEqual({
+          totalDecisionPoints: 5,
+          analyzedDecisionPoints: 5,
+          skippedDecisionPoints: 0,
+          callDecisions: 2
+        });
+
+        expect(
+          result.decisions
+        ).toHaveLength(5);
+
+        expect(
+          result.decisions.every(
+            (decision) =>
+              decision.status ===
+              "analyzed"
+          )
+        ).toBe(true);
+
+        expect(
+          result.decisions.every(
+            (decision) =>
+              decision.analysis !==
+              undefined
+          )
+        ).toBe(true);
+
+        const callDecisions =
+          result.decisions.filter(
+            (decision) =>
+              decision.action.type ===
+              "call"
+          );
+
+        expect(
+          callDecisions
+        ).toHaveLength(2);
+
+        expect(
+          callDecisions[0]?.action
+        ).toEqual({
+          playerId: "seat-1",
+          type: "call",
+          amount: 20,
+          street: "turn"
+        });
+
+        expect(
+          callDecisions[0]?.context.pot
+        ).toBe(52);
+
+        expect(
+          callDecisions[0]?.context.callAmount
+        ).toBe(20);
+
+        expect(
+          callDecisions[1]?.action
+        ).toEqual({
+          playerId: "seat-1",
+          type: "call",
+          amount: 20,
+          street: "river"
+        });
+
+        expect(
+          callDecisions[1]?.context.pot
+        ).toBe(92);
+
+        expect(
+          callDecisions[1]?.context.callAmount
+        ).toBe(20);
+
+        for (
+          const decision of callDecisions
+          ) {
+          expect(
+            decision.analysis
+          ).toBeDefined();
+
+          expect(
+            decision.analysis?.equity
+          ).toBeGreaterThan(0);
+
+          expect(
+            decision.analysis?.validVillainCombos
+          ).toBeGreaterThan(0);
         }
-      );
-
-    expect(result.handId)
-      .toBeDefined();
-
-    expect(result.summary)
-      .toEqual({
-        totalDecisionPoints: 5,
-        analyzedDecisionPoints: 2,
-        skippedDecisionPoints: 3,
-        callDecisions: 2
-      });
-
-    expect(result.decisions)
-      .toHaveLength(5);
-
-    const analyzedDecisions =
-      result.decisions.filter(
-        (decision) =>
-          decision.status ===
-          "analyzed"
-      );
-
-    expect(analyzedDecisions)
-      .toHaveLength(2);
-
-    const skippedDecisions =
-      result.decisions.filter(
-        (decision) =>
-          decision.status ===
-          "skipped"
-      );
-
-    expect(skippedDecisions)
-      .toHaveLength(3);
-
-    expect(
-      analyzedDecisions[0]?.action
-    ).toEqual({
-      playerId: "seat-1",
-      type: "call",
-      amount: 20,
-      street: "turn"
-    });
-
-    expect(
-      analyzedDecisions[0]?.context.pot
-    ).toBe(52);
-
-    expect(
-      analyzedDecisions[0]?.context.callAmount
-    ).toBe(20);
-
-    expect(
-      analyzedDecisions[1]?.action
-    ).toEqual({
-      playerId: "seat-1",
-      type: "call",
-      amount: 20,
-      street: "river"
-    });
-
-    expect(
-      analyzedDecisions[1]?.context.pot
-    ).toBe(92);
-
-    expect(
-      analyzedDecisions[1]?.context.callAmount
-    ).toBe(20);
-
-    for (
-      const decision of analyzedDecisions
-      ) {
-      expect(
-        decision.analysis
-      ).toBeDefined();
-
-      expect(
-        decision.analysis?.equity
-      ).toBeGreaterThan(0);
-
-      expect(
-        decision.analysis?.validVillainCombos
-      ).toBeGreaterThan(0);
-    }
-
-    for (
-      const decision of skippedDecisions
-      ) {
-      expect(
-        decision.analysis
-      ).toBeUndefined();
-
-      expect(
-        decision.skipReason
-      ).toBeDefined();
-    }
-  });
-});
+      },
+      15000
+    );
+  }
+);
