@@ -10,7 +10,8 @@
     "dev": "tsx src/index.ts"
   },
   "dependencies": {
-    "@poker-vision/hand-history": "workspace:*"
+    "@poker-vision/hand-history": "workspace:*",
+    "@poker-vision/poker-engine": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",

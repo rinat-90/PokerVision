@@ -6,11 +6,15 @@ import { describe, expect, it } from "vitest";
 import { parsePluribusHand } from "./pluribus.js";
 import { validateHandHistory } from "../validate-hand-history.js";
 
+import { fileURLToPath } from "node:url";
+
 describe("Pluribus hand validation", () => {
   it("parses and validates Pluribus Hand #100000", () => {
-    const fixturePath = resolve(
-      process.cwd(),
-      "fixtures/pluribus/pluribus_100.txt",
+    const fixturePath = fileURLToPath(
+      new URL(
+        "../../fixtures/pluribus/pluribus_100.txt",
+        import.meta.url
+      )
     );
 
     const input = readFileSync(fixturePath, "utf8");

@@ -1,4 +1,12 @@
 import {
+  readFileSync
+} from "node:fs";
+
+import {
+  resolve
+} from "node:path";
+
+import {
   describe,
   expect,
   it
@@ -7,6 +15,10 @@ import {
 import {
   findDecisionPoints
 } from "./decision-points.js";
+
+import {
+  parsePluribusHand
+} from "./parsers/pluribus.js";
 
 import type {
   HandHistory
@@ -274,5 +286,87 @@ describe("findDecisionPoints", () => {
       );
 
     expect(result).toHaveLength(0);
+  });
+
+  it("finds all decision points for MrBlue in Pluribus hand 100000", () => {
+    const fixturePath =
+      resolve(
+        process.cwd(),
+        "packages/hand-history/fixtures/pluribus/pluribus_100.txt"
+      );
+
+    const text =
+      readFileSync(
+        fixturePath,
+        "utf8"
+      );
+
+    const handStart =
+      text.indexOf(
+        "PokerStars Hand #100000:"
+      );
+
+    const handEnd =
+      text.indexOf(
+        "PokerStars Hand #100001:"
+      );
+
+    expect(handStart).toBeGreaterThanOrEqual(0);
+    expect(handEnd).toBeGreaterThan(handStart);
+
+    const handText =
+      text.slice(
+        handStart,
+        handEnd
+      );
+
+    const hand =
+      parsePluribusHand(
+        handText
+      );
+
+    const result =
+      findDecisionPoints(
+        hand,
+        {
+          playerId: "MrBlue"
+        }
+      );
+
+    expect(result).toHaveLength(4);
+
+    expect(
+      result.map(
+        (decision) => ({
+          actionIndex:
+          decision.actionIndex,
+          street:
+          decision.street,
+          type:
+          decision.action.type
+        })
+      )
+    ).toEqual([
+      {
+        actionIndex: 4,
+        street: "preflop",
+        type: "call"
+      },
+      {
+        actionIndex: 6,
+        street: "flop",
+        type: "check"
+      },
+      {
+        actionIndex: 8,
+        street: "turn",
+        type: "check"
+      },
+      {
+        actionIndex: 10,
+        street: "river",
+        type: "bet"
+      }
+    ]);
   });
 });

@@ -29,13 +29,8 @@ export function reconstructBettingState(
   currentBet: number,
   currentStreetContributions: Record<string, number>
 ): ReconstructedBettingState {
-  const streetActions = actions.filter(
-    (action) =>
-      action.street === street
-  );
-
   const foldedPlayerIds = new Set(
-    streetActions
+    actions
       .filter(
         (action) =>
           action.type === "fold"
@@ -46,15 +41,18 @@ export function reconstructBettingState(
       )
   );
 
-  const activePlayers = players.filter(
-    (player) =>
-      player.status === "active" &&
-      !foldedPlayerIds.has(
-        player.id
-      )
-  );
+  const activePlayers =
+    players.filter(
+      (player) =>
+        player.status === "active" &&
+        !foldedPlayerIds.has(
+          player.id
+        )
+    );
 
-  if (activePlayers.length <= 1) {
+  if (
+    activePlayers.length <= 1
+  ) {
     return {
       currentPlayerId: null,
       playersToAct: [],
@@ -62,12 +60,58 @@ export function reconstructBettingState(
     };
   }
 
-  const actedPlayerIds = new Set(
-    streetActions.map(
+  const streetActions =
+    actions.filter(
       (action) =>
-        action.playerId
-    )
-  );
+        action.street === street
+    );
+
+  const orderedPlayers =
+    orderPlayersForAction(
+      activePlayers,
+      street,
+      findLastAggressorId(
+        streetActions
+      )
+    );
+
+  /*
+   * No action has happened on this street yet.
+   *
+   * This is especially important when replaying
+   * a decision point BEFORE the player's action.
+   *
+   * Example:
+   *
+   * FLOP
+   * MrBlue: check   <-- target action
+   *
+   * At this point streetActions is empty, so
+   * MrBlue is the first player expected to act.
+   */
+  if (
+    streetActions.length === 0
+  ) {
+    return {
+      currentPlayerId:
+        orderedPlayers[0]?.id ??
+        null,
+      playersToAct:
+        orderedPlayers.map(
+          (player) =>
+            player.id
+        ),
+      bettingRoundComplete: false
+    };
+  }
+
+  const actedPlayerIds =
+    new Set(
+      streetActions.map(
+        (action) =>
+          action.playerId
+      )
+    );
 
   const lastAggressorId =
     findLastAggressorId(
@@ -82,6 +126,11 @@ export function reconstructBettingState(
   const playersNeedingAction =
     activePlayers.filter(
       (player) => {
+        /*
+         * The last aggressor does not need
+         * to act again unless somebody raised
+         * after them.
+         */
         if (
           player.id ===
           lastAggressorId
@@ -94,6 +143,9 @@ export function reconstructBettingState(
             player.id
             ] ?? 0;
 
+        /*
+         * Player has not matched the current bet.
+         */
         if (
           contribution <
           currentBet
@@ -101,6 +153,11 @@ export function reconstructBettingState(
           return true;
         }
 
+        /*
+         * No aggression on this street.
+         * Any player who has not acted yet
+         * still needs to act.
+         */
         if (
           lastAggressorIndex === -1
         ) {
@@ -109,6 +166,11 @@ export function reconstructBettingState(
           );
         }
 
+        /*
+         * There was aggression.
+         * A player needs to act again if their
+         * latest action happened before it.
+         */
         const lastActionIndex =
           findLastActionIndex(
             streetActions,
@@ -120,13 +182,6 @@ export function reconstructBettingState(
           lastAggressorIndex
         );
       }
-    );
-
-  const orderedPlayers =
-    orderPlayersForAction(
-      activePlayers,
-      street,
-      lastAggressorId
     );
 
   const orderedPlayersNeedingAction =
@@ -150,19 +205,15 @@ export function reconstructBettingState(
     };
   }
 
-  const currentPlayer =
-    orderedPlayersNeedingAction[0];
-
   return {
     currentPlayerId:
-      currentPlayer?.id ?? null,
-
+      orderedPlayersNeedingAction[0]?.id ??
+      null,
     playersToAct:
       orderedPlayersNeedingAction.map(
         (player) =>
           player.id
       ),
-
     bettingRoundComplete: false
   };
 }
@@ -171,8 +222,7 @@ function findLastAggressorId(
   actions: PlayerAction[]
 ): string | null {
   for (
-    let index =
-      actions.length - 1;
+    let index = actions.length - 1;
     index >= 0;
     index--
   ) {
@@ -198,8 +248,7 @@ function findLastAggressorIndex(
   actions: PlayerAction[]
 ): number {
   for (
-    let index =
-      actions.length - 1;
+    let index = actions.length - 1;
     index >= 0;
     index--
   ) {
@@ -226,8 +275,7 @@ function findLastActionIndex(
   playerId: string
 ): number {
   for (
-    let index =
-      actions.length - 1;
+    let index = actions.length - 1;
     index >= 0;
     index--
   ) {
@@ -290,15 +338,16 @@ function orderPlayersForStreet(
   players: Player[],
   street: Street
 ): Player[] {
-  const sorted = [...players].sort(
-    (a, b) =>
-      POSITION_ORDER.indexOf(
-        a.position
-      ) -
-      POSITION_ORDER.indexOf(
-        b.position
-      )
-  );
+  const sorted =
+    [...players].sort(
+      (a, b) =>
+        POSITION_ORDER.indexOf(
+          a.position
+        ) -
+        POSITION_ORDER.indexOf(
+          b.position
+        )
+    );
 
   if (
     street === "preflop"
@@ -316,7 +365,9 @@ function orderPlayersForStreet(
 function orderPreflopPlayers(
   players: Player[]
 ): Player[] {
-  if (players.length === 2) {
+  if (
+    players.length === 2
+  ) {
     const bigBlind =
       players.find(
         (player) =>
@@ -368,49 +419,75 @@ function orderPreflopPlayers(
 function orderPostflopPlayers(
   players: Player[]
 ): Player[] {
-  const buttonIndex =
-    players.findIndex(
+  /*
+   * Heads-up:
+   *
+   * BTN is also the small blind.
+   * Therefore BTN acts first postflop.
+   *
+   * Important:
+   * We cannot use players.length === 2 here.
+   *
+   * In a 6-max hand, after folds, there may also
+   * be exactly two active players remaining.
+   * They must keep their original table positions.
+   *
+   * Therefore we only use the heads-up rule when
+   * the remaining players are actually BTN + BB.
+   */
+  const button =
+    players.find(
       (player) =>
         player.position ===
         "BTN"
     );
 
-  if (
-    buttonIndex === -1
-  ) {
-    return players;
-  }
-
-  /**
-   * Heads-up:
-   * The Button is also the Small Blind
-   * and acts first postflop.
-   */
-  if (players.length === 2) {
-    return [
-      players[buttonIndex],
-      ...players.filter(
-        (_, index) =>
-          index !== buttonIndex
-      )
-    ].filter(
-      (player): player is Player =>
-        player !== undefined
+  const bigBlind =
+    players.find(
+      (player) =>
+        player.position ===
+        "BB"
     );
+
+  if (
+    players.length === 2 &&
+    button !== undefined &&
+    bigBlind !== undefined
+  ) {
+    return [
+      button,
+      bigBlind
+    ];
   }
 
-  /**
-   * Multiway:
-   * The first player left of the Button
-   * acts first postflop.
+  /*
+   * Multi-player postflop order:
+   *
+   * SB -> BB -> UTG -> UTG+1 -> MP -> HJ -> CO -> BTN
+   *
+   * Keep the original table positions even when
+   * some players have folded.
    */
-  return [
-    ...players.slice(
-      buttonIndex + 1
-    ),
-    ...players.slice(
-      0,
-      buttonIndex + 1
-    )
+  const postflopOrder: Position[] = [
+    "SB",
+    "BB",
+    "UTG",
+    "UTG+1",
+    "MP",
+    "HJ",
+    "CO",
+    "BTN"
   ];
+
+  return [
+    ...players
+  ].sort(
+    (a, b) =>
+      postflopOrder.indexOf(
+        a.position
+      ) -
+      postflopOrder.indexOf(
+        b.position
+      )
+  );
 }

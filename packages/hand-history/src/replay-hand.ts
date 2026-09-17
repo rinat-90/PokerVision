@@ -214,14 +214,16 @@ function calculateTotalContributions(
     contributions[player.id] = 0;
   }
 
-  /**
-   * Forced bets are not included in street.actions,
-   * so they must be added separately.
-   */
   for (const forcedBet of hand.forcedBets ?? []) {
     contributions[forcedBet.playerId] =
       (contributions[forcedBet.playerId] ?? 0) +
       forcedBet.amount;
+  }
+
+  const streetContributions: Record<string, number> = {};
+
+  for (const player of hand.players) {
+    streetContributions[player.id] = 0;
   }
 
   for (const action of actions) {
@@ -232,9 +234,30 @@ function calculateTotalContributions(
       continue;
     }
 
+    const previousStreetContribution =
+      streetContributions[action.playerId] ?? 0;
+
+    let contributionAmount: number;
+
+    if (action.amountType === "total") {
+      contributionAmount =
+        Math.max(
+          0,
+          action.amount -
+          previousStreetContribution
+        );
+    } else {
+      contributionAmount =
+        action.amount;
+    }
+
     contributions[action.playerId] =
       (contributions[action.playerId] ?? 0) +
-      action.amount;
+      contributionAmount;
+
+    streetContributions[action.playerId] =
+      previousStreetContribution +
+      contributionAmount;
   }
 
   return contributions;
