@@ -9,7 +9,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@poker-vision/video": "workspace:*"
-  },
-  "devDependencies": {}
+    "@poker-vision/video": "workspace:*",
+    "sharp": "^0.35.4"
+  }
 }

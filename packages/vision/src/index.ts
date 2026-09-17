@@ -12,9 +12,35 @@ export {
 } from "./table/basic-table-detector.js";
 
 export {
+  PurpleTableDetector
+} from "./table/purple-table-detector.js";
+
+export type {
+  PurpleTableDetectorOptions
+} from "./table/purple-table-detector.js";
+
+export type {
+  DecodedImage,
+  ImageDecoder
+} from "./image/image-decoder.js";
+
+export {
+  SharpImageDecoder
+} from "./image/sharp-image-decoder.js";
+
+export {
   cropFrame
 } from "./table/crop-frame.js";
 
 export type {
   CroppedFrame
 } from "./table/crop-frame.js";
+
+export {
+  detectTablesInVideo
+} from "./table/table-detection-pipeline.js";
+
+export type {
+  TableDetectionFrame,
+  TableDetectionPipelineOptions
+} from "./table/table-detection-pipeline.js";
