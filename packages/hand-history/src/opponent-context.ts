@@ -4,6 +4,9 @@ import type {
 } from "@poker-vision/poker-engine";
 
 import {
+  buildOpponentModelRange,
+  createActionRangeWeightModel,
+  createOpponentActionHistory,
   createOpponentModel
 } from "@poker-vision/poker-engine";
 
@@ -25,6 +28,19 @@ export function createOpponentContext(
   snapshot: HandStateSnapshot,
   options: CreateOpponentContextOptions
 ): HandOpponentContext {
+  const heroPlayer =
+    snapshot.players.find(
+      (player) =>
+        player.id ===
+        options.heroPlayerId
+    );
+
+  const knownCards =
+    heroPlayer?.holeCards ?? [];
+
+  const weightModel =
+    createActionRangeWeightModel();
+
   const opponents =
     snapshot.players
       .filter(
@@ -34,17 +50,48 @@ export function createOpponentContext(
           player.status === "active"
       )
       .map(
-        (player) =>
-          createOpponentModel({
-            player,
-            range:
-            options.villainRange,
-            response: {
-              foldProbability: 0,
-              callProbability: 1,
-              raiseProbability: 0
-            }
-          }).opponent
+        (player) => {
+          const opponentModel =
+            createOpponentModel({
+              player,
+              range:
+              options.villainRange,
+              response: {
+                foldProbability: 0,
+                callProbability: 1,
+                raiseProbability: 0
+              }
+            });
+
+          const actionHistory =
+            createOpponentActionHistory({
+              playerId:
+              player.id,
+              actions:
+              snapshot.actions,
+              currentActionIndex:
+              snapshot.actionIndex
+            });
+
+          const rangedModel =
+            buildOpponentModelRange({
+              model:
+              opponentModel,
+              actionHistory,
+              board:
+              snapshot.board,
+              street:
+              snapshot.street,
+              weightModel,
+              ...(knownCards.length > 0
+                ? {
+                  knownCards
+                }
+                : {})
+            });
+
+          return rangedModel.opponent;
+        }
       );
 
   return {

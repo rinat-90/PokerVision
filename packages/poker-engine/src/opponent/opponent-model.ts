@@ -1,4 +1,9 @@
 import type {
+  Card,
+  Street
+} from "../types.js";
+
+import type {
   Player
 } from "../game-state/types.js";
 
@@ -9,6 +14,18 @@ import type {
 import {
   createOpponentResponseModel
 } from "./response-model.js";
+
+import {
+  buildOpponentRange
+} from "./build-opponent-range.js";
+
+import type {
+  OpponentActionHistory
+} from "./action-history.js";
+
+import type {
+  ActionRangeWeightModel
+} from "./action-range-weight.js";
 
 import type {
   OpponentContext,
@@ -66,4 +83,52 @@ export function createDefaultOpponentResponseModel(): OpponentResponseModel {
     callProbability: 1,
     raiseProbability: 0
   });
+}
+
+export interface BuildOpponentModelRangeInput {
+  model: OpponentModel;
+  actionHistory: OpponentActionHistory;
+  board: Card[];
+  street: Street;
+  weightModel: ActionRangeWeightModel;
+  knownCards?: Card[];
+}
+
+export function buildOpponentModelRange(
+  input: BuildOpponentModelRangeInput
+): OpponentModel {
+  const result =
+    buildOpponentRange({
+      range:
+      input.model.opponent.range,
+
+      actionHistory:
+      input.actionHistory,
+
+      board:
+      input.board,
+
+      street:
+      input.street,
+
+      weightModel:
+      input.weightModel,
+
+      ...(input.knownCards !== undefined
+        ? {
+          knownCards:
+          input.knownCards
+        }
+        : {})
+    });
+
+  return {
+    opponent: {
+      ...input.model.opponent,
+      range:
+      result.range
+    },
+    response:
+    input.model.response
+  };
 }

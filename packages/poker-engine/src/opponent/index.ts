@@ -3,3 +3,6 @@ export * from "./response-model.js";
 export * from "./opponent-model.js";
 export * from "./action-history.js";
 export * from "./range-narrowing.js";
+export * from "./action-range-weight.js";
+export * from "./apply-action-range-weights.js";
+export * from "./build-opponent-range.js";
