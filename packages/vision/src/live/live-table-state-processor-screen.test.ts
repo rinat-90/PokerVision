@@ -29,6 +29,10 @@ import {
 } from "./live-table-state-processor.js";
 
 import {
+  LiveBoardStateProcessor
+} from "./live-board-state-processor.js";
+
+import {
   LiveHandTracker
 } from "./live-hand-tracker.js";
 
@@ -36,7 +40,7 @@ describe(
   "LiveTableStateProcessor on live screen",
   () => {
     it(
-      "processes live table state and tracks hands",
+      "processes live table state, board state and tracks hands",
       async () => {
         const source =
           new ScreenFrameSource();
@@ -58,10 +62,16 @@ describe(
             new WhiteCardDetector()
           );
 
-        const processor =
+        const tableProcessor =
           new LiveTableStateProcessor(
             tableDetector,
             seatDetector
+          );
+
+        const boardProcessor =
+          new LiveBoardStateProcessor(
+            tableDetector,
+            decoder
           );
 
         const handTracker =
@@ -72,8 +82,15 @@ describe(
         let previousSeatState:
           string | null = null;
 
+        let previousBoardState:
+          string | null = null;
+
         let processedFrames = 0;
         let detectedStates = 0;
+        let detectedBoardStates = 0;
+
+        const observedBoardStreets =
+          new Set<string>();
 
         const maxFrames = 60;
 
@@ -83,21 +100,28 @@ describe(
             ) {
             processedFrames++;
 
-            const result =
-              await processor.process(
+            const tableResult =
+              await tableProcessor.process(
+                frame
+              );
+
+            const boardResult =
+              await boardProcessor.process(
                 frame
               );
 
             const handResult =
               handTracker.update(
-                result
+                tableResult
               );
 
-            if (result.state) {
+            if (
+              tableResult.state
+            ) {
               detectedStates++;
 
               const seatState =
-                result.state.seats
+                tableResult.state.seats
                   .map(
                     seat =>
                       `${seat.index}:${
@@ -123,9 +147,42 @@ describe(
               }
             }
 
+            if (
+              boardResult.state
+            ) {
+              detectedBoardStates++;
+
+              const boardState =
+                `${boardResult.state.street} ${
+                  boardResult.state.cardCount
+                }`;
+
+              observedBoardStreets.add(
+                boardResult.state.street
+              );
+
+              if (
+                boardState !==
+                previousBoardState
+              ) {
+                console.log(
+                  `${frame.timestampSeconds.toFixed(1)}s`,
+                  "BOARD:",
+                  boardResult.state.street,
+                  boardResult.state.cardCount,
+                  boardResult.changed
+                    ? "(changed)"
+                    : ""
+                );
+
+                previousBoardState =
+                  boardState;
+              }
+            }
+
             for (
               const event
-              of result.lifecycleEvents
+              of tableResult.lifecycleEvents
               ) {
               console.log(
                 `${frame.timestampSeconds.toFixed(1)}s`,
@@ -160,11 +217,6 @@ describe(
 
               expect(
                 handResult.completedHand
-                  .streets
-              ).toEqual([]);
-
-              expect(
-                handResult.completedHand
                   .actions
               ).toEqual([]);
             }
@@ -180,6 +232,13 @@ describe(
           await source.stop();
         }
 
+        console.log(
+          "OBSERVED BOARD STREETS:",
+          [
+            ...observedBoardStreets
+          ]
+        );
+
         expect(
           processedFrames
         ).toBeGreaterThan(0);
@@ -189,7 +248,15 @@ describe(
         ).toBeGreaterThan(0);
 
         expect(
+          detectedBoardStates
+        ).toBeGreaterThan(0);
+
+        expect(
           previousSeatState
+        ).not.toBeNull();
+
+        expect(
+          previousBoardState
         ).not.toBeNull();
       },
       40_000

@@ -8,8 +8,16 @@ import type {
 } from "../hand/video-hand.js";
 
 import type {
+  RecognizedBoardEvent
+} from "../board/recognized-board-event.js";
+
+import type {
   LiveTableStateResult
 } from "./live-table-state-processor.js";
+
+import type {
+  LiveBoardResult
+} from "./live-board-processor.js";
 
 export interface LiveHandTrackerResult {
   handActive: boolean;
@@ -100,8 +108,34 @@ export class LiveHandTracker {
     };
   }
 
+  updateBoard(
+    result: LiveBoardResult
+  ): void {
+    if (
+      !this.handActive ||
+      !result.event
+    ) {
+      return;
+    }
+
+    this.addBoardEvent(
+      result.timestampSeconds,
+      result.event
+    );
+  }
+
   isHandActive(): boolean {
     return this.handActive;
+  }
+
+  private addBoardEvent(
+    timestampSeconds: number,
+    event: RecognizedBoardEvent
+  ): void {
+    this.builder.addBoardEvent(
+      timestampSeconds,
+      event
+    );
   }
 
   private getActivePlayers(

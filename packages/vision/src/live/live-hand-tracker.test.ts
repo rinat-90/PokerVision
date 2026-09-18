@@ -8,6 +8,14 @@ import type {
   LiveTableStateResult
 } from "./live-table-state-processor.js";
 
+import type {
+  LiveBoardResult
+} from "./live-board-processor.js";
+
+import type {
+  RecognizedCard
+} from "../card/card-recognizer.js";
+
 import {
   LiveHandTracker
 } from "./live-hand-tracker.js";
@@ -433,6 +441,148 @@ describe(
         expect(
           completed.handActive
         ).toBe(false);
+      }
+    );
+
+    it(
+      "adds recognized board streets to the active hand",
+      () => {
+        const tracker =
+          new LiveHandTracker();
+
+        tracker.update(
+          result(
+            10,
+            [
+              0,
+              2,
+              5
+            ],
+            [
+              {
+                type:
+                  "handStarted",
+
+                activeSeatIndexes: [
+                  0,
+                  2,
+                  5
+                ]
+              }
+            ]
+          )
+        );
+
+        const flop: [
+          RecognizedCard,
+          RecognizedCard,
+          RecognizedCard
+        ] = [
+          {
+            rank: "2",
+            suit: "hearts",
+            rankConfidence: 1,
+            suitConfidence: 1,
+            confidence: 1
+          },
+          {
+            rank: "6",
+            suit: "hearts",
+            rankConfidence: 1,
+            suitConfidence: 1,
+            confidence: 1
+          },
+          {
+            rank: "5",
+            suit: "hearts",
+            rankConfidence: 1,
+            suitConfidence: 1,
+            confidence: 1
+          }
+        ];
+
+        tracker.updateBoard({
+          timestampSeconds: 12,
+
+          state: {
+            cardCount: 3,
+            street: "flop"
+          },
+
+          event: {
+            type:
+              "flopDealt",
+
+            cards:
+            flop
+          }
+        } satisfies LiveBoardResult);
+
+        const turn:
+          RecognizedCard = {
+          rank: "5",
+          suit: "clubs",
+          rankConfidence: 1,
+          suitConfidence: 1,
+          confidence: 1
+        };
+
+        tracker.updateBoard({
+          timestampSeconds: 22,
+
+          state: {
+            cardCount: 4,
+            street: "turn"
+          },
+
+          event: {
+            type:
+              "turnDealt",
+
+            card:
+            turn
+          }
+        } satisfies LiveBoardResult);
+
+        const completed =
+          tracker.update(
+            result(
+              27,
+              [],
+              [
+                {
+                  type:
+                    "handEnded",
+
+                  activeSeatIndexes: []
+                }
+              ]
+            )
+          );
+
+        expect(
+          completed.completedHand
+            ?.streets
+        ).toEqual([
+          {
+            street: "flop",
+
+            board:
+            flop,
+
+            timestampSeconds: 12
+          },
+          {
+            street: "turn",
+
+            board: [
+              ...flop,
+              turn
+            ],
+
+            timestampSeconds: 22
+          }
+        ]);
       }
     );
   }
