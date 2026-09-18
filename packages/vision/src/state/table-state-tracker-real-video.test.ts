@@ -40,11 +40,15 @@ import {
   TableStateTracker
 } from "./table-state-tracker.js";
 
+import {
+  detectTableEvents
+} from "./table-event-detector.js";
+
 describe(
   "TableStateTracker on real video",
   () => {
     it(
-      "tracks seat card state across video frames",
+      "detects stable card events across video frames",
       async () => {
         const videoPath =
           fileURLToPath(
@@ -111,9 +115,12 @@ describe(
               2
           });
 
-        const confirmedChanges: {
+        const detectedEvents: {
           timestampSeconds: number;
-          seatIndexes: number[];
+          type:
+            | "cardsAppeared"
+            | "cardsDisappeared";
+          seatIndex: number;
         }[] = [];
 
         for (
@@ -168,19 +175,22 @@ describe(
               rawState
             );
 
-          if (
-            tracked.changed
-          ) {
-            confirmedChanges.push({
+          const events =
+            detectTableEvents(
+              tracked.diff
+            );
+
+          for (
+            const event
+            of events
+            ) {
+            detectedEvents.push({
               timestampSeconds:
               frame.timestampSeconds,
-              seatIndexes:
-                tracked.diff
-                  .seatChanges
-                  .map(
-                    (change) =>
-                      change.index
-                  )
+              type:
+              event.type,
+              seatIndex:
+              event.seatIndex
             });
           }
 
@@ -211,7 +221,8 @@ describe(
               tracked.changed,
               changes:
               tracked.diff
-                .seatChanges
+                .seatChanges,
+              events
             }
           );
 
@@ -229,30 +240,47 @@ describe(
         }
 
         expect(
-          confirmedChanges
+          detectedEvents
         ).toEqual([
           {
             timestampSeconds:
               10,
-            seatIndexes: [
-              0,
+            type:
+              "cardsDisappeared",
+            seatIndex:
+              0
+          },
+          {
+            timestampSeconds:
+              10,
+            type:
+              "cardsDisappeared",
+            seatIndex:
               1
-            ]
           },
           {
             timestampSeconds:
               22,
-            seatIndexes: [
+            type:
+              "cardsDisappeared",
+            seatIndex:
               2
-            ]
           },
           {
             timestampSeconds:
               27,
-            seatIndexes: [
-              4,
+            type:
+              "cardsDisappeared",
+            seatIndex:
+              4
+          },
+          {
+            timestampSeconds:
+              27,
+            type:
+              "cardsDisappeared",
+            seatIndex:
               5
-            ]
           }
         ]);
       }
