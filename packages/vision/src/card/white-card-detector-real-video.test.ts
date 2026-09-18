@@ -29,6 +29,14 @@ import {
 } from "../table/crop-frame.js";
 
 import {
+  expandRegion
+} from "../table/expand-region.js";
+
+import {
+  createSixMaxSeatAnchors
+} from "../seat/seat-layout.js";
+
+import {
   WhiteCardDetector
 } from "./white-card-detector.js";
 
@@ -50,6 +58,22 @@ describe(
           fileURLToPath(
             new URL(
               "../../../video/fixtures/real/table-crop.png",
+              import.meta.url
+            )
+          );
+
+        const sceneOutputPath =
+          fileURLToPath(
+            new URL(
+              "../../../video/fixtures/real/table-scene-crop.png",
+              import.meta.url
+            )
+          );
+
+        const seatDebugOutputPath =
+          fileURLToPath(
+            new URL(
+              "../../../video/fixtures/real/seat-layout-debug.png",
               import.meta.url
             )
           );
@@ -87,6 +111,16 @@ describe(
           );
         }
 
+        console.log(
+          "FULL FRAME:",
+          {
+            width:
+            frame.width,
+            height:
+            frame.height
+          }
+        );
+
         const decoder =
           new SharpImageDecoder();
 
@@ -112,6 +146,223 @@ describe(
           );
         }
 
+        console.log(
+          "TABLE REGION:",
+          tableDetection.region
+        );
+
+        /*
+         * Expand the detected table oval to include
+         * the surrounding player/seat area.
+         */
+        const sceneRegion =
+          expandRegion(
+            tableDetection.region,
+            {
+              top:
+                Math.round(
+                  tableDetection.region.height *
+                  0.5
+                ),
+              right:
+                Math.round(
+                  tableDetection.region.width *
+                  0.125
+                ),
+              bottom:
+                Math.round(
+                  tableDetection.region.height *
+                  0.5
+                ),
+              left:
+                Math.round(
+                  tableDetection.region.width *
+                  0.125
+                )
+            },
+            {
+              width:
+              frame.width,
+              height:
+              frame.height
+            }
+          );
+
+        console.log(
+          "TABLE SCENE REGION:",
+          sceneRegion
+        );
+
+        const sceneCropped =
+          await cropFrame(
+            frame,
+            sceneRegion,
+            decoder
+          );
+
+        await sharp(
+          Buffer.from(
+            sceneCropped.data
+          ),
+          {
+            raw: {
+              width:
+              sceneCropped.width,
+              height:
+              sceneCropped.height,
+              channels:
+                sceneCropped.channels as Channels
+            }
+          }
+        )
+          .png()
+          .toFile(
+            sceneOutputPath
+          );
+
+        console.log(
+          "TABLE SCENE SAVED:",
+          sceneOutputPath
+        );
+
+        /*
+         * Generate the six expected seat positions
+         * around the detected table.
+         *
+         * Anchors are generated in full-frame
+         * coordinates, so convert them into
+         * scene-crop coordinates before drawing.
+         */
+        const seatAnchors =
+          createSixMaxSeatAnchors(
+            tableDetection.region
+          );
+
+        console.log(
+          "SEAT ANCHORS:",
+          seatAnchors
+        );
+
+        const seatOverlay =
+          seatAnchors.map(
+            (anchor) => {
+              const x =
+                Math.round(
+                  anchor.x -
+                  sceneRegion.x
+                );
+
+              const y =
+                Math.round(
+                  anchor.y -
+                  sceneRegion.y
+                );
+
+              const overlayWidth =
+                100;
+
+              const overlayHeight =
+                50;
+
+              const left =
+                Math.max(
+                  0,
+                  Math.min(
+                    sceneCropped.width -
+                    overlayWidth,
+                    x -
+                    overlayWidth / 2
+                  )
+                );
+
+              const top =
+                Math.max(
+                  0,
+                  Math.min(
+                    sceneCropped.height -
+                    overlayHeight,
+                    y -
+                    overlayHeight / 2
+                  )
+                );
+
+              return {
+                input:
+                  Buffer.from(
+                    `<svg
+                      width="${overlayWidth}"
+                      height="${overlayHeight}"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <circle
+                        cx="50"
+                        cy="25"
+                        r="20"
+                        fill="none"
+                        stroke="lime"
+                        stroke-width="4"
+                      />
+                      <text
+                        x="50"
+                        y="30"
+                        text-anchor="middle"
+                        font-family="Arial"
+                        font-size="16"
+                        font-weight="bold"
+                        fill="white"
+                        stroke="black"
+                        stroke-width="3"
+                        paint-order="stroke"
+                      >
+                        ${anchor.index}
+                      </text>
+                    </svg>`
+                  ),
+                left:
+                  Math.round(
+                    left
+                  ),
+                top:
+                  Math.round(
+                    top
+                  )
+              };
+            }
+          );
+
+        await sharp(
+          Buffer.from(
+            sceneCropped.data
+          ),
+          {
+            raw: {
+              width:
+              sceneCropped.width,
+              height:
+              sceneCropped.height,
+              channels:
+                sceneCropped.channels as Channels
+            }
+          }
+        )
+          .composite(
+            seatOverlay
+          )
+          .png()
+          .toFile(
+            seatDebugOutputPath
+          );
+
+        console.log(
+          "SEAT LAYOUT DEBUG SAVED:",
+          seatDebugOutputPath
+        );
+
+        /*
+         * Keep the original table-only crop because
+         * current card detection coordinates are
+         * relative to this region.
+         */
         const cropped =
           await cropFrame(
             frame,
