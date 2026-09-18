@@ -19,8 +19,8 @@ export class HandLifecycleDetector {
   private readonly minPlayers:
     number;
 
-  private previousState:
-    TableState | null = null;
+  private initialized = false;
+  private handActive = false;
 
   constructor(
     options:
@@ -33,56 +33,49 @@ export class HandLifecycleDetector {
   update(
     state: TableState
   ): HandLifecycleEvent[] {
-    if (!this.previousState) {
-      this.previousState =
-        state;
-
-      return [];
-    }
-
-    const previousActiveSeats =
-      this.getActiveSeatIndexes(
-        this.previousState
-      );
-
-    const currentActiveSeats =
+    const activeSeatIndexes =
       this.getActiveSeatIndexes(
         state
       );
 
-    this.previousState =
-      state;
+    if (!this.initialized) {
+      this.initialized = true;
 
-    const previousHasHand =
-      previousActiveSeats.length >=
-      this.minPlayers;
+      this.handActive =
+        activeSeatIndexes.length >=
+        this.minPlayers;
 
-    const currentHasHand =
-      currentActiveSeats.length >=
-      this.minPlayers;
+      return [];
+    }
 
     if (
-      !previousHasHand &&
-      currentHasHand
+      !this.handActive &&
+      activeSeatIndexes.length >=
+      this.minPlayers
     ) {
+      this.handActive = true;
+
       return [
         {
           type:
             "handStarted",
-          activeSeatIndexes:
-          currentActiveSeats
+
+          activeSeatIndexes
         }
       ];
     }
 
     if (
-      previousHasHand &&
-      currentActiveSeats.length === 0
+      this.handActive &&
+      activeSeatIndexes.length === 0
     ) {
+      this.handActive = false;
+
       return [
         {
           type:
             "handEnded",
+
           activeSeatIndexes: []
         }
       ];
@@ -96,11 +89,11 @@ export class HandLifecycleDetector {
   ): number[] {
     return state.seats
       .filter(
-        (seat) =>
+        seat =>
           seat.hasCards
       )
       .map(
-        (seat) =>
+        seat =>
           seat.index
       );
   }
