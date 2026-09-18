@@ -44,11 +44,15 @@ import {
   detectTableEvents
 } from "./table-event-detector.js";
 
+import {
+  HandLifecycleDetector
+} from "./hand-lifecycle-detector.js";
+
 describe(
   "TableStateTracker on real video",
   () => {
     it(
-      "detects stable card events across video frames",
+      "detects stable card and hand lifecycle events across video frames",
       async () => {
         const videoPath =
           fileURLToPath(
@@ -115,12 +119,23 @@ describe(
               2
           });
 
+        const lifecycleDetector =
+          new HandLifecycleDetector();
+
         const detectedEvents: {
           timestampSeconds: number;
           type:
             | "cardsAppeared"
             | "cardsDisappeared";
           seatIndex: number;
+        }[] = [];
+
+        const lifecycleEvents: {
+          timestampSeconds: number;
+          type:
+            | "handStarted"
+            | "handEnded";
+          activeSeatIndexes: number[];
         }[] = [];
 
         for (
@@ -194,6 +209,25 @@ describe(
             });
           }
 
+          const handEvents =
+            lifecycleDetector.update(
+              tracked.state
+            );
+
+          for (
+            const event
+            of handEvents
+            ) {
+            lifecycleEvents.push({
+              timestampSeconds:
+              frame.timestampSeconds,
+              type:
+              event.type,
+              activeSeatIndexes:
+              event.activeSeatIndexes
+            });
+          }
+
           const rawCards =
             rawState.seats.map(
               (seat) =>
@@ -222,7 +256,8 @@ describe(
               changes:
               tracked.diff
                 .seatChanges,
-              events
+              events,
+              handEvents
             }
           );
 
@@ -281,6 +316,19 @@ describe(
               "cardsDisappeared",
             seatIndex:
               5
+          }
+        ]);
+
+        expect(
+          lifecycleEvents
+        ).toEqual([
+          {
+            timestampSeconds:
+              27,
+            type:
+              "handEnded",
+            activeSeatIndexes:
+              []
           }
         ]);
       }
