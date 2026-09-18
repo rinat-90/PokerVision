@@ -44,11 +44,41 @@ import {
   BetAmountStateTracker
 } from "./bet-amount-state-tracker.js";
 
+import {
+  createPlayerContributionState
+} from "./player-contribution-state.js";
+
+import {
+  PlayerActionDetector
+} from "./player-action-detector.js";
+
+import type {
+  PokerStreet
+} from "./player-action-context.js";
+
+function getStreet(
+  timestampSeconds: number
+): PokerStreet {
+  if (
+    timestampSeconds >= 22
+  ) {
+    return "turn";
+  }
+
+  if (
+    timestampSeconds >= 12
+  ) {
+    return "flop";
+  }
+
+  return "preflop";
+}
+
 describe(
-  "BetAmountStateTracker on real video",
+  "PlayerActionDetector on real video",
   () => {
     it(
-      "tracks stable numeric bet amounts independently per seat",
+      "detects reliable player actions from stable bet amount transitions",
       async () => {
         const videoPath =
           fileURLToPath(
@@ -111,22 +141,25 @@ describe(
         const ocr =
           new TesseractBetAmountOcr();
 
-        const detector =
+        const amountDetector =
           new BetAmountDetector(
             ocr
           );
 
-        const tracker =
+        const amountTracker =
           new BetAmountStateTracker({
             requiredStableFrames: 2
           });
 
-        const transitions: Array<{
+        const actionDetector =
+          new PlayerActionDetector();
+
+        const actionCandidates: Array<{
           timestampSeconds: number;
           seatIndex: number;
-          previousAmount: number | null;
-          currentAmount: number | null;
-          confidence: number;
+          street: PokerStreet;
+          type: string;
+          amount: number | null;
         }> = [];
 
         try {
@@ -145,6 +178,11 @@ describe(
             const timestampSeconds =
               startSeconds +
               frameIndex;
+
+            const street =
+              getStreet(
+                timestampSeconds
+              );
 
             const states = [];
 
@@ -180,7 +218,7 @@ describe(
                 );
 
               const detection =
-                await detector.detect(
+                await amountDetector.detect(
                   actionFrame,
                   amountFrame,
                   actionRegion.seatIndex
@@ -205,33 +243,117 @@ describe(
               });
             }
 
-            const result =
-              tracker.update(
+            const tracked =
+              amountTracker.update(
                 states
               );
 
+            /*
+             * Build the contribution snapshot from
+             * the stable state BEFORE processing
+             * this frame's transitions.
+             *
+             * For seats that changed on this frame,
+             * use previousAmount so the classifier
+             * sees the state before the action.
+             */
+            const contributions =
+              tracked.stable
+                .map(
+                  state => {
+                    const change =
+                      tracked.changes.find(
+                        candidate =>
+                          candidate.seatIndex ===
+                          state.seatIndex
+                      );
+
+                    const amount =
+                      change
+                        ? change.previousAmount
+                        : state.amount;
+
+                    if (
+                      amount === null
+                    ) {
+                      return null;
+                    }
+
+                    return {
+                      seatIndex:
+                      state.seatIndex,
+
+                      amount
+                    };
+                  }
+                )
+                .filter(
+                  (
+                    contribution
+                  ): contribution is {
+                    seatIndex: number;
+                    amount: number;
+                  } =>
+                    contribution !== null
+                );
+
+            /*
+ * Preflop recording starts with existing chips
+ * already on the table and OCR does not recognize
+ * every visible amount, so that snapshot is
+ * incomplete.
+ *
+ * Postflop streets begin from a known cleared
+ * contribution state in this fixture.
+ */
+            const contributionState =
+              createPlayerContributionState(
+                street,
+                contributions,
+                street !== "preflop"
+              );
+
+            if (
+              tracked.changes.length > 0
+            ) {
+              console.log(
+                `${timestampSeconds}s ${street}`,
+                "snapshot=",
+                contributions,
+                "changes=",
+                tracked.changes
+              );
+            }
+
+            const events =
+              actionDetector.detect({
+                contributionState,
+                changes:
+                tracked.changes
+              });
+
             for (
-              const change
-              of result.changes
+              const event
+              of events
               ) {
-              transitions.push({
+              actionCandidates.push({
                 timestampSeconds,
 
                 seatIndex:
-                change.seatIndex,
+                event.seatIndex,
 
-                previousAmount:
-                change.previousAmount,
+                street:
+                event.street,
 
-                currentAmount:
-                change.currentAmount,
+                type:
+                event.type,
 
-                confidence:
-                change.confidence
+                amount:
+                event.amount
               });
 
               console.log(
-                `${timestampSeconds}s S${change.seatIndex} ${change.previousAmount ?? "null"} -> ${change.currentAmount ?? "null"} confidence=${change.confidence.toFixed(3)}`
+                `  ACTION CANDIDATE: S${event.seatIndex} ${event.type} ${event.amount ?? ""}`
               );
             }
           }
@@ -240,61 +362,31 @@ describe(
         }
 
         console.log(
-          "TRANSITIONS:",
-          transitions
+          "ACTION CANDIDATES:",
+          actionCandidates
         );
 
+        /*
+         * Diagnostic validation for now.
+         * After seeing the real output we'll
+         * replace this with semantic assertions.
+         */
         expect(
-          transitions
+          actionCandidates
         ).toEqual([
-          {
-            timestampSeconds: 8,
-            seatIndex: 4,
-            previousAmount: null,
-            currentAmount: 600,
-            confidence: 0.36
-          },
-          {
-            timestampSeconds: 12,
-            seatIndex: 2,
-            previousAmount: 200,
-            currentAmount: null,
-            confidence: 0
-          },
-          {
-            timestampSeconds: 13,
-            seatIndex: 4,
-            previousAmount: 600,
-            currentAmount: null,
-            confidence: 0
-          },
           {
             timestampSeconds: 20,
             seatIndex: 4,
-            previousAmount: null,
-            currentAmount: 1900,
-            confidence: 0
-          },
-          {
-            timestampSeconds: 22,
-            seatIndex: 4,
-            previousAmount: 1900,
-            currentAmount: null,
-            confidence: 0
+            street: "flop",
+            type: "bet",
+            amount: 1900
           },
           {
             timestampSeconds: 25,
             seatIndex: 4,
-            previousAmount: null,
-            currentAmount: 5700,
-            confidence: 0.23
-          },
-          {
-            timestampSeconds: 27,
-            seatIndex: 4,
-            previousAmount: 5700,
-            currentAmount: null,
-            confidence: 0
+            street: "turn",
+            type: "bet",
+            amount: 5700
           }
         ]);
       }
