@@ -36,7 +36,7 @@ describe(
   "WhiteCardDetector on real video",
   () => {
     it(
-      "analyzes candidate card regions on the poker table",
+      "detects face-down card clusters on the poker table",
       async () => {
         const videoPath =
           fileURLToPath(
@@ -50,6 +50,14 @@ describe(
           fileURLToPath(
             new URL(
               "../../../video/fixtures/real/table-crop.png",
+              import.meta.url
+            )
+          );
+
+        const debugOutputPath =
+          fileURLToPath(
+            new URL(
+              "../../../video/fixtures/real/card-detection-debug.png",
               import.meta.url
             )
           );
@@ -118,11 +126,15 @@ describe(
           .toBeGreaterThan(0);
 
         await sharp(
-          Buffer.from(cropped.data),
+          Buffer.from(
+            cropped.data
+          ),
           {
             raw: {
-              width: cropped.width,
-              height: cropped.height,
+              width:
+              cropped.width,
+              height:
+              cropped.height,
               channels:
                 cropped.channels as Channels
             }
@@ -140,14 +152,22 @@ describe(
 
         const cardDetector =
           new WhiteCardDetector({
-            brightnessThreshold: 0.6,
-            minWhiteRatio: 0.15,
-            minWidth: 20,
-            minHeight: 30,
-            maxWidth: 150,
-            maxHeight: 200,
-            minAspectRatio: 0.45,
-            maxAspectRatio: 0.85
+            brightnessThreshold:
+              0.6,
+            minWhiteRatio:
+              0.65,
+            minWidth:
+              20,
+            minHeight:
+              30,
+            maxWidth:
+              150,
+            maxHeight:
+              200,
+            minAspectRatio:
+              0.45,
+            maxAspectRatio:
+              0.85
           });
 
         const result =
@@ -155,30 +175,107 @@ describe(
             cropped
           );
 
+        expect(result.found)
+          .toBe(true);
+
+        expect(result.regions)
+          .toEqual([
+            {
+              x: 99,
+              y: 286,
+              width: 121,
+              height: 53
+            },
+            {
+              x: 1325,
+              y: 286,
+              width: 121,
+              height: 53
+            }
+          ]);
+
+        const debugOverlay =
+          result.regions.map(
+            (region) => ({
+              input:
+                Buffer.from(
+                  `<svg
+                    width="${region.width}"
+                    height="${region.height}"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <rect
+                      x="1"
+                      y="1"
+                      width="${Math.max(
+                    1,
+                    region.width - 2
+                  )}"
+                      height="${Math.max(
+                    1,
+                    region.height - 2
+                  )}"
+                      fill="none"
+                      stroke="red"
+                      stroke-width="3"
+                    />
+                  </svg>`
+                ),
+              left:
+              region.x,
+              top:
+              region.y
+            })
+          );
+
+        await sharp(
+          Buffer.from(
+            cropped.data
+          ),
+          {
+            raw: {
+              width:
+              cropped.width,
+              height:
+              cropped.height,
+              channels:
+                cropped.channels as Channels
+            }
+          }
+        )
+          .composite(
+            debugOverlay
+          )
+          .png()
+          .toFile(
+            debugOutputPath
+          );
+
+        console.log(
+          "CARD DEBUG SAVED:",
+          debugOutputPath
+        );
+
         console.log(
           "CARD DETECTION:",
           {
             table: {
-              width: cropped.width,
-              height: cropped.height
+              width:
+              cropped.width,
+              height:
+              cropped.height
             },
-            found: result.found,
-            confidence: result.confidence,
-            regions: result.regions
+            found:
+            result.found,
+            confidence:
+            result.confidence,
+            regions:
+            result.regions
           }
         );
 
-        expect(result)
-          .toEqual(
-            expect.objectContaining({
-              found:
-                expect.any(Boolean),
-              confidence:
-                expect.any(Number),
-              regions:
-                expect.any(Array)
-            })
-          );
+        expect(result.confidence)
+          .toBeGreaterThan(0);
       }
     );
   }

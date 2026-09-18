@@ -11,6 +11,14 @@ import type {
   CardDetector
 } from "./card-detector.js";
 
+import {
+  CardComponentGrouper
+} from "./card-component-grouper.js";
+
+import type {
+  CardComponent
+} from "./card-component.js";
+
 export interface WhiteCardDetectorOptions {
   brightnessThreshold?: number;
   minWhiteRatio?: number;
@@ -71,7 +79,8 @@ export class WhiteCardDetector
       );
 
     return {
-      found: regions.length > 0,
+      found:
+        regions.length > 0,
       confidence:
         regions.length > 0
           ? 0.5
@@ -83,7 +92,7 @@ export class WhiteCardDetector
   private findCardRegions(
     frame: CroppedFrame
   ): CardRegion[] {
-    const regions: CardRegion[] = [];
+    const components: CardComponent[] = [];
 
     const visited =
       new Uint8Array(
@@ -131,56 +140,134 @@ export class WhiteCardDetector
           );
 
         if (
-          component.width <
-          this.minWidth ||
-          component.width >
-          this.maxWidth ||
-          component.height <
-          this.minHeight ||
-          component.height >
-          this.maxHeight
+          component.width < 3 ||
+          component.height < 3
         ) {
           continue;
         }
 
-        const aspectRatio =
-          component.width /
-          component.height;
-
-        if (
-          aspectRatio <
-          this.minAspectRatio ||
-          aspectRatio >
-          this.maxAspectRatio
-        ) {
-          continue;
-        }
-
-        const area =
-          component.width *
-          component.height;
-
-        const cardRatio =
-          component.pixelCount /
-          area;
-
-        if (
-          cardRatio <
-          this.minWhiteRatio
-        ) {
-          continue;
-        }
-
-        regions.push({
-          x: component.minX,
-          y: component.minY,
-          width: component.width,
-          height: component.height
+        components.push({
+          x:
+          component.minX,
+          y:
+          component.minY,
+          width:
+          component.width,
+          height:
+          component.height,
+          pixelCount:
+          component.pixelCount
         });
       }
     }
 
-    return regions;
+    const grouper =
+      new CardComponentGrouper({
+        maxHorizontalGap: 8,
+        maxVerticalGap: 8,
+        maxWidth:
+        this.maxWidth,
+        maxHeight:
+        this.maxHeight
+      });
+
+    const groupedRegions =
+      grouper.group(
+        components
+      );
+
+    return groupedRegions.filter(
+      (region) => {
+        const density =
+          this.getRegionPixelDensity(
+            region,
+            components
+          );
+
+        if (
+          density <
+          this.minWhiteRatio
+        ) {
+          return false;
+        }
+
+        const aspectRatio =
+          region.width /
+          region.height;
+
+        const isIndividualCard =
+          region.width >=
+          this.minWidth &&
+          region.width <=
+          this.maxWidth &&
+          region.height >=
+          this.minHeight &&
+          region.height <=
+          this.maxHeight &&
+          aspectRatio >=
+          this.minAspectRatio &&
+          aspectRatio <=
+          this.maxAspectRatio;
+
+        const isCardBackCluster =
+          region.width >= 80 &&
+          region.width <= 150 &&
+          region.height >= 45 &&
+          region.height <= 80 &&
+          aspectRatio >= 1.5 &&
+          aspectRatio <= 2.8;
+
+        return (
+          isIndividualCard ||
+          isCardBackCluster
+        );
+      }
+    );
+  }
+
+  private getRegionPixelDensity(
+    region: CardRegion,
+    components: CardComponent[]
+  ): number {
+    const pixelCount =
+      components
+        .filter(
+          (component) =>
+            component.x >=
+            region.x &&
+            component.y >=
+            region.y &&
+            component.x +
+            component.width <=
+            region.x +
+            region.width &&
+            component.y +
+            component.height <=
+            region.y +
+            region.height
+        )
+        .reduce(
+          (
+            total,
+            component
+          ) =>
+            total +
+            component.pixelCount,
+          0
+        );
+
+    const area =
+      region.width *
+      region.height;
+
+    if (area === 0) {
+      return 0;
+    }
+
+    return (
+      pixelCount /
+      area
+    );
   }
 
   private floodFill(
@@ -233,25 +320,29 @@ export class WhiteCardDetector
 
       pixelCount += 1;
 
-      minX = Math.min(
-        minX,
-        x
-      );
+      minX =
+        Math.min(
+          minX,
+          x
+        );
 
-      maxX = Math.max(
-        maxX,
-        x
-      );
+      maxX =
+        Math.max(
+          maxX,
+          x
+        );
 
-      minY = Math.min(
-        minY,
-        y
-      );
+      minY =
+        Math.min(
+          minY,
+          y
+        );
 
-      maxY = Math.max(
-        maxY,
-        y
-      );
+      maxY =
+        Math.max(
+          maxY,
+          y
+        );
 
       const neighbors: Array<{
         x: number;
@@ -355,24 +446,23 @@ export class WhiteCardDetector
 
     const r =
       (
-        frame.data[offset] ??
-        0
+        frame.data[
+          offset
+          ] ?? 0
       ) / 255;
 
     const g =
       (
         frame.data[
         offset + 1
-          ] ??
-        0
+          ] ?? 0
       ) / 255;
 
     const b =
       (
         frame.data[
         offset + 2
-          ] ??
-        0
+          ] ?? 0
       ) / 255;
 
     const brightness =
@@ -382,14 +472,13 @@ export class WhiteCardDetector
         b
       ) / 3;
 
-    if (
-      brightness <
-      this.brightnessThreshold
-    ) {
-      return false;
-    }
-
+    /*
+     * Face-up cards:
+     * bright / near-white surface.
+     */
     const isWhite =
+      brightness >=
+      this.brightnessThreshold &&
       r >=
       this.brightnessThreshold &&
       g >=
@@ -401,11 +490,25 @@ export class WhiteCardDetector
       return true;
     }
 
+    /*
+     * Face-down PokerStars cards.
+     *
+     * Real-video samples are roughly:
+     *
+     * R: 94–118
+     * G: 148–184
+     * B: 176–218
+     *
+     * Brightness:
+     * ~0.55–0.68
+     */
     const isLightBlue =
       b > g &&
       g > r &&
-      b - r >= 0.08 &&
-      brightness >= 0.78;
+      g - r >= 0.15 &&
+      b - r >= 0.25 &&
+      brightness >= 0.5 &&
+      brightness <= 0.75;
 
     return isLightBlue;
   }

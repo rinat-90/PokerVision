@@ -95,13 +95,13 @@ function fillLightBlueRectangle(
         frame.channels;
 
       frame.data[offset] =
-        190;
+        111;
 
       frame.data[offset + 1] =
-        220;
+        177;
 
       frame.data[offset + 2] =
-        235;
+        209;
     }
   }
 }
@@ -324,6 +324,47 @@ describe(
 
         expect(result.regions)
           .toHaveLength(0);
+      }
+    );
+
+    it(
+      "detects an overlapping card-back cluster",
+      async () => {
+        const frame =
+          createFrame(
+            300,
+            200
+          );
+
+        fillLightBlueRectangle(
+          frame,
+          80,
+          60,
+          120,
+          55
+        );
+
+        const detector =
+          new WhiteCardDetector();
+
+        const result =
+          await detector.detect(
+            frame
+          );
+
+        expect(result.found)
+          .toBe(true);
+
+        expect(result.regions)
+          .toHaveLength(1);
+
+        expect(result.regions[0])
+          .toEqual({
+            x: 80,
+            y: 60,
+            width: 120,
+            height: 55
+          });
       }
     );
 
