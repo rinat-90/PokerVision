@@ -37,8 +37,16 @@ import {
 } from "../seat/seat-layout.js";
 
 import {
+  createSixMaxSeatRegions
+} from "../seat/seat-region.js";
+
+import {
   WhiteCardDetector
 } from "./white-card-detector.js";
+
+import {
+  SeatDetector
+} from "../seat/seat-detector.js";
 
 describe(
   "WhiteCardDetector on real video",
@@ -74,6 +82,14 @@ describe(
           fileURLToPath(
             new URL(
               "../../../video/fixtures/real/seat-layout-debug.png",
+              import.meta.url
+            )
+          );
+
+        const seatRegionsDebugOutputPath =
+          fileURLToPath(
+            new URL(
+              "../../../video/fixtures/real/seat-regions-debug.png",
               import.meta.url
             )
           );
@@ -270,6 +286,7 @@ describe(
                   Math.min(
                     sceneCropped.width -
                     overlayWidth,
+                    overlayWidth,
                     x -
                     overlayWidth / 2
                   )
@@ -357,6 +374,246 @@ describe(
           "SEAT LAYOUT DEBUG SAVED:",
           seatDebugOutputPath
         );
+
+        /*
+         * Build search regions around the six
+         * expected player seats.
+         */
+        const seatRegions =
+          createSixMaxSeatRegions(
+            tableDetection.region,
+            {
+              width:
+              frame.width,
+              height:
+              frame.height
+            }
+          );
+
+        console.log(
+          "SEAT REGIONS:",
+          seatRegions
+        );
+
+        const seatRegionOverlay =
+          seatRegions.map(
+            (region) => {
+              const left =
+                Math.round(
+                  region.x -
+                  sceneRegion.x
+                );
+
+              const top =
+                Math.round(
+                  region.y -
+                  sceneRegion.y
+                );
+
+              return {
+                input:
+                  Buffer.from(
+                    `<svg
+                      width="${region.width}"
+                      height="${region.height}"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <rect
+                        x="2"
+                        y="2"
+                        width="${Math.max(
+                      1,
+                      region.width - 4
+                    )}"
+                        height="${Math.max(
+                      1,
+                      region.height - 4
+                    )}"
+                        fill="none"
+                        stroke="yellow"
+                        stroke-width="4"
+                      />
+
+                      <rect
+                        x="8"
+                        y="8"
+                        width="90"
+                        height="32"
+                        rx="5"
+                        fill="black"
+                        fill-opacity="0.75"
+                      />
+
+                      <text
+                        x="53"
+                        y="30"
+                        text-anchor="middle"
+                        font-family="Arial"
+                        font-size="18"
+                        font-weight="bold"
+                        fill="white"
+                      >
+                        Seat ${region.index}
+                      </text>
+                    </svg>`
+                  ),
+                left,
+                top
+              };
+            }
+          );
+
+        await sharp(
+          Buffer.from(
+            sceneCropped.data
+          ),
+          {
+            raw: {
+              width:
+              sceneCropped.width,
+              height:
+              sceneCropped.height,
+              channels:
+                sceneCropped.channels as Channels
+            }
+          }
+        )
+          .composite(
+            seatRegionOverlay
+          )
+          .png()
+          .toFile(
+            seatRegionsDebugOutputPath
+          );
+
+        console.log(
+          "SEAT REGIONS DEBUG SAVED:",
+          seatRegionsDebugOutputPath
+        );
+
+        /*
+ * Diagnostic:
+ * run the existing card detector independently
+ * inside each seat search region.
+ */
+        const seatCardDetector =
+          new WhiteCardDetector({
+            brightnessThreshold:
+              0.6,
+            minWhiteRatio:
+              0.65,
+            minWidth:
+              20,
+            minHeight:
+              30,
+            maxWidth:
+              150,
+            maxHeight:
+              200,
+            minAspectRatio:
+              0.45,
+            maxAspectRatio:
+              0.85
+          });
+
+        const seatDetector =
+          new SeatDetector(
+            decoder,
+            seatCardDetector
+          );
+
+        const detectedSeats =
+          await seatDetector.detect(
+            frame,
+            seatRegions
+          );
+
+        console.log(
+          "DETECTED SEATS:",
+          JSON.stringify(
+            detectedSeats,
+            null,
+            2
+          )
+        );
+
+        expect(
+          detectedSeats.map(
+            (seat) =>
+              seat.hasCards
+          )
+        ).toEqual([
+          true,
+          true,
+          true,
+          false,
+          true,
+          true
+        ]);
+
+        expect(
+          detectedSeats
+        ).toHaveLength(6);
+
+        const seatCardResults =
+          [];
+
+        for (
+          const seatRegion
+          of seatRegions
+          ) {
+          const seatCropped =
+            await cropFrame(
+              frame,
+              seatRegion,
+              decoder
+            );
+
+          const seatCropOutputPath =
+            fileURLToPath(
+              new URL(
+                `../../../video/fixtures/real/seat-${seatRegion.index}.png`,
+                import.meta.url
+              )
+            );
+
+          await sharp(
+            Buffer.from(
+              seatCropped.data
+            ),
+            {
+              raw: {
+                width:
+                seatCropped.width,
+                height:
+                seatCropped.height,
+                channels:
+                  seatCropped.channels as Channels
+              }
+            }
+          )
+            .png()
+            .toFile(
+              seatCropOutputPath
+            );
+
+          const cardResult =
+            await seatCardDetector.detect(
+              seatCropped
+            );
+
+          seatCardResults.push({
+            index:
+            seatRegion.index,
+            found:
+            cardResult.found,
+            confidence:
+            cardResult.confidence,
+            regions:
+            cardResult.regions
+          });
+        }
+
 
         /*
          * Keep the original table-only crop because
