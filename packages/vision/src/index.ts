@@ -61,3 +61,7 @@ export {
 export type {
   WhiteCardDetectorOptions
 } from "./card/white-card-detector.js";
+
+export * from "./hand/video-hand.js";
+
+export * from "./hand/video-hand-builder.js";
