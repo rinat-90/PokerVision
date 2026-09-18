@@ -12,7 +12,7 @@ describe(
   "BetAmountStateTracker",
   () => {
     it(
-      "requires stable frames before appearance",
+      "requires stable frames before amount appears",
       () => {
         const tracker =
           new BetAmountStateTracker({
@@ -23,8 +23,9 @@ describe(
           tracker.update([
             {
               seatIndex: 4,
-              hasAmount: false,
-                confidence: 0
+              amount: null,
+              rawText: null,
+              confidence: 0
             }
           ]).changes
         ).toEqual([]);
@@ -33,9 +34,10 @@ describe(
           tracker.update([
             {
               seatIndex: 4,
-              hasAmount: true,
-                confidence: 0
-            },
+              amount: 600,
+              rawText: "600",
+              confidence: 0.4
+            }
           ]).changes
         ).toEqual([]);
 
@@ -43,14 +45,64 @@ describe(
           tracker.update([
             {
               seatIndex: 4,
-              hasAmount: true,
-                confidence: 0
+              amount: 600,
+              rawText: "600",
+              confidence: 0.5
             }
           ]).changes
         ).toEqual([
           {
             seatIndex: 4,
-            hasAmount: true,
+            previousAmount: null,
+            currentAmount: 600,
+            confidence: 0.5
+          }
+        ]);
+      }
+    );
+
+    it(
+      "requires stable frames before amount disappears",
+      () => {
+        const tracker =
+          new BetAmountStateTracker({
+            requiredStableFrames: 2
+          });
+
+        tracker.update([
+          {
+            seatIndex: 4,
+            amount: 600,
+            rawText: "600",
+            confidence: 0.5
+          }
+        ]);
+
+        expect(
+          tracker.update([
+            {
+              seatIndex: 4,
+              amount: null,
+              rawText: null,
+              confidence: 0
+            }
+          ]).changes
+        ).toEqual([]);
+
+        expect(
+          tracker.update([
+            {
+              seatIndex: 4,
+              amount: null,
+              rawText: null,
+              confidence: 0
+            }
+          ]).changes
+        ).toEqual([
+          {
+            seatIndex: 4,
+            previousAmount: 600,
+            currentAmount: null,
             confidence: 0
           }
         ]);
@@ -58,7 +110,7 @@ describe(
     );
 
     it(
-      "requires stable frames before disappearance",
+      "detects stable amount changes",
       () => {
         const tracker =
           new BetAmountStateTracker({
@@ -68,24 +120,9 @@ describe(
         tracker.update([
           {
             seatIndex: 4,
-            hasAmount: false,
-              confidence: 0
-          }
-        ]);
-
-        tracker.update([
-          {
-            seatIndex: 4,
-            hasAmount: true,
-              confidence: 0
-          }
-        ]);
-
-        tracker.update([
-          {
-            seatIndex: 4,
-            hasAmount: true,
-              confidence: 0
+            amount: 600,
+            rawText: "600",
+            confidence: 0.5
           }
         ]);
 
@@ -93,8 +130,9 @@ describe(
           tracker.update([
             {
               seatIndex: 4,
-              hasAmount: false,
-                confidence: 0
+              amount: 1900,
+              rawText: "1,900",
+              confidence: 0
             }
           ]).changes
         ).toEqual([]);
@@ -103,17 +141,74 @@ describe(
           tracker.update([
             {
               seatIndex: 4,
-              hasAmount: false,
-                confidence: 0
+              amount: 1900,
+              rawText: "1,900",
+              confidence: 0
             }
           ]).changes
         ).toEqual([
           {
             seatIndex: 4,
-            hasAmount: false,
+            previousAmount: 600,
+            currentAmount: 1900,
             confidence: 0
           }
         ]);
+      }
+    );
+
+    it(
+      "ignores a single OCR miss",
+      () => {
+        const tracker =
+          new BetAmountStateTracker({
+            requiredStableFrames: 2
+          });
+
+        tracker.update([
+          {
+            seatIndex: 4,
+            amount: 600,
+            rawText: "600",
+            confidence: 0.5
+          }
+        ]);
+
+        const missed =
+          tracker.update([
+            {
+              seatIndex: 4,
+              amount: null,
+              rawText: null,
+              confidence: 0
+            }
+          ]);
+
+        expect(
+          missed.changes
+        ).toEqual([]);
+
+        expect(
+          missed.stable[0]?.amount
+        ).toBe(600);
+
+        const recovered =
+          tracker.update([
+            {
+              seatIndex: 4,
+              amount: 600,
+              rawText: "600",
+              confidence: 0.4
+            }
+          ]);
+
+        expect(
+          recovered.changes
+        ).toEqual([]);
+
+        expect(
+          recovered.stable[0]?.amount
+        ).toBe(600);
       }
     );
 
@@ -128,26 +223,30 @@ describe(
         tracker.update([
           {
             seatIndex: 4,
-            hasAmount: false,
-              confidence: 0
+            amount: null,
+            rawText: null,
+            confidence: 0
           },
           {
             seatIndex: 5,
-            hasAmount: false,
-              confidence: 0
+            amount: null,
+            rawText: null,
+            confidence: 0
           }
         ]);
 
         tracker.update([
           {
             seatIndex: 4,
-            hasAmount: true,
-              confidence: 0,
+            amount: 600,
+            rawText: "600",
+            confidence: 0.5
           },
           {
             seatIndex: 5,
-            hasAmount: false,
-              confidence: 0,
+            amount: null,
+            rawText: null,
+            confidence: 0
           }
         ]);
 
@@ -155,13 +254,15 @@ describe(
           tracker.update([
             {
               seatIndex: 4,
-              hasAmount: true,
-                confidence: 0,
+              amount: 600,
+              rawText: "600",
+              confidence: 0.6
             },
             {
               seatIndex: 5,
-              hasAmount: true,
-                confidence: 0,
+              amount: 200,
+              rawText: "200",
+              confidence: 0.9
             }
           ]);
 
@@ -170,15 +271,23 @@ describe(
         ).toEqual([
           {
             seatIndex: 4,
-            hasAmount: true,
-            confidence: 0,
+            previousAmount: null,
+            currentAmount: 600,
+            confidence: 0.6
           }
         ]);
+
+        expect(
+          result.stable.find(
+            state =>
+              state.seatIndex === 5
+          )?.amount
+        ).toBeNull();
       }
     );
 
     it(
-      "does not emit repeated changes",
+      "does not emit repeated changes for the same amount",
       () => {
         const tracker =
           new BetAmountStateTracker({
@@ -188,7 +297,8 @@ describe(
         tracker.update([
           {
             seatIndex: 4,
-            hasAmount: false,
+            amount: null,
+            rawText: null,
             confidence: 0
           }
         ]);
@@ -196,8 +306,9 @@ describe(
         tracker.update([
           {
             seatIndex: 4,
-            hasAmount: true,
-              confidence: 0
+            amount: 5700,
+            rawText: "5,700",
+            confidence: 0.2
           }
         ]);
 
@@ -205,8 +316,9 @@ describe(
           tracker.update([
             {
               seatIndex: 4,
-              hasAmount: true,
-                confidence: 0
+              amount: 5700,
+              rawText: "5,700",
+              confidence: 0.3
             }
           ]).changes
         ).toHaveLength(1);
@@ -215,8 +327,9 @@ describe(
           tracker.update([
             {
               seatIndex: 4,
-              hasAmount: true,
-                confidence: 0
+              amount: 5700,
+              rawText: "5,700",
+              confidence: 0.4
             }
           ]).changes
         ).toEqual([]);

@@ -19,14 +19,16 @@ describe(
             [
               {
                 seatIndex: 4,
-                hasAmount: false,
+                amount: null,
+                rawText: null,
                 confidence: 0
               }
             ],
             [
               {
                 seatIndex: 4,
-                hasAmount: true,
+                amount: 600,
+                rawText: "600",
                 confidence: 0.9
               }
             ]
@@ -39,8 +41,8 @@ describe(
           changes: [
             {
               seatIndex: 4,
-              previousHasAmount: false,
-              currentHasAmount: true
+              previousAmount: null,
+              currentAmount: 600
             }
           ]
         });
@@ -55,42 +57,93 @@ describe(
             [
               {
                 seatIndex: 4,
-                hasAmount: true,
+                amount: 600,
+                rawText: "600",
                 confidence: 0.9
               }
             ],
             [
               {
                 seatIndex: 4,
-                hasAmount: false,
+                amount: null,
+                rawText: null,
                 confidence: 0
               }
             ]
           );
 
         expect(
-          result.changed
-        ).toBe(true);
+          result
+        ).toEqual({
+          changed: true,
+          changes: [
+            {
+              seatIndex: 4,
+              previousAmount: 600,
+              currentAmount: null
+            }
+          ]
+        });
       }
     );
 
     it(
-      "does not report unchanged state",
+      "detects amount changing",
       () => {
         const result =
           diffBetAmountStates(
             [
               {
                 seatIndex: 4,
-                hasAmount: true,
-                confidence: 0.9
+                amount: 600,
+                rawText: "600",
+                confidence: 0.5
               }
             ],
             [
               {
                 seatIndex: 4,
-                hasAmount: true,
-                confidence: 0.8
+                amount: 1900,
+                rawText: "1,900",
+                confidence: 0
+              }
+            ]
+          );
+
+        expect(
+          result
+        ).toEqual({
+          changed: true,
+          changes: [
+            {
+              seatIndex: 4,
+              previousAmount: 600,
+              currentAmount: 1900
+            }
+          ]
+        });
+      }
+    );
+
+    it(
+      "does not report unchanged amount",
+      () => {
+        const result =
+          diffBetAmountStates(
+            [
+              {
+                seatIndex: 4,
+                amount: 600,
+                rawText: "600",
+                confidence: 0.4
+              }
+            ],
+            [
+              {
+                seatIndex: 4,
+                amount: 600,
+                rawText: "600",
+                confidence: 0.9
               }
             ]
           );
@@ -101,7 +154,7 @@ describe(
 
         expect(
           result.changes
-        ).toHaveLength(0);
+        ).toEqual([]);
       }
     );
   }

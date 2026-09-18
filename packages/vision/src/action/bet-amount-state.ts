@@ -1,13 +1,14 @@
 export interface BetAmountState {
   seatIndex: number;
-  hasAmount: boolean;
+  amount: number | null;
+  rawText: string | null;
   confidence: number;
 }
 
 export interface BetAmountChange {
   seatIndex: number;
-  previousHasAmount: boolean;
-  currentHasAmount: boolean;
+  previousAmount: number | null;
+  currentAmount: number | null;
 }
 
 export interface BetAmountStateDiff {
@@ -25,7 +26,8 @@ export function diffBetAmountStates(
     const previousState =
       previous.find(
         (state) =>
-          state.seatIndex === currentState.seatIndex
+          state.seatIndex ===
+          currentState.seatIndex
       );
 
     if (!previousState) {
@@ -33,18 +35,18 @@ export function diffBetAmountStates(
     }
 
     if (
-      previousState.hasAmount !==
-      currentState.hasAmount
+      previousState.amount !==
+      currentState.amount
     ) {
       changes.push({
         seatIndex:
         currentState.seatIndex,
 
-        previousHasAmount:
-        previousState.hasAmount,
+        previousAmount:
+        previousState.amount,
 
-        currentHasAmount:
-        currentState.hasAmount
+        currentAmount:
+        currentState.amount
       });
     }
   }

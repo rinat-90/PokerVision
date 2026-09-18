@@ -4,7 +4,8 @@ import type {
 
 export interface BetAmountStateChange {
   seatIndex: number;
-  hasAmount: boolean;
+  previousAmount: number | null;
+  currentAmount: number | null;
   confidence: number;
 }
 
@@ -55,6 +56,10 @@ export class BetAmountStateTracker {
           state.seatIndex
         );
 
+      /*
+       * First observation establishes the baseline.
+       * It does not emit a change.
+       */
       if (!currentStable) {
         this.stableState.set(
           state.seatIndex,
@@ -64,9 +69,13 @@ export class BetAmountStateTracker {
         continue;
       }
 
+      /*
+       * Raw observation agrees with stable state.
+       * Cancel any pending candidate.
+       */
       if (
-        state.hasAmount ===
-        currentStable.hasAmount
+        state.amount ===
+        currentStable.amount
       ) {
         this.candidateState.delete(
           state.seatIndex
@@ -89,10 +98,13 @@ export class BetAmountStateTracker {
           state.seatIndex
         );
 
+      /*
+       * Start tracking a new candidate amount.
+       */
       if (
         !candidate ||
-        candidate.hasAmount !==
-        state.hasAmount
+        candidate.amount !==
+        state.amount
       ) {
         this.candidateState.set(
           state.seatIndex,
@@ -108,15 +120,21 @@ export class BetAmountStateTracker {
       }
 
       const frames =
-        (this.candidateFrames.get(
-          state.seatIndex
-        ) ?? 0) + 1;
+        (
+          this.candidateFrames.get(
+            state.seatIndex
+          ) ?? 0
+        ) + 1;
 
       this.candidateFrames.set(
         state.seatIndex,
         frames
       );
 
+      /*
+       * Promote the candidate only after it
+       * has remained stable long enough.
+       */
       if (
         frames >=
         this.requiredStableFrames
@@ -137,8 +155,13 @@ export class BetAmountStateTracker {
         changes.push({
           seatIndex:
           state.seatIndex,
-          hasAmount:
-          state.hasAmount,
+
+          previousAmount:
+          currentStable.amount,
+
+          currentAmount:
+          state.amount,
+
           confidence:
           state.confidence
         });
@@ -156,8 +179,10 @@ export class BetAmountStateTracker {
     return {
       raw,
       stable,
+
       changed:
         changes.length > 0,
+
       changes
     };
   }
