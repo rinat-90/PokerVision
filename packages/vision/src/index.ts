@@ -77,3 +77,5 @@ export * from "./action/bet-state-diff.js";
 export * from "./action/bet-event-detector.js";
 
 export * from "./action/seat-bet-state-tracker.js";
+
+export * from "./action/bet-amount-region.js";
