@@ -213,6 +213,61 @@ describe(
     );
 
     it(
+      "ignores a single incorrect OCR amount",
+      () => {
+        const tracker =
+          new BetAmountStateTracker({
+            requiredStableFrames: 2
+          });
+
+        tracker.update([
+          {
+            seatIndex: 4,
+            amount: 600,
+            rawText: "600",
+            confidence: 0.5
+          }
+        ]);
+
+        const noisy =
+          tracker.update([
+            {
+              seatIndex: 4,
+              amount: 800,
+              rawText: "800",
+              confidence: 0.9
+            }
+          ]);
+
+        expect(
+          noisy.changes
+        ).toEqual([]);
+
+        expect(
+          noisy.stable[0]?.amount
+        ).toBe(600);
+
+        const recovered =
+          tracker.update([
+            {
+              seatIndex: 4,
+              amount: 600,
+              rawText: "600",
+              confidence: 0
+            }
+          ]);
+
+        expect(
+          recovered.changes
+        ).toEqual([]);
+
+        expect(
+          recovered.stable[0]?.amount
+        ).toBe(600);
+      }
+    );
+
+    it(
       "tracks seats independently",
       () => {
         const tracker =
