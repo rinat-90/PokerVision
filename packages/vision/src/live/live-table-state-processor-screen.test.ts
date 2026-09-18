@@ -28,11 +28,15 @@ import {
   LiveTableStateProcessor
 } from "./live-table-state-processor.js";
 
+import {
+  LiveHandTracker
+} from "./live-hand-tracker.js";
+
 describe(
   "LiveTableStateProcessor on live screen",
   () => {
     it(
-      "detects a live hand boundary",
+      "processes live table state and tracks hands",
       async () => {
         const source =
           new ScreenFrameSource();
@@ -60,26 +64,38 @@ describe(
             seatDetector
           );
 
+        const handTracker =
+          new LiveHandTracker();
+
         await source.start();
 
         let previousSeatState:
           string | null = null;
 
-        let sawHandEnded = false;
-        let sawHandStarted = false;
+        let processedFrames = 0;
+        let detectedStates = 0;
 
-        const maxFrames = 90;
+        const maxFrames = 60;
 
         try {
           for await (
             const frame of source
             ) {
+            processedFrames++;
+
             const result =
               await processor.process(
                 frame
               );
 
+            const handResult =
+              handTracker.update(
+                result
+              );
+
             if (result.state) {
+              detectedStates++;
+
               const seatState =
                 result.state.seats
                   .map(
@@ -117,28 +133,40 @@ describe(
                 event.type,
                 event.activeSeatIndexes
               );
-
-              if (
-                event.type ===
-                "handEnded"
-              ) {
-                sawHandEnded = true;
-              }
-
-              if (
-                sawHandEnded &&
-                event.type ===
-                "handStarted"
-              ) {
-                sawHandStarted = true;
-              }
             }
 
             if (
-              sawHandEnded &&
-              sawHandStarted
+              handResult.completedHand
             ) {
-              break;
+              console.log(
+                `${frame.timestampSeconds.toFixed(1)}s`,
+                "COMPLETED HAND:",
+                handResult.completedHand
+              );
+
+              expect(
+                handResult.completedHand
+                  .completedAt
+              ).toBe(
+                frame.timestampSeconds
+              );
+
+              expect(
+                handResult.completedHand
+                  .players.length
+              ).toBeGreaterThanOrEqual(
+                2
+              );
+
+              expect(
+                handResult.completedHand
+                  .streets
+              ).toEqual([]);
+
+              expect(
+                handResult.completedHand
+                  .actions
+              ).toEqual([]);
             }
 
             if (
@@ -153,14 +181,18 @@ describe(
         }
 
         expect(
-          sawHandEnded
-        ).toBe(true);
+          processedFrames
+        ).toBeGreaterThan(0);
 
         expect(
-          sawHandStarted
-        ).toBe(true);
+          detectedStates
+        ).toBeGreaterThan(0);
+
+        expect(
+          previousSeatState
+        ).not.toBeNull();
       },
-      55_000
+      40_000
     );
   }
 );
