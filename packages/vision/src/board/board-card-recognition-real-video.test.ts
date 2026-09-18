@@ -54,6 +54,14 @@ import {
   BoardCardRecognizer
 } from "./board-card-recognizer.js";
 
+import {
+  RecognizedBoardEventDetector
+} from "./recognized-board-event-detector.js";
+
+import type {
+  RecognizedBoardEvent
+} from "./recognized-board-event.js";
+
 async function extractFrameAt(
   videoPath: string,
   timestampSeconds: number
@@ -483,6 +491,270 @@ describe(
           {
             rank: "5",
             suit: "clubs"
+          }
+        ]);
+      }
+    );
+
+    it(
+      "emits recognized board events across a real poker hand",
+      async () => {
+        const flopTemplateFrame =
+          await extractFrameAt(
+            videoPath,
+            11
+          );
+
+        const turnTemplateFrame =
+          await extractFrameAt(
+            videoPath,
+            21
+          );
+
+        const decoder =
+          new SharpImageDecoder();
+
+        const flopSymbols =
+          await extractBoardSymbols(
+            flopTemplateFrame,
+            3,
+            decoder
+          );
+
+        const turnSymbols =
+          await extractBoardSymbols(
+            turnTemplateFrame,
+            4,
+            decoder
+          );
+
+        const rank2 =
+          flopSymbols[0];
+
+        const rank6 =
+          flopSymbols[1];
+
+        const rank5 =
+          flopSymbols[2];
+
+        const club5 =
+          turnSymbols[3];
+
+        if (
+          !rank2 ||
+          !rank6 ||
+          !rank5 ||
+          !club5
+        ) {
+          throw new Error(
+            "Expected rank and suit templates"
+          );
+        }
+
+        const rankRecognizer =
+          new RankRecognizer(
+            [
+              {
+                rank: "2",
+                mask: rank2.rank
+              },
+              {
+                rank: "6",
+                mask: rank6.rank
+              },
+              {
+                rank: "5",
+                mask: rank5.rank
+              }
+            ],
+            {
+              minimumConfidence:
+                0.9
+            }
+          );
+
+        const suitRecognizer =
+          new SuitRecognizer(
+            [
+              {
+                suit: "hearts",
+                mask: rank2.suit
+              },
+              {
+                suit: "clubs",
+                mask: club5.suit
+              }
+            ],
+            {
+              minimumConfidence:
+                0.8
+            }
+          );
+
+        const cardRecognizer =
+          new CardRecognizer(
+            rankRecognizer,
+            suitRecognizer
+          );
+
+        const frames =
+          await extractFrames(
+            videoPath,
+            {
+              startSeconds: 0,
+              endSeconds: 30,
+              fps: 1
+            }
+          );
+
+        const tableDetector =
+          new PurpleTableDetector(
+            decoder
+          );
+
+        const boardRecognizer =
+          new BoardCardRecognizer(
+            decoder,
+            cardRecognizer
+          );
+
+        const eventDetector =
+          new RecognizedBoardEventDetector({
+            requiredStableFrames: 2
+          });
+
+        const events: {
+          timestampSeconds: number;
+          event: RecognizedBoardEvent;
+        }[] = [];
+
+        for (
+          const frame
+          of frames
+          ) {
+          const tableDetection =
+            await tableDetector.detect(
+              frame
+            );
+
+          if (
+            !tableDetection.region
+          ) {
+            throw new Error(
+              `Expected table region at ${frame.timestampSeconds}s`
+            );
+          }
+
+          const boardRegion =
+            createBoardRegion(
+              tableDetection.region
+            );
+
+          const result =
+            await boardRecognizer.recognize(
+              frame,
+              boardRegion
+            );
+
+          const recognizedCards =
+            result.cards.flatMap(
+              ({
+                 recognition
+               }) =>
+                recognition.card
+                  ? [
+                    recognition.card
+                  ]
+                  : []
+            );
+
+          const tracked =
+            eventDetector.update(
+              result.cards.length,
+              recognizedCards
+            );
+
+          if (
+            tracked.event
+          ) {
+            events.push({
+              timestampSeconds:
+              frame.timestampSeconds,
+              event:
+              tracked.event
+            });
+          }
+        }
+
+        expect(
+          events.map(
+            ({
+               timestampSeconds,
+               event
+             }) => ({
+              timestampSeconds,
+              event:
+                event.type ===
+                "flopDealt"
+                  ? {
+                    type:
+                    event.type,
+                    cards:
+                      event.cards.map(
+                        (card) => ({
+                          rank:
+                          card.rank,
+                          suit:
+                          card.suit
+                        })
+                      )
+                  }
+                  : {
+                    type:
+                    event.type,
+                    card: {
+                      rank:
+                      event.card.rank,
+                      suit:
+                      event.card.suit
+                    }
+                  }
+            })
+          )
+        ).toEqual([
+          {
+            timestampSeconds:
+              12,
+            event: {
+              type:
+                "flopDealt",
+              cards: [
+                {
+                  rank: "2",
+                  suit: "hearts"
+                },
+                {
+                  rank: "6",
+                  suit: "hearts"
+                },
+                {
+                  rank: "5",
+                  suit: "hearts"
+                }
+              ]
+            }
+          },
+          {
+            timestampSeconds:
+              22,
+            event: {
+              type:
+                "turnDealt",
+              card: {
+                rank: "5",
+                suit: "clubs"
+              }
+            }
           }
         ]);
       }
