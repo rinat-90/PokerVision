@@ -27,7 +27,8 @@ function card(
 
 describe("VideoHandBuilder", () => {
   it("builds a hand from lifecycle and board events", () => {
-    const builder = new VideoHandBuilder();
+    const builder =
+      new VideoHandBuilder();
 
     builder.start(0, [
       { seatIndex: 0, hasCards: true },
@@ -51,7 +52,8 @@ describe("VideoHandBuilder", () => {
       card: card("5", "clubs")
     });
 
-    const hand = builder.complete(27);
+    const hand =
+      builder.complete(27);
 
     expect(hand.startedAt).toBe(0);
     expect(hand.completedAt).toBe(27);
@@ -80,10 +82,87 @@ describe("VideoHandBuilder", () => {
         { rank: "5", suit: "clubs" }
       ]
     });
+
+    expect(hand.actions).toEqual([]);
+  });
+
+  it("adds player actions in chronological order", () => {
+    const builder =
+      new VideoHandBuilder();
+
+    builder.start(0, [
+      { seatIndex: 1, hasCards: true },
+      { seatIndex: 2, hasCards: true },
+      { seatIndex: 4, hasCards: true },
+      { seatIndex: 5, hasCards: true }
+    ]);
+
+    builder.addAction(9, {
+      seatIndex: 1,
+      street: "preflop",
+      type: "fold",
+      amount: null
+    });
+
+    builder.addAction(9, {
+      seatIndex: 5,
+      street: "preflop",
+      type: "call",
+      amount: null
+    });
+
+    builder.addAction(12, {
+      seatIndex: 2,
+      street: "flop",
+      type: "check",
+      amount: null
+    });
+
+    builder.addAction(20, {
+      seatIndex: 4,
+      street: "flop",
+      type: "bet",
+      amount: 1900
+    });
+
+    const hand =
+      builder.complete(27);
+
+    expect(hand.actions).toEqual([
+      {
+        timestampSeconds: 9,
+        seatIndex: 1,
+        street: "preflop",
+        type: "fold",
+        amount: null
+      },
+      {
+        timestampSeconds: 9,
+        seatIndex: 5,
+        street: "preflop",
+        type: "call",
+        amount: null
+      },
+      {
+        timestampSeconds: 12,
+        seatIndex: 2,
+        street: "flop",
+        type: "check",
+        amount: null
+      },
+      {
+        timestampSeconds: 20,
+        seatIndex: 4,
+        street: "flop",
+        type: "bet",
+        amount: 1900
+      }
+    ]);
   });
 
   it("resets state when a new hand starts", () => {
-    const builder = new VideoHandBuilder();
+    const builder =
+      new VideoHandBuilder();
 
     builder.start(0, [
       { seatIndex: 0, hasCards: true }
@@ -98,21 +177,67 @@ describe("VideoHandBuilder", () => {
       ]
     });
 
+    builder.addAction(20, {
+      seatIndex: 0,
+      street: "flop",
+      type: "bet",
+      amount: 1900
+    });
+
     builder.start(30, [
       { seatIndex: 1, hasCards: true },
       { seatIndex: 2, hasCards: true }
     ]);
 
-    const hand = builder.complete(50);
+    const hand =
+      builder.complete(50);
 
     expect(hand.startedAt).toBe(30);
     expect(hand.completedAt).toBe(50);
+
     expect(hand.players).toEqual([
       { seatIndex: 1, hasCards: true },
       { seatIndex: 2, hasCards: true }
     ]);
+
     expect(hand.streets).toEqual([]);
+    expect(hand.actions).toEqual([]);
   });
+
+  it(
+    "resets actions when a partial hand starts",
+    () => {
+      const builder =
+        new VideoHandBuilder();
+
+      builder.start(0, [
+        {
+          seatIndex: 0,
+          hasCards: true
+        }
+      ]);
+
+      builder.addAction(9, {
+        seatIndex: 0,
+        street: "preflop",
+        type: "call",
+        amount: null
+      });
+
+      builder.startPartial([
+        {
+          seatIndex: 1,
+          hasCards: true
+        }
+      ]);
+
+      const hand =
+        builder.complete(27);
+
+      expect(hand.actions).toEqual([]);
+    }
+  );
+
   it(
     "builds a partial hand when the recording starts mid-hand",
     () => {
@@ -140,6 +265,7 @@ describe("VideoHandBuilder", () => {
       expect(hand).toEqual({
         startedAt: null,
         completedAt: 27,
+
         players: [
           {
             seatIndex: 0,
@@ -154,7 +280,9 @@ describe("VideoHandBuilder", () => {
             hasCards: true
           }
         ],
-        streets: []
+
+        streets: [],
+        actions: []
       });
     }
   );

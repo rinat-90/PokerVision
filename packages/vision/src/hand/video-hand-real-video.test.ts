@@ -83,14 +83,76 @@ import {
 } from "../board/board-card-detector.js";
 
 import {
+  createPlayerActionRegions
+} from "../action/player-action-region.js";
+
+import {
+  createBetAmountRegions
+} from "../action/bet-amount-region.js";
+
+import {
+  TesseractBetAmountOcr
+} from "../action/bet-amount-ocr.js";
+
+import {
+  BetAmountDetector
+} from "../action/bet-amount-detector.js";
+
+import {
+  BetAmountStateTracker
+} from "../action/bet-amount-state-tracker.js";
+
+import {
+  createPlayerContributionState
+} from "../action/player-contribution-state.js";
+
+import {
+  PlayerActionDetector
+} from "../action/player-action-detector.js";
+
+import {
+  createPlayerActionLabelRegions
+} from "../action/player-action-label-region.js";
+
+import {
+  PlayerActionLabelRecognizer
+} from "../action/player-action-label-recognizer.js";
+
+import {
+  PlayerActionLabelEventDetector
+} from "../action/player-action-label-event-detector.js";
+
+import type {
+  PokerStreet
+} from "../action/player-action-context.js";
+
+import {
   VideoHandBuilder
 } from "./video-hand-builder.js";
+
+function getStreet(
+  timestampSeconds: number
+): PokerStreet {
+  if (
+    timestampSeconds >= 22
+  ) {
+    return "turn";
+  }
+
+  if (
+    timestampSeconds >= 12
+  ) {
+    return "flop";
+  }
+
+  return "preflop";
+}
 
 describe(
   "VideoHand on real video",
   () => {
     it(
-      "reconstructs a poker hand from video",
+      "reconstructs a poker hand with board and player actions from video",
       async () => {
         const videoPath =
           fileURLToPath(
@@ -113,6 +175,15 @@ describe(
         expect(
           frames.length
         ).toBeGreaterThan(0);
+
+        const firstFrame =
+          frames[0];
+
+        if (!firstFrame) {
+          throw new Error(
+            "Expected video frames"
+          );
+        }
 
         const decoder =
           new SharpImageDecoder();
@@ -149,7 +220,7 @@ describe(
           new HandLifecycleDetector();
 
         /*
-         * Build recognition templates
+         * Build board recognition templates
          * from known calibration frames.
          */
         const extractFrameAt =
@@ -162,8 +233,10 @@ describe(
                 {
                   startSeconds:
                   timestampSeconds,
+
                   endSeconds:
                     timestampSeconds + 1,
+
                   fps: 1
                 }
               );
@@ -243,7 +316,7 @@ describe(
 
             return Promise.all(
               detection.regions.map(
-                (region) =>
+                region =>
                   symbolExtractor.extract(
                     frame,
                     boardRegion,
@@ -346,6 +419,71 @@ describe(
             requiredStableFrames: 2
           });
 
+        /*
+         * Player action recognition.
+         */
+        const initialTableDetection =
+          await tableDetector.detect(
+            firstFrame
+          );
+
+        if (
+          !initialTableDetection.region
+        ) {
+          throw new Error(
+            "Expected initial table region"
+          );
+        }
+
+        const actionRegions =
+          createPlayerActionRegions(
+            initialTableDetection.region
+          );
+
+        const amountRegions =
+          createBetAmountRegions(
+            actionRegions
+          );
+
+        const actionSeatRegions =
+          createSixMaxSeatRegions(
+            initialTableDetection.region,
+            {
+              width:
+              firstFrame.width,
+
+              height:
+              firstFrame.height
+            }
+          );
+
+        const labelRegions =
+          createPlayerActionLabelRegions(
+            actionSeatRegions
+          );
+
+        const ocr =
+          new TesseractBetAmountOcr();
+
+        const amountDetector =
+          new BetAmountDetector(
+            ocr
+          );
+
+        const amountTracker =
+          new BetAmountStateTracker({
+            requiredStableFrames: 2
+          });
+
+        const labelRecognizer =
+          new PlayerActionLabelRecognizer();
+
+        const labelEventDetector =
+          new PlayerActionLabelEventDetector();
+
+        const actionDetector =
+          new PlayerActionDetector();
+
         const handBuilder =
           new VideoHandBuilder();
 
@@ -359,170 +497,379 @@ describe(
               ]
           > | null = null;
 
-        for (
-          const frame
-          of frames
-          ) {
-          const tableDetection =
-            await tableDetector.detect(
-              frame
-            );
-
-          if (
-            !tableDetection.region
-          ) {
-            throw new Error(
-              `Expected table region at ${frame.timestampSeconds}s`
-            );
-          }
-
-          /*
-           * Seat / hand lifecycle.
-           */
-          const seatRegions =
-            createSixMaxSeatRegions(
-              tableDetection.region,
-              {
-                width:
-                frame.width,
-                height:
-                frame.height
-              }
-            );
-
-          const detectedSeats =
-            await seatDetector.detect(
-              frame,
-              seatRegions
-            );
-
-          const trackedState =
-            tableStateTracker.update(
-              createTableState(
-                detectedSeats
-              )
-            );
-
-          const lifecycleEvents =
-            lifecycleDetector.update(
-              trackedState.state
-            );
-
-          /*
-           * The video may begin while a hand
-           * is already in progress. In that
-           * case the lifecycle detector does
-           * not emit handStarted for its
-           * initial state, so initialize a
-           * partial hand from the active seats.
-           */
-          if (
-            !handInitialized
-          ) {
-            const activeSeatIndexes =
-              trackedState.state.seats
-                .filter(
-                  (seat) =>
-                    seat.hasCards
-                )
-                .map(
-                  (seat) =>
-                    seat.index
-                );
-
-            if (
-              activeSeatIndexes.length >= 2
-            ) {
-              handBuilder.startPartial(
-                activeSeatIndexes.map(
-                  (seatIndex) => ({
-                    seatIndex,
-                    hasCards: true
-                  })
-                )
-              );
-
-              handInitialized =
-                true;
-            }
-          }
-
+        try {
           for (
-            const event
-            of lifecycleEvents
-            ) {
+            let frameIndex = 0;
+            frameIndex < frames.length;
+            frameIndex += 1
+          ) {
+            const frame =
+              frames[frameIndex];
+
+            if (!frame) {
+              continue;
+            }
+
+            const timestampSeconds =
+              frame.timestampSeconds;
+
+            const tableDetection =
+              await tableDetector.detect(
+                frame
+              );
+
             if (
-              event.type ===
-              "handStarted"
+              !tableDetection.region
             ) {
-              handBuilder.start(
-                frame.timestampSeconds,
-                event.activeSeatIndexes.map(
-                  (seatIndex) => ({
-                    seatIndex,
-                    hasCards: true
-                  })
+              throw new Error(
+                `Expected table region at ${timestampSeconds}s`
+              );
+            }
+
+            /*
+             * Seat / hand lifecycle.
+             */
+            const seatRegions =
+              createSixMaxSeatRegions(
+                tableDetection.region,
+                {
+                  width:
+                  frame.width,
+
+                  height:
+                  frame.height
+                }
+              );
+
+            const detectedSeats =
+              await seatDetector.detect(
+                frame,
+                seatRegions
+              );
+
+            const trackedState =
+              tableStateTracker.update(
+                createTableState(
+                  detectedSeats
                 )
               );
 
-              handInitialized =
-                true;
-            }
+            const lifecycleEvents =
+              lifecycleDetector.update(
+                trackedState.state
+              );
 
+            /*
+             * The recording may begin while a hand
+             * is already in progress.
+             */
             if (
-              event.type ===
-              "handEnded"
+              !handInitialized
             ) {
-              completedHand =
-                handBuilder.complete(
-                  frame.timestampSeconds
+              const activeSeatIndexes =
+                trackedState.state.seats
+                  .filter(
+                    seat =>
+                      seat.hasCards
+                  )
+                  .map(
+                    seat =>
+                      seat.index
+                  );
+
+              if (
+                activeSeatIndexes.length >= 2
+              ) {
+                handBuilder.startPartial(
+                  activeSeatIndexes.map(
+                    seatIndex => ({
+                      seatIndex,
+                      hasCards: true
+                    })
+                  )
                 );
 
-              handInitialized =
-                false;
+                handInitialized =
+                  true;
+              }
+            }
+
+            for (
+              const event
+              of lifecycleEvents
+              ) {
+              if (
+                event.type ===
+                "handStarted"
+              ) {
+                handBuilder.start(
+                  timestampSeconds,
+                  event.activeSeatIndexes.map(
+                    seatIndex => ({
+                      seatIndex,
+                      hasCards: true
+                    })
+                  )
+                );
+
+                handInitialized =
+                  true;
+              }
+            }
+
+            /*
+             * Community card recognition.
+             */
+            const boardRegion =
+              createBoardRegion(
+                tableDetection.region
+              );
+
+            const boardResult =
+              await boardRecognizer.recognize(
+                frame,
+                boardRegion
+              );
+
+            const recognizedCards =
+              boardResult.cards.flatMap(
+                ({
+                   recognition
+                 }) =>
+                  recognition.card
+                    ? [
+                      recognition.card
+                    ]
+                    : []
+              );
+
+            const boardUpdate =
+              boardEventDetector.update(
+                boardResult.cards.length,
+                recognizedCards
+              );
+
+            if (
+              boardUpdate.event &&
+              handInitialized
+            ) {
+              handBuilder.addBoardEvent(
+                timestampSeconds,
+                boardUpdate.event
+              );
+            }
+
+            /*
+             * Stable bet amount observations.
+             */
+            const amountStates = [];
+
+            for (
+              const actionRegion
+              of actionRegions
+              ) {
+              const amountRegion =
+                amountRegions.find(
+                  region =>
+                    region.seatIndex ===
+                    actionRegion.seatIndex
+                );
+
+              if (!amountRegion) {
+                throw new Error(
+                  `Expected amount region for seat ${actionRegion.seatIndex}`
+                );
+              }
+
+              const actionFrame =
+                await cropFrame(
+                  frame,
+                  actionRegion,
+                  decoder
+                );
+
+              const amountFrame =
+                await cropFrame(
+                  frame,
+                  amountRegion,
+                  decoder
+                );
+
+              const detection =
+                await amountDetector.detect(
+                  actionFrame,
+                  amountFrame,
+                  actionRegion.seatIndex
+                );
+
+              amountStates.push({
+                seatIndex:
+                detection.seatIndex,
+
+                amount:
+                  detection.chipPresent
+                    ? detection.amount
+                    : null,
+
+                rawText:
+                  detection.chipPresent
+                    ? detection.rawText
+                    : null,
+
+                confidence:
+                detection.confidence
+              });
+            }
+
+            const trackedAmounts =
+              amountTracker.update(
+                amountStates
+              );
+
+            /*
+             * Explicit action labels.
+             */
+            const labelObservations = [];
+
+            for (
+              const labelRegion
+              of labelRegions
+              ) {
+              const labelFrame =
+                await cropFrame(
+                  frame,
+                  labelRegion,
+                  decoder
+                );
+
+              const recognition =
+                await labelRecognizer.recognize(
+                  labelFrame
+                );
+
+              labelObservations.push({
+                seatIndex:
+                labelRegion.seatIndex,
+
+                label:
+                recognition.label
+              });
+            }
+
+            const labelEvents =
+              labelEventDetector.update(
+                labelObservations
+              );
+
+            /*
+             * Build the contribution snapshot from
+             * the stable state before this frame's
+             * amount transitions are applied.
+             */
+            const contributions =
+              trackedAmounts.stable
+                .map(
+                  state => {
+                    const change =
+                      trackedAmounts.changes.find(
+                        candidate =>
+                          candidate.seatIndex ===
+                          state.seatIndex
+                      );
+
+                    const amount =
+                      change
+                        ? change.previousAmount
+                        : state.amount;
+
+                    if (
+                      amount === null
+                    ) {
+                      return null;
+                    }
+
+                    return {
+                      seatIndex:
+                      state.seatIndex,
+
+                      amount
+                    };
+                  }
+                )
+                .filter(
+                  (
+                    contribution
+                  ): contribution is {
+                    seatIndex: number;
+                    amount: number;
+                  } =>
+                    contribution !== null
+                );
+
+            const street =
+              getStreet(
+                timestampSeconds
+              );
+
+            /*
+             * The fixture begins mid-preflop, so
+             * that contribution snapshot is incomplete.
+             * Postflop begins from a known cleared state.
+             */
+            const contributionState =
+              createPlayerContributionState(
+                street,
+                contributions,
+                street !== "preflop"
+              );
+
+            const actionEvents =
+              actionDetector.detect({
+                contributionState,
+                changes:
+                trackedAmounts.changes,
+                labelEvents
+              });
+
+            if (
+              handInitialized
+            ) {
+              for (
+                const event
+                of actionEvents
+                ) {
+                handBuilder.addAction(
+                  timestampSeconds,
+                  event
+                );
+              }
+            }
+
+            /*
+             * Complete only after all observations
+             * for this frame have been processed.
+             */
+            for (
+              const event
+              of lifecycleEvents
+              ) {
+              if (
+                event.type ===
+                "handEnded"
+              ) {
+                completedHand =
+                  handBuilder.complete(
+                    timestampSeconds
+                  );
+
+                handInitialized =
+                  false;
+              }
             }
           }
-
-          /*
-           * Community card recognition.
-           */
-          const boardRegion =
-            createBoardRegion(
-              tableDetection.region
-            );
-
-          const boardResult =
-            await boardRecognizer.recognize(
-              frame,
-              boardRegion
-            );
-
-          const recognizedCards =
-            boardResult.cards.flatMap(
-              ({
-                 recognition
-               }) =>
-                recognition.card
-                  ? [
-                    recognition.card
-                  ]
-                  : []
-            );
-
-          const boardUpdate =
-            boardEventDetector.update(
-              boardResult.cards.length,
-              recognizedCards
-            );
-
-          if (
-            boardUpdate.event
-          ) {
-            handBuilder.addBoardEvent(
-              frame.timestampSeconds,
-              boardUpdate.event
-            );
-          }
+        } finally {
+          await ocr.terminate();
+          await labelRecognizer.terminate();
         }
 
         expect(
@@ -537,22 +884,13 @@ describe(
           );
         }
 
-        console.log(
-          "VIDEO HAND:",
-          JSON.stringify(
-            completedHand,
-            null,
-            2
-          )
-        );
-
         expect(
           completedHand.startedAt
         ).toBeNull();
 
         expect(
           completedHand.players.map(
-            (player) =>
+            player =>
               player.seatIndex
           )
         ).toEqual([
@@ -565,16 +903,19 @@ describe(
 
         expect(
           completedHand.streets.map(
-            (street) => ({
+            street => ({
               street:
               street.street,
+
               timestampSeconds:
               street.timestampSeconds,
+
               board:
                 street.board.map(
-                  (card) => ({
+                  card => ({
                     rank:
                     card.rank,
+
                     suit:
                     card.suit
                   })
@@ -625,9 +966,63 @@ describe(
         ]);
 
         expect(
+          completedHand.actions
+        ).toEqual([
+          {
+            timestampSeconds: 9,
+            seatIndex: 1,
+            street: "preflop",
+            type: "fold",
+            amount: null
+          },
+          {
+            timestampSeconds: 9,
+            seatIndex: 5,
+            street: "preflop",
+            type: "call",
+            amount: null
+          },
+          {
+            timestampSeconds: 12,
+            seatIndex: 2,
+            street: "flop",
+            type: "check",
+            amount: null
+          },
+          {
+            timestampSeconds: 20,
+            seatIndex: 4,
+            street: "flop",
+            type: "bet",
+            amount: 1900
+          },
+          {
+            timestampSeconds: 21,
+            seatIndex: 2,
+            street: "flop",
+            type: "fold",
+            amount: null
+          },
+          {
+            timestampSeconds: 21,
+            seatIndex: 5,
+            street: "flop",
+            type: "call",
+            amount: null
+          },
+          {
+            timestampSeconds: 25,
+            seatIndex: 4,
+            street: "turn",
+            type: "bet",
+            amount: 5700
+          }
+        ]);
+
+        expect(
           completedHand.completedAt
         ).toBe(27);
-      }
+      }, 20_000
     );
   }
 );

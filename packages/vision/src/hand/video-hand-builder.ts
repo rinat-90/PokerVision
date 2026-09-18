@@ -7,7 +7,12 @@ import type {
 } from "../card/card-recognizer.js";
 
 import type {
+  PlayerActionEvent
+} from "../action/player-action-detector.js";
+
+import type {
   VideoHand,
+  VideoHandAction,
   VideoHandPlayer
 } from "./video-hand.js";
 
@@ -18,7 +23,11 @@ export class VideoHandBuilder {
   private players: VideoHandPlayer[] = [];
   private board: RecognizedCard[] = [];
 
-  private readonly streets: VideoHand["streets"] = [];
+  private readonly streets:
+    VideoHand["streets"] = [];
+
+  private readonly actions:
+    VideoHandAction[] = [];
 
   start(
     timestampSeconds: number,
@@ -88,6 +97,27 @@ export class VideoHandBuilder {
     }
   }
 
+  addAction(
+    timestampSeconds: number,
+    event: PlayerActionEvent
+  ): void {
+    this.actions.push({
+      seatIndex:
+      event.seatIndex,
+
+      street:
+      event.street,
+
+      type:
+      event.type,
+
+      amount:
+      event.amount,
+
+      timestampSeconds
+    });
+  }
+
   complete(
     timestampSeconds: number
   ): VideoHand {
@@ -97,18 +127,29 @@ export class VideoHandBuilder {
     return {
       startedAt:
       this.startedAt,
+
       completedAt:
       this.completedAt,
+
       players: [
         ...this.players
       ],
+
       streets:
         this.streets.map(
-          (street) => ({
+          street => ({
             ...street,
+
             board: [
               ...street.board
             ]
+          })
+        ),
+
+      actions:
+        this.actions.map(
+          action => ({
+            ...action
           })
         )
     };
@@ -131,6 +172,9 @@ export class VideoHandBuilder {
     this.board = [];
 
     this.streets.length =
+      0;
+
+    this.actions.length =
       0;
   }
 }

@@ -16,58 +16,122 @@ describe(
       () => {
         const hand:
           VideoHand = {
-            startedAt: 0,
-            completedAt: 27,
+          startedAt: 0,
+          completedAt: 27,
 
-            players: [
-              {
-                seatIndex: 0,
-                hasCards: true
-              },
-              {
-                seatIndex: 1,
-                hasCards: true
-              }
-            ],
+          players: [
+            {
+              seatIndex: 0,
+              hasCards: true
+            },
+            {
+              seatIndex: 1,
+              hasCards: true
+            }
+          ],
 
-            streets: [
-              {
-                street:
-                  "flop",
+          streets: [
+            {
+              street:
+                "flop",
 
-                timestampSeconds:
-                  12,
+              timestampSeconds:
+                12,
 
-                board: [
-                  {
-                    rank: "2",
-                    suit: "hearts",
-                    rankConfidence: 1,
-                    suitConfidence: 1,
-                    confidence: 1
-                  },
-                  {
-                    rank: "6",
-                    suit: "hearts",
-                    rankConfidence: 1,
-                    suitConfidence: 1,
-                    confidence: 1
-                  },
-                  {
-                    rank: "5",
-                    suit: "hearts",
-                    rankConfidence: 1,
-                    suitConfidence: 1,
-                    confidence: 1
-                  }
-                ]
-              }
-            ]
-          };
+              board: [
+                {
+                  rank: "2",
+                  suit: "hearts",
+                  rankConfidence: 1,
+                  suitConfidence: 1,
+                  confidence: 1
+                },
+                {
+                  rank: "6",
+                  suit: "hearts",
+                  rankConfidence: 1,
+                  suitConfidence: 1,
+                  confidence: 1
+                },
+                {
+                  rank: "5",
+                  suit: "hearts",
+                  rankConfidence: 1,
+                  suitConfidence: 1,
+                  confidence: 1
+                }
+              ]
+            }
+          ],
+
+          actions: [
+            {
+              timestampSeconds: 12,
+              seatIndex: 2,
+              street: "flop",
+              type: "check",
+              amount: null
+            },
+            {
+              timestampSeconds: 20,
+              seatIndex: 4,
+              street: "flop",
+              type: "bet",
+              amount: 1900
+            },
+            {
+              timestampSeconds: 21,
+              seatIndex: 2,
+              street: "flop",
+              type: "fold",
+              amount: null
+            },
+            {
+              timestampSeconds: 21,
+              seatIndex: 5,
+              street: "flop",
+              type: "call",
+              amount: null
+            }
+          ]
+        };
 
         expect(
           hand.streets[0]?.board
         ).toHaveLength(3);
+
+        expect(
+          hand.actions
+        ).toEqual([
+          {
+            timestampSeconds: 12,
+            seatIndex: 2,
+            street: "flop",
+            type: "check",
+            amount: null
+          },
+          {
+            timestampSeconds: 20,
+            seatIndex: 4,
+            street: "flop",
+            type: "bet",
+            amount: 1900
+          },
+          {
+            timestampSeconds: 21,
+            seatIndex: 2,
+            street: "flop",
+            type: "fold",
+            amount: null
+          },
+          {
+            timestampSeconds: 21,
+            seatIndex: 5,
+            street: "flop",
+            type: "call",
+            amount: null
+          }
+        ]);
       }
     );
   }
