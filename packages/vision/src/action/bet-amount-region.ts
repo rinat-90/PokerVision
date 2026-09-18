@@ -25,39 +25,51 @@ export function createBetAmountRegions(
           region.height * 0.1
         );
 
+      const isUpperSideSeat =
+        region.seatIndex === 1 ||
+        region.seatIndex === 5;
+
+      /*
+       * Most bet amounts are rendered inside
+       * the player action region next to the chip.
+       *
+       * For the upper side seats (S1/S5), the
+       * amount is positioned higher and can extend
+       * above the normal action region.
+       */
+      const y =
+        isUpperSideSeat
+          ? region.y -
+          Math.round(
+            region.height * 0.5
+          )
+          : region.y +
+          verticalInset;
+
+      const height =
+        isUpperSideSeat
+          ? region.height +
+          Math.round(
+            region.height * 0.5
+          )
+          : region.height -
+          verticalInset * 2;
+
       return {
         seatIndex:
         region.seatIndex,
 
-        /*
-         * Bet amounts are rendered inside the
-         * player action region next to the chip.
-         *
-         * Inset the region horizontally to reduce
-         * chip/table-edge noise while preserving
-         * amounts such as:
-         *
-         * 100
-         * 200
-         * 600
-         * 1,900
-         * 5,700
-         */
         x:
           region.x +
           horizontalInset,
 
-        y:
-          region.y +
-          verticalInset,
+        y,
 
         width:
           region.width -
           horizontalInset * 2,
 
-        height:
-          region.height -
-          verticalInset * 2
+        height
       };
     }
   );

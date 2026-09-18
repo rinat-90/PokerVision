@@ -49,14 +49,14 @@ describe(
     );
 
     it(
-      "keeps amount regions inside the player action region",
+      "insets the standard seat amount region",
       () => {
         const [
           region
         ] =
           createBetAmountRegions([
             {
-              seatIndex: 0,
+              seatIndex: 2,
               x: 100,
               y: 200,
               width: 180,
@@ -66,29 +66,111 @@ describe(
 
         expect(
           region
-        ).toBeDefined();
+        ).toEqual({
+          seatIndex: 2,
+          x: 127,
+          y: 206,
+          width: 126,
+          height: 44
+        });
+      }
+    );
 
-        if (!region) {
-          throw new Error(
-            "Expected region"
-          );
-        }
+    it(
+      "extends seat 1 amount region upward",
+      () => {
+        const [
+          region
+        ] =
+          createBetAmountRegions([
+            {
+              seatIndex: 1,
+              x: 400,
+              y: 300,
+              width: 180,
+              height: 56
+            }
+          ]);
 
         expect(
-          region.width
-        ).toBe(126);
+          region
+        ).toEqual({
+          seatIndex: 1,
+          x: 427,
+          y: 272,
+          width: 126,
+          height: 84
+        });
+      }
+    );
+
+    it(
+      "extends seat 5 amount region upward",
+      () => {
+        const [
+          region
+        ] =
+          createBetAmountRegions([
+            {
+              seatIndex: 5,
+              x: 400,
+              y: 300,
+              width: 180,
+              height: 56
+            }
+          ]);
 
         expect(
-          region.height
-        ).toBe(44);
+          region
+        ).toEqual({
+          seatIndex: 5,
+          x: 427,
+          y: 272,
+          width: 126,
+          height: 84
+        });
+      }
+    );
+
+    it(
+      "does not extend other seats upward",
+      () => {
+        const regions =
+          createBetAmountRegions([
+            {
+              seatIndex: 2,
+              x: 100,
+              y: 200,
+              width: 180,
+              height: 56
+            },
+            {
+              seatIndex: 4,
+              x: 400,
+              y: 300,
+              width: 180,
+              height: 56
+            }
+          ]);
 
         expect(
-          region.x
-        ).toBe(127);
-
-        expect(
-          region.y
-        ).toBe(206);
+          regions
+        ).toEqual([
+          {
+            seatIndex: 2,
+            x: 127,
+            y: 206,
+            width: 126,
+            height: 44
+          },
+          {
+            seatIndex: 4,
+            x: 427,
+            y: 306,
+            width: 126,
+            height: 44
+          }
+        ]);
       }
     );
   }
