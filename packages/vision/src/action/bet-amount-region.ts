@@ -14,43 +14,51 @@ export function createBetAmountRegions(
   actionRegions: PlayerActionRegion[]
 ): BetAmountRegion[] {
   return actionRegions.map(
-    (region) => ({
-      seatIndex:
-      region.seatIndex,
-
-      /*
-       * Bet amounts are rendered below the
-       * player action region on the table.
-       *
-       * Keep the region wide enough to support
-       * amounts such as:
-       *
-       * 100
-       * 600
-       * 1,900
-       * 5,700
-       */
-      x:
-        region.x -
+    (region) => {
+      const horizontalInset =
         Math.round(
           region.width * 0.15
-        ),
+        );
 
-      y:
-        region.y +
+      const verticalInset =
         Math.round(
-          region.height * 0.8
-        ),
+          region.height * 0.1
+        );
 
-      width:
-        Math.round(
-          region.width * 1.3
-        ),
+      return {
+        seatIndex:
+        region.seatIndex,
 
-      height:
-        Math.round(
-          region.height * 0.9
-        )
-    })
+        /*
+         * Bet amounts are rendered inside the
+         * player action region next to the chip.
+         *
+         * Inset the region horizontally to reduce
+         * chip/table-edge noise while preserving
+         * amounts such as:
+         *
+         * 100
+         * 200
+         * 600
+         * 1,900
+         * 5,700
+         */
+        x:
+          region.x +
+          horizontalInset,
+
+        y:
+          region.y +
+          verticalInset,
+
+        width:
+          region.width -
+          horizontalInset * 2,
+
+        height:
+          region.height -
+          verticalInset * 2
+      };
+    }
   );
 }

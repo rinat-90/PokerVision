@@ -81,4 +81,7 @@ export * from "./action/seat-bet-state-tracker.js";
 export * from "./action/bet-amount-region.js";
 
 export * from "./action/bet-amount-state.js";
+
 export * from "./action/bet-amount-state-tracker.js";
+
+export * from "./action/bet-amount-ocr-preprocessor.js";

@@ -3,6 +3,7 @@ export interface BetAmountRecognition {
   hasText: boolean;
   confidence: number;
   matchingPixelRatio: number;
+  rawText: string | null;
 }
 
 export interface BetAmountRecognizerOptions {
@@ -102,7 +103,8 @@ export class BetAmountRecognizer {
         1,
         matchingPixelRatio /
         0.1
-      )
+      ),
+      rawText: null
     };
   }
 }

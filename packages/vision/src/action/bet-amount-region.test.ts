@@ -49,7 +49,7 @@ describe(
     );
 
     it(
-      "keeps amount regions inside the expected horizontal area",
+      "keeps amount regions inside the player action region",
       () => {
         const [
           region
@@ -64,7 +64,9 @@ describe(
             }
           ]);
 
-        expect(region).toBeDefined();
+        expect(
+          region
+        ).toBeDefined();
 
         if (!region) {
           throw new Error(
@@ -74,19 +76,19 @@ describe(
 
         expect(
           region.width
-        ).toBe(234);
+        ).toBe(126);
 
         expect(
           region.height
-        ).toBe(50);
+        ).toBe(44);
 
         expect(
           region.x
-        ).toBe(73);
+        ).toBe(127);
 
         expect(
           region.y
-        ).toBe(245);
+        ).toBe(206);
       }
     );
   }
