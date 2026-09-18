@@ -65,3 +65,5 @@ export type {
 export * from "./hand/video-hand.js";
 
 export * from "./hand/video-hand-builder.js";
+
+export * from "./action/player-action-region.js";
