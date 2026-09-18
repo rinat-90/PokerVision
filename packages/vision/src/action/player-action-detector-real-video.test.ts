@@ -52,6 +52,22 @@ import {
   PlayerActionDetector
 } from "./player-action-detector.js";
 
+import {
+  createPlayerActionLabelRegions
+} from "./player-action-label-region.js";
+
+import {
+  PlayerActionLabelRecognizer
+} from "./player-action-label-recognizer.js";
+
+import {
+  PlayerActionLabelEventDetector
+} from "./player-action-label-event-detector.js";
+
+import {
+  createSixMaxSeatRegions
+} from "../seat/seat-region.js";
+
 import type {
   PokerStreet
 } from "./player-action-context.js";
@@ -78,7 +94,7 @@ describe(
   "PlayerActionDetector on real video",
   () => {
     it(
-      "detects reliable player actions from stable bet amount transitions",
+      "combines stable bet amounts and explicit action labels",
       async () => {
         const videoPath =
           fileURLToPath(
@@ -138,6 +154,23 @@ describe(
             actionRegions
           );
 
+        const seatRegions =
+          createSixMaxSeatRegions(
+            tableDetection.region,
+            {
+              width:
+              firstFrame.width,
+
+              height:
+              firstFrame.height
+            }
+          );
+
+        const labelRegions =
+          createPlayerActionLabelRegions(
+            seatRegions
+          );
+
         const ocr =
           new TesseractBetAmountOcr();
 
@@ -151,10 +184,16 @@ describe(
             requiredStableFrames: 2
           });
 
+        const labelRecognizer =
+          new PlayerActionLabelRecognizer();
+
+        const labelEventDetector =
+          new PlayerActionLabelEventDetector();
+
         const actionDetector =
           new PlayerActionDetector();
 
-        const actionCandidates: Array<{
+        const actions: Array<{
           timestampSeconds: number;
           seatIndex: number;
           street: PokerStreet;
@@ -184,7 +223,7 @@ describe(
                 timestampSeconds
               );
 
-            const states = [];
+            const amountStates = [];
 
             for (
               const actionRegion
@@ -224,7 +263,7 @@ describe(
                   actionRegion.seatIndex
                 );
 
-              states.push({
+              amountStates.push({
                 seatIndex:
                 detection.seatIndex,
 
@@ -245,17 +284,82 @@ describe(
 
             const tracked =
               amountTracker.update(
-                states
+                amountStates
               );
+
+            const labelObservations = [];
+
+            for (
+              const labelRegion
+              of labelRegions
+              ) {
+              const labelFrame =
+                await cropFrame(
+                  frame,
+                  labelRegion,
+                  decoder
+                );
+
+              const recognition =
+                await labelRecognizer.recognize(
+                  labelFrame
+                );
+
+              if (
+                (
+                  timestampSeconds === 9 ||
+                  timestampSeconds === 12 ||
+                  timestampSeconds === 18 ||
+                  timestampSeconds === 21
+                ) &&
+                (
+                  recognition.label !== null ||
+                  recognition.rawText !== null
+                )
+              ) {
+                console.log(
+                  `${timestampSeconds}s LABEL S${labelRegion.seatIndex}`,
+                  {
+                    label:
+                    recognition.label,
+
+                    rawText:
+                    recognition.rawText,
+
+                    confidence:
+                    recognition.confidence,
+
+                    matchingPixelRatio:
+                    recognition.matchingPixelRatio
+                  }
+                );
+              }
+
+              labelObservations.push({
+                seatIndex:
+                labelRegion.seatIndex,
+
+                label:
+                recognition.label
+              });
+            }
+
+            const labelEvents =
+              labelEventDetector.update(
+                labelObservations
+              );
+
+            if (labelEvents.length > 0) {
+              console.log(
+                `${timestampSeconds}s LABEL EVENTS:`,
+                labelEvents
+              );
+            }
 
             /*
              * Build the contribution snapshot from
-             * the stable state BEFORE processing
-             * this frame's transitions.
-             *
-             * For seats that changed on this frame,
-             * use previousAmount so the classifier
-             * sees the state before the action.
+             * the stable state before this frame's
+             * amount transitions are applied.
              */
             const contributions =
               tracked.stable
@@ -298,14 +402,13 @@ describe(
                 );
 
             /*
- * Preflop recording starts with existing chips
- * already on the table and OCR does not recognize
- * every visible amount, so that snapshot is
- * incomplete.
- *
- * Postflop streets begin from a known cleared
- * contribution state in this fixture.
- */
+             * The recording begins mid-preflop,
+             * so the initial contribution snapshot
+             * is incomplete.
+             *
+             * Postflop starts from a known cleared
+             * contribution state in this fixture.
+             */
             const contributionState =
               createPlayerContributionState(
                 street,
@@ -313,30 +416,19 @@ describe(
                 street !== "preflop"
               );
 
-            if (
-              tracked.changes.length > 0
-            ) {
-              console.log(
-                `${timestampSeconds}s ${street}`,
-                "snapshot=",
-                contributions,
-                "changes=",
-                tracked.changes
-              );
-            }
-
             const events =
               actionDetector.detect({
                 contributionState,
                 changes:
-                tracked.changes
+                tracked.changes,
+                labelEvents
               });
 
             for (
               const event
               of events
               ) {
-              actionCandidates.push({
+              actions.push({
                 timestampSeconds,
 
                 seatIndex:
@@ -353,33 +445,64 @@ describe(
               });
 
               console.log(
-                `  ACTION CANDIDATE: S${event.seatIndex} ${event.type} ${event.amount ?? ""}`
+                `${timestampSeconds}s S${event.seatIndex} ${event.type} ${event.amount ?? ""}`
               );
             }
           }
         } finally {
           await ocr.terminate();
+          await labelRecognizer.terminate();
         }
 
         console.log(
-          "ACTION CANDIDATES:",
-          actionCandidates
+          "PLAYER ACTIONS:",
+          actions
         );
 
-        /*
-         * Diagnostic validation for now.
-         * After seeing the real output we'll
-         * replace this with semantic assertions.
-         */
         expect(
-          actionCandidates
+          actions
         ).toEqual([
+          {
+            timestampSeconds: 9,
+            seatIndex: 1,
+            street: "preflop",
+            type: "fold",
+            amount: null
+          },
+          {
+            timestampSeconds: 9,
+            seatIndex: 5,
+            street: "preflop",
+            type: "call",
+            amount: null
+          },
+          {
+            timestampSeconds: 12,
+            seatIndex: 2,
+            street: "flop",
+            type: "check",
+            amount: null
+          },
           {
             timestampSeconds: 20,
             seatIndex: 4,
             street: "flop",
             type: "bet",
             amount: 1900
+          },
+          {
+            timestampSeconds: 21,
+            seatIndex: 2,
+            street: "flop",
+            type: "fold",
+            amount: null
+          },
+          {
+            timestampSeconds: 21,
+            seatIndex: 5,
+            street: "flop",
+            type: "call",
+            amount: null
           },
           {
             timestampSeconds: 25,

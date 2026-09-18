@@ -4,6 +4,7 @@ import type {
 
 export type PlayerActionType =
   | "check"
+  | "fold"
   | "call"
   | "bet"
   | "raise";

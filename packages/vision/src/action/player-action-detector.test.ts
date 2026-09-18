@@ -39,9 +39,7 @@ describe(
             ]
           });
 
-        expect(
-          events
-        ).toEqual([
+        expect(events).toEqual([
           {
             seatIndex: 4,
             street: "flop",
@@ -89,9 +87,7 @@ describe(
             ]
           });
 
-        expect(
-          events
-        ).toEqual([
+        expect(events).toEqual([
           {
             seatIndex: 2,
             street: "preflop",
@@ -139,9 +135,7 @@ describe(
             ]
           });
 
-        expect(
-          events
-        ).toEqual([
+        expect(events).toEqual([
           {
             seatIndex: 4,
             street: "preflop",
@@ -181,9 +175,7 @@ describe(
             ]
           });
 
-        expect(
-          events
-        ).toEqual([]);
+        expect(events).toEqual([]);
       }
     );
 
@@ -216,9 +208,7 @@ describe(
             ]
           });
 
-        expect(
-          events
-        ).toEqual([
+        expect(events).toEqual([
           {
             seatIndex: 4,
             street: "preflop",
@@ -258,9 +248,7 @@ describe(
             ]
           });
 
-        expect(
-          events
-        ).toEqual([]);
+        expect(events).toEqual([]);
       }
     );
 
@@ -288,9 +276,7 @@ describe(
             ]
           });
 
-        expect(
-          events
-        ).toEqual([
+        expect(events).toEqual([
           {
             seatIndex: 4,
             street: "turn",
@@ -300,7 +286,6 @@ describe(
         ]);
       }
     );
-
 
     it(
       "does not classify raise from incomplete contribution snapshot",
@@ -332,9 +317,7 @@ describe(
             ]
           });
 
-        expect(
-          events
-        ).toEqual([]);
+        expect(events).toEqual([]);
       }
     );
 
@@ -368,11 +351,231 @@ describe(
             ]
           });
 
-        expect(
-          events
-        ).toEqual([]);
+        expect(events).toEqual([]);
       }
     );
 
+    it(
+      "emits check from explicit action label",
+      () => {
+        const detector =
+          new PlayerActionDetector();
+
+        const events =
+          detector.detect({
+            contributionState:
+              createPlayerContributionState(
+                "flop",
+                []
+              ),
+
+            changes: [],
+
+            labelEvents: [
+              {
+                seatIndex: 2,
+                label: "check"
+              }
+            ]
+          });
+
+        expect(events).toEqual([
+          {
+            seatIndex: 2,
+            street: "flop",
+            type: "check",
+            amount: null
+          }
+        ]);
+      }
+    );
+
+    it(
+      "emits fold from explicit action label",
+      () => {
+        const detector =
+          new PlayerActionDetector();
+
+        const events =
+          detector.detect({
+            contributionState:
+              createPlayerContributionState(
+                "flop",
+                []
+              ),
+
+            changes: [],
+
+            labelEvents: [
+              {
+                seatIndex: 2,
+                label: "fold"
+              }
+            ]
+          });
+
+        expect(events).toEqual([
+          {
+            seatIndex: 2,
+            street: "flop",
+            type: "fold",
+            amount: null
+          }
+        ]);
+      }
+    );
+
+    it(
+      "emits call from explicit action label even when amount is unknown",
+      () => {
+        const detector =
+          new PlayerActionDetector();
+
+        const events =
+          detector.detect({
+            contributionState:
+              createPlayerContributionState(
+                "flop",
+                [],
+                false
+              ),
+
+            changes: [],
+
+            labelEvents: [
+              {
+                seatIndex: 5,
+                label: "call"
+              }
+            ]
+          });
+
+        expect(events).toEqual([
+          {
+            seatIndex: 5,
+            street: "flop",
+            type: "call",
+            amount: null
+          }
+        ]);
+      }
+    );
+
+    it(
+      "does not emit poker action from placeBet label alone",
+      () => {
+        const detector =
+          new PlayerActionDetector();
+
+        const events =
+          detector.detect({
+            contributionState:
+              createPlayerContributionState(
+                "flop",
+                []
+              ),
+
+            changes: [],
+
+            labelEvents: [
+              {
+                seatIndex: 4,
+                label: "placeBet"
+              }
+            ]
+          });
+
+        expect(events).toEqual([]);
+      }
+    );
+
+    it(
+      "does not duplicate call when label and amount identify the same action",
+      () => {
+        const detector =
+          new PlayerActionDetector();
+
+        const events =
+          detector.detect({
+            contributionState:
+              createPlayerContributionState(
+                "flop",
+                [
+                  {
+                    seatIndex: 4,
+                    amount: 600
+                  }
+                ]
+              ),
+
+            changes: [
+              {
+                seatIndex: 5,
+                previousAmount: null,
+                currentAmount: 600,
+                confidence: 0.9
+              }
+            ],
+
+            labelEvents: [
+              {
+                seatIndex: 5,
+                label: "call"
+              }
+            ]
+          });
+
+        expect(events).toEqual([
+          {
+            seatIndex: 5,
+            street: "flop",
+            type: "call",
+            amount: null
+          }
+        ]);
+      }
+    );
+
+    it(
+      "uses amount context to classify placeBet as bet",
+      () => {
+        const detector =
+          new PlayerActionDetector();
+
+        const events =
+          detector.detect({
+            contributionState:
+              createPlayerContributionState(
+                "turn",
+                []
+              ),
+
+            changes: [
+              {
+                seatIndex: 4,
+                previousAmount: null,
+                currentAmount: 5700,
+                confidence: 0.23
+              }
+            ],
+
+            labelEvents: [
+              {
+                seatIndex: 4,
+                label: "placeBet"
+              }
+            ]
+          });
+
+        expect(events).toEqual([
+          {
+            seatIndex: 4,
+            street: "turn",
+            type: "bet",
+            amount: 5700
+          }
+        ]);
+      }
+    );
   }
 );

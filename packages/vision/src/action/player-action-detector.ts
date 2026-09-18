@@ -6,6 +6,10 @@ import type {
   PlayerContributionState
 } from "./player-contribution-state.js";
 
+import type {
+  PlayerActionLabelEvent
+} from "./player-action-label-event-detector.js";
+
 import {
   createPlayerActionContext
 } from "./player-action-context.js";
@@ -27,6 +31,7 @@ export interface PlayerActionEvent
 export interface PlayerActionDetectorInput {
   contributionState: PlayerContributionState;
   changes: BetAmountStateChange[];
+  labelEvents?: PlayerActionLabelEvent[];
 }
 
 export class PlayerActionDetector {
@@ -39,6 +44,79 @@ export class PlayerActionDetector {
     const events: PlayerActionEvent[] =
       [];
 
+    /*
+     * Explicit UI labels are direct evidence
+     * for check, fold, and call.
+     *
+     * placeBet is intentionally not emitted
+     * here. It only tells us that the player is
+     * placing chips. Bet vs raise still requires
+     * amount/contribution context.
+     */
+    for (
+      const labelEvent
+      of input.labelEvents ?? []
+      ) {
+      if (
+        labelEvent.label === "placeBet"
+      ) {
+        continue;
+      }
+
+      if (
+        labelEvent.label === "check"
+      ) {
+        events.push({
+          seatIndex:
+          labelEvent.seatIndex,
+
+          street:
+          input.contributionState.street,
+
+          type: "check",
+          amount: null
+        });
+
+        continue;
+      }
+
+      if (
+        labelEvent.label === "fold"
+      ) {
+        events.push({
+          seatIndex:
+          labelEvent.seatIndex,
+
+          street:
+          input.contributionState.street,
+
+          type: "fold",
+          amount: null
+        });
+
+        continue;
+      }
+
+      if (
+        labelEvent.label === "call"
+      ) {
+        events.push({
+          seatIndex:
+          labelEvent.seatIndex,
+
+          street:
+          input.contributionState.street,
+
+          type: "call",
+          amount: null
+        });
+      }
+    }
+
+    /*
+     * Stable amount transitions are used for
+     * amount-based bet/call/raise detection.
+     */
     for (
       const change
       of input.changes
@@ -111,6 +189,25 @@ export class PlayerActionDetector {
           classification.type === "raise"
         )
       ) {
+        continue;
+      }
+
+      /*
+       * If the explicit label already emitted
+       * the same semantic action for this seat,
+       * do not emit a duplicate from the amount
+       * transition.
+       */
+      const duplicate =
+        events.some(
+          event =>
+            event.seatIndex ===
+            change.seatIndex &&
+            event.type ===
+            classification.type
+        );
+
+      if (duplicate) {
         continue;
       }
 
