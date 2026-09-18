@@ -111,7 +111,101 @@ describe(
     );
 
     it(
-      "returns null below minimum confidence",
+      "accepts lower confidence with a sufficient margin",
+      () => {
+        const recognizer =
+          new RankRecognizer(
+            [
+              {
+                rank: "2",
+                mask:
+                  createMask([
+                    1, 1,
+                    1, 1
+                  ])
+              },
+              {
+                rank: "6",
+                mask:
+                  createMask([
+                    0, 0,
+                    0, 0
+                  ])
+              }
+            ],
+            {
+              minimumConfidence:
+                0.9,
+              fallbackConfidence:
+                0.7,
+              minimumMargin:
+                0.2
+            }
+          );
+
+        expect(
+          recognizer.recognize(
+            createMask([
+              1, 1,
+              1, 0
+            ])
+          )
+        ).toEqual({
+          rank: "2",
+          confidence: 0.75
+        });
+      }
+    );
+
+    it(
+      "rejects lower confidence with a weak margin",
+      () => {
+        const recognizer =
+          new RankRecognizer(
+            [
+              {
+                rank: "2",
+                mask:
+                  createMask([
+                    1, 1,
+                    1, 1
+                  ])
+              },
+              {
+                rank: "6",
+                mask:
+                  createMask([
+                    1, 1,
+                    0, 0
+                  ])
+              }
+            ],
+            {
+              minimumConfidence:
+                0.9,
+              fallbackConfidence:
+                0.7,
+              minimumMargin:
+                0.3
+            }
+          );
+
+        expect(
+          recognizer.recognize(
+            createMask([
+              1, 1,
+              1, 0
+            ])
+          )
+        ).toEqual({
+          rank: null,
+          confidence: 0.75
+        });
+      }
+    );
+
+    it(
+      "returns null below fallback confidence",
       () => {
         const recognizer =
           new RankRecognizer(
@@ -127,20 +221,22 @@ describe(
             ],
             {
               minimumConfidence:
-                0.9
+                0.9,
+              fallbackConfidence:
+                0.75
             }
           );
 
         expect(
           recognizer.recognize(
             createMask([
-              0, 0,
-              1, 1
+              1, 0,
+              0, 1
             ])
           )
         ).toEqual({
           rank: null,
-          confidence: 0
+          confidence: 0.5
         });
       }
     );

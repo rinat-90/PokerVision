@@ -33,6 +33,8 @@ export interface RankRecognition {
 
 export interface RankRecognizerOptions {
   minimumConfidence?: number;
+  fallbackConfidence?: number;
+  minimumMargin?: number;
 }
 
 export class RankRecognizer {
@@ -40,6 +42,12 @@ export class RankRecognizer {
     RankTemplate[];
 
   private readonly minimumConfidence:
+    number;
+
+  private readonly fallbackConfidence:
+    number;
+
+  private readonly minimumMargin:
     number;
 
   constructor(
@@ -53,6 +61,14 @@ export class RankRecognizer {
     this.minimumConfidence =
       options.minimumConfidence ??
       0.9;
+
+    this.fallbackConfidence =
+      options.fallbackConfidence ??
+      0.85;
+
+    this.minimumMargin =
+      options.minimumMargin ??
+      0.05;
   }
 
   recognize(
@@ -62,6 +78,7 @@ export class RankRecognizer {
       CardRank | null = null;
 
     let bestConfidence = 0;
+    let secondBestConfidence = 0;
 
     for (
       const template
@@ -77,28 +94,68 @@ export class RankRecognizer {
         confidence >
         bestConfidence
       ) {
+        secondBestConfidence =
+          bestConfidence;
+
         bestRank =
           template.rank;
 
         bestConfidence =
           confidence;
+
+        continue;
+      }
+
+      if (
+        confidence >
+        secondBestConfidence
+      ) {
+        secondBestConfidence =
+          confidence;
       }
     }
 
     if (
-      bestConfidence <
-      this.minimumConfidence
+      bestRank === null
     ) {
       return {
         rank: null,
+        confidence: 0
+      };
+    }
+
+    if (
+      bestConfidence >=
+      this.minimumConfidence
+    ) {
+      return {
+        rank:
+        bestRank,
+        confidence:
+        bestConfidence
+      };
+    }
+
+    const margin =
+      bestConfidence -
+      secondBestConfidence;
+
+    if (
+      bestConfidence >=
+      this.fallbackConfidence &&
+      margin >=
+      this.minimumMargin
+    ) {
+      return {
+        rank:
+        bestRank,
         confidence:
         bestConfidence
       };
     }
 
     return {
-      rank:
-      bestRank,
+      rank: null,
       confidence:
       bestConfidence
     };
