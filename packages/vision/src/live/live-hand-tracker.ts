@@ -12,6 +12,10 @@ import type {
 } from "../board/recognized-board-event.js";
 
 import type {
+  PlayerActionEvent
+} from "../action/player-action-detector.js";
+
+import type {
   LiveTableStateResult
 } from "./live-table-state-processor.js";
 
@@ -122,6 +126,27 @@ export class LiveHandTracker {
       result.timestampSeconds,
       result.event
     );
+  }
+
+  updateActions(
+    timestampSeconds: number,
+    events: PlayerActionEvent[]
+  ): void {
+    if (
+      !this.handActive
+    ) {
+      return;
+    }
+
+    for (
+      const event
+      of events
+      ) {
+      this.builder.addAction(
+        timestampSeconds,
+        event
+      );
+    }
   }
 
   isHandActive(): boolean {

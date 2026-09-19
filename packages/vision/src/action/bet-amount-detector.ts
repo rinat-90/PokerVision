@@ -7,6 +7,10 @@ import {
 } from "./bet-chip-detector.js";
 
 import type {
+  BetChipRegion
+} from "./bet-chip-detector.js";
+
+import type {
   BetAmountOcr,
   BetAmountOcrResult
 } from "./bet-amount-ocr.js";
@@ -19,6 +23,7 @@ export interface BetAmountDetection {
   seatIndex: number;
   chipPresent: boolean;
   chipMatchingPixelRatio: number;
+  chipRegion: BetChipRegion | null;
   amount: number | null;
   rawText: string | null;
   confidence: number;
@@ -30,17 +35,22 @@ export interface BetAmountDetectorOptions {
 }
 
 export class BetAmountDetector {
-  private readonly chipDetector: BetChipDetector;
+  private readonly chipDetector:
+    BetChipDetector;
 
-  private readonly preprocessor: BetAmountOcrPreprocessor;
+  private readonly preprocessor:
+    BetAmountOcrPreprocessor;
 
-  private readonly ocr: BetAmountOcr;
+  private readonly ocr:
+    BetAmountOcr;
 
   constructor(
     ocr: BetAmountOcr,
-    options: BetAmountDetectorOptions = {}
+    options:
+    BetAmountDetectorOptions = {}
   ) {
-    this.ocr = ocr;
+    this.ocr =
+      ocr;
 
     this.chipDetector =
       options.chipDetector ??
@@ -64,12 +74,24 @@ export class BetAmountDetector {
     if (!chipDetection.present) {
       return {
         seatIndex,
-        chipPresent: false,
+
+        chipPresent:
+          false,
+
         chipMatchingPixelRatio:
         chipDetection.matchingPixelRatio,
-        amount: null,
-        rawText: null,
-        confidence: 0
+
+        chipRegion:
+          null,
+
+        amount:
+          null,
+
+        rawText:
+          null,
+
+        confidence:
+          0
       };
     }
 
@@ -78,7 +100,8 @@ export class BetAmountDetector {
         amountFrame
       );
 
-    const ocrResult: BetAmountOcrResult =
+    const ocrResult:
+      BetAmountOcrResult =
       await this.ocr.recognize(
         image,
         seatIndex
@@ -86,13 +109,22 @@ export class BetAmountDetector {
 
     return {
       seatIndex,
-      chipPresent: true,
+
+      chipPresent:
+        true,
+
       chipMatchingPixelRatio:
       chipDetection.matchingPixelRatio,
+
+      chipRegion:
+      chipDetection.region,
+
       amount:
       ocrResult.parsed.value,
+
       rawText:
       ocrResult.rawText,
+
       confidence:
       ocrResult.confidence
     };

@@ -273,5 +273,118 @@ describe(
         });
       }
     );
+    it(
+      "does not regress within the same hand",
+      async () => {
+        const processor =
+          new LiveBoardStateProcessor(
+            new FakeTableDetector(),
+            new FakeImageDecoder([
+              0,
+              3,
+              3,
+              4,
+              4,
+              3,
+              3,
+              0,
+              0,
+              5,
+              5
+            ])
+          );
+
+        const states = [];
+
+        for (
+          let index = 0;
+          index < 11;
+          index++
+        ) {
+          states.push(
+            await processor.process(
+              frame(index)
+            )
+          );
+        }
+
+        expect(
+          states[4]?.state?.street
+        ).toBe(
+          "turn"
+        );
+
+        expect(
+          states[6]?.state?.street
+        ).toBe(
+          "turn"
+        );
+
+        expect(
+          states[8]?.state?.street
+        ).toBe(
+          "turn"
+        );
+
+        expect(
+          states[10]?.state?.street
+        ).toBe(
+          "river"
+        );
+      }
+    );
+
+    it(
+      "allows preflop again after reset",
+      async () => {
+        const processor =
+          new LiveBoardStateProcessor(
+            new FakeTableDetector(),
+            new FakeImageDecoder([
+              0,
+              3,
+              3,
+              0,
+              0
+            ])
+          );
+
+        await processor.process(
+          frame(0)
+        );
+
+        await processor.process(
+          frame(1)
+        );
+
+        const flop =
+          await processor.process(
+            frame(2)
+          );
+
+        expect(
+          flop.state?.street
+        ).toBe(
+          "flop"
+        );
+
+        processor.reset();
+
+        const preflop =
+          await processor.process(
+            frame(3)
+          );
+
+        expect(
+          preflop.state?.street
+        ).toBe(
+          "preflop"
+        );
+
+        expect(
+          preflop.changed
+        ).toBe(false);
+      }
+    );
   }
 );

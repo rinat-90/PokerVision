@@ -585,5 +585,154 @@ describe(
         ]);
       }
     );
+
+    it(
+      "adds confirmed player actions to the active hand",
+      () => {
+        const tracker =
+          new LiveHandTracker();
+
+        tracker.update(
+          result(
+            10,
+            [
+              0,
+              2,
+              4,
+              5
+            ],
+            [
+              {
+                type:
+                  "handStarted",
+
+                activeSeatIndexes: [
+                  0,
+                  2,
+                  4,
+                  5
+                ]
+              }
+            ]
+          )
+        );
+
+        tracker.updateActions(
+          12,
+          [
+            {
+              seatIndex: 2,
+              street: "flop",
+              type: "check",
+              amount: null
+            }
+          ]
+        );
+
+        tracker.updateActions(
+          20,
+          [
+            {
+              seatIndex: 4,
+              street: "flop",
+              type: "bet",
+              amount: 1900
+            }
+          ]
+        );
+
+        tracker.updateActions(
+          21,
+          [
+            {
+              seatIndex: 2,
+              street: "flop",
+              type: "fold",
+              amount: null
+            },
+            {
+              seatIndex: 5,
+              street: "flop",
+              type: "call",
+              amount: null
+            }
+          ]
+        );
+
+        const completed =
+          tracker.update(
+            result(
+              27,
+              [],
+              [
+                {
+                  type:
+                    "handEnded",
+
+                  activeSeatIndexes: []
+                }
+              ]
+            )
+          );
+
+        expect(
+          completed.completedHand
+            ?.actions
+        ).toEqual([
+          {
+            seatIndex: 2,
+            street: "flop",
+            type: "check",
+            amount: null,
+            timestampSeconds: 12
+          },
+          {
+            seatIndex: 4,
+            street: "flop",
+            type: "bet",
+            amount: 1900,
+            timestampSeconds: 20
+          },
+          {
+            seatIndex: 2,
+            street: "flop",
+            type: "fold",
+            amount: null,
+            timestampSeconds: 21
+          },
+          {
+            seatIndex: 5,
+            street: "flop",
+            type: "call",
+            amount: null,
+            timestampSeconds: 21
+          }
+        ]);
+      }
+    );
+
+    it(
+      "ignores player actions when no hand is active",
+      () => {
+        const tracker =
+          new LiveHandTracker();
+
+        tracker.updateActions(
+          10,
+          [
+            {
+              seatIndex: 2,
+              street: "flop",
+              type: "check",
+              amount: null
+            }
+          ]
+        );
+
+        expect(
+          tracker.isHandActive()
+        ).toBe(false);
+      }
+    );
   }
 );

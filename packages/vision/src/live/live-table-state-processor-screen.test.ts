@@ -25,12 +25,32 @@ import {
 } from "../seat/seat-detector.js";
 
 import {
+  TesseractBetAmountOcr
+} from "../action/bet-amount-ocr.js";
+
+import {
+  BetAmountDetector
+} from "../action/bet-amount-detector.js";
+
+import {
+  PlayerActionLabelRecognizer
+} from "../action/player-action-label-recognizer.js";
+
+import type {
+  PokerStreet
+} from "../action/player-action-context.js";
+
+import {
   LiveTableStateProcessor
 } from "./live-table-state-processor.js";
 
 import {
   LiveBoardStateProcessor
 } from "./live-board-state-processor.js";
+
+import {
+  LivePlayerActionProcessor
+} from "./live-player-action-processor.js";
 
 import {
   LiveHandTracker
@@ -40,7 +60,7 @@ describe(
   "LiveTableStateProcessor on live screen",
   () => {
     it(
-      "processes live table state, board state and tracks hands",
+      "processes live table state, board state, player actions and tracks hands",
       async () => {
         const source =
           new ScreenFrameSource();
@@ -74,6 +94,25 @@ describe(
             decoder
           );
 
+        const betAmountOcr =
+          new TesseractBetAmountOcr();
+
+        const amountDetector =
+          new BetAmountDetector(
+            betAmountOcr
+          );
+
+        const labelRecognizer =
+          new PlayerActionLabelRecognizer();
+
+        const actionProcessor =
+          new LivePlayerActionProcessor(
+            tableDetector,
+            decoder,
+            amountDetector,
+            labelRecognizer
+          );
+
         const handTracker =
           new LiveHandTracker();
 
@@ -85,9 +124,13 @@ describe(
         let previousBoardState:
           string | null = null;
 
+        let previousStreet:
+          PokerStreet | null = null;
+
         let processedFrames = 0;
         let detectedStates = 0;
         let detectedBoardStates = 0;
+        let detectedActions = 0;
 
         const observedBoardStreets =
           new Set<string>();
@@ -105,15 +148,88 @@ describe(
                 frame
               );
 
+            const handStarted =
+              tableResult.lifecycleEvents.some(
+                event =>
+                  event.type ===
+                  "handStarted"
+              );
+
+            if (handStarted) {
+              boardProcessor.reset();
+            }
+
             const boardResult =
               await boardProcessor.process(
                 frame
               );
 
+            /*
+             * Board state is the source of truth
+             * for the current poker street.
+             *
+             * Do not derive live streets from
+             * fixture-specific timestamps.
+             */
+            const detectedStreet =
+              boardResult.state
+                ?.street;
+
+            const street:
+              PokerStreet =
+              detectedStreet &&
+              detectedStreet !== "unknown"
+                ? detectedStreet
+                : previousStreet ??
+                "preflop";
+
+
+            previousStreet =
+              street;
+
+            const actionResult =
+              await actionProcessor.process(
+                frame,
+                street
+              );
+
+            /*
+             * Update hand lifecycle first so a
+             * handStarted event activates the
+             * builder before actions from the same
+             * frame are added.
+             */
             const handResult =
               handTracker.update(
                 tableResult
               );
+
+            handTracker.updateActions(
+              actionResult.timestampSeconds,
+              actionResult.events
+            );
+
+            if (
+              actionResult.events.length >
+              0
+            ) {
+              detectedActions +=
+                actionResult.events.length;
+
+              for (
+                const event
+                of actionResult.events
+                ) {
+                console.log(
+                  `${frame.timestampSeconds.toFixed(1)}s`,
+                  "ACTION:",
+                  `S${event.seatIndex}`,
+                  event.street,
+                  event.type,
+                  event.amount
+                );
+              }
+            }
 
             if (
               tableResult.state
@@ -214,11 +330,6 @@ describe(
               ).toBeGreaterThanOrEqual(
                 2
               );
-
-              expect(
-                handResult.completedHand
-                  .actions
-              ).toEqual([]);
             }
 
             if (
@@ -230,6 +341,12 @@ describe(
           }
         } finally {
           await source.stop();
+
+          await betAmountOcr
+            .terminate();
+
+          await labelRecognizer
+            .terminate();
         }
 
         console.log(
@@ -237,6 +354,11 @@ describe(
           [
             ...observedBoardStreets
           ]
+        );
+
+        console.log(
+          "DETECTED ACTIONS:",
+          detectedActions
         );
 
         expect(
@@ -259,7 +381,7 @@ describe(
           previousBoardState
         ).not.toBeNull();
       },
-      40_000
+      120_000
     );
   }
 );

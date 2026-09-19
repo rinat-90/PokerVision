@@ -41,10 +41,11 @@ export class LiveBoardStateProcessor {
   private readonly cardDetector =
     new BoardCardDetector();
 
-  private readonly stateTracker =
-    new BoardStateTracker({
-      requiredStableFrames: 2
-    });
+  private stateTracker =
+    this.createStateTracker();
+
+  private stableState:
+    BoardState | null = null;
 
   constructor(
     private readonly tableDetector:
@@ -99,15 +100,94 @@ export class LiveBoardStateProcessor {
         )
       );
 
+    if (
+      this.stableState &&
+      this.isRegression(
+        this.stableState,
+        tracked.state
+      )
+    ) {
+      return {
+        timestampSeconds:
+        frame.timestampSeconds,
+
+        state:
+        this.stableState,
+
+        changed: false
+      };
+    }
+
+    const changed =
+      this.stableState !== null &&
+      (
+        this.stableState.street !==
+        tracked.state.street ||
+        this.stableState.cardCount !==
+        tracked.state.cardCount
+      );
+
+    this.stableState =
+      tracked.state;
+
     return {
       timestampSeconds:
       frame.timestampSeconds,
 
       state:
-      tracked.state,
+      this.stableState,
 
-      changed:
-      tracked.changed
+      changed
     };
+  }
+
+  reset(): void {
+    this.stateTracker =
+      this.createStateTracker();
+
+    this.stableState =
+      null;
+  }
+
+  private createStateTracker():
+    BoardStateTracker {
+    return new BoardStateTracker({
+      requiredStableFrames: 2
+    });
+  }
+
+  private isRegression(
+    current: BoardState,
+    next: BoardState
+  ): boolean {
+    return (
+      this.streetOrder(
+        next
+      ) <
+      this.streetOrder(
+        current
+      )
+    );
+  }
+
+  private streetOrder(
+    state: BoardState
+  ): number {
+    switch (state.street) {
+      case "preflop":
+        return 0;
+
+      case "flop":
+        return 1;
+
+      case "turn":
+        return 2;
+
+      case "river":
+        return 3;
+
+      case "unknown":
+        return -1;
+    }
   }
 }
