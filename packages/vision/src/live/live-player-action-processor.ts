@@ -23,8 +23,16 @@ import {
 } from "../action/player-action-region.js";
 
 import {
-  createBetAmountRegions
-} from "../action/bet-amount-region.js";
+  createBetAmountRegionFromChip
+} from "../action/bet-amount-chip-region.js";
+
+import {
+  BetChipDetector
+} from "../action/bet-chip-detector.js";
+
+import {
+  BetChipComponentSelector
+} from "../action/bet-chip-component-selector.js";
 
 import {
   createSixMaxSeatRegions
@@ -99,6 +107,12 @@ export class LivePlayerActionProcessor {
   private readonly actionDetector =
     new PlayerActionDetector();
 
+  private readonly chipDetector =
+    new BetChipDetector();
+
+  private readonly chipSelector =
+    new BetChipComponentSelector();
+
   private contributionStateComplete:
     boolean;
 
@@ -151,11 +165,6 @@ export class LivePlayerActionProcessor {
         tableDetection.region
       );
 
-    const amountRegions =
-      createBetAmountRegions(
-        actionRegions
-      );
-
     const seatRegions =
       createSixMaxSeatRegions(
         tableDetection.region,
@@ -179,24 +188,56 @@ export class LivePlayerActionProcessor {
       const actionRegion
       of actionRegions
       ) {
-      const amountRegion =
-        amountRegions.find(
-          region =>
-            region.seatIndex ===
-            actionRegion.seatIndex
-        );
-
-      if (!amountRegion) {
-        throw new Error(
-          `Expected amount region for seat ${actionRegion.seatIndex}`
-        );
-      }
-
       const actionFrame =
         await cropFrame(
           frame,
           actionRegion,
           this.decoder
+        );
+
+      const components =
+        this.chipDetector.detectComponents(
+          actionFrame
+        );
+
+      const selectedComponent =
+        this.chipSelector.select({
+          components,
+
+          seatIndex:
+          actionRegion.seatIndex,
+
+          frameWidth:
+          actionFrame.width,
+
+          frameHeight:
+          actionFrame.height
+        });
+
+      if (!selectedComponent) {
+        amountStates.push({
+          seatIndex:
+          actionRegion.seatIndex,
+
+          amount:
+            null,
+
+          rawText:
+            null,
+
+          confidence:
+            0
+        });
+
+        continue;
+      }
+
+      const amountRegion =
+        createBetAmountRegionFromChip(
+          selectedComponent.region,
+          actionRegion,
+          frame.width,
+          frame.height
         );
 
       const amountFrame =
@@ -319,8 +360,10 @@ export class LivePlayerActionProcessor {
     const events =
       this.actionDetector.detect({
         contributionState,
+
         changes:
         tracked.changes,
+
         labelEvents
       });
 

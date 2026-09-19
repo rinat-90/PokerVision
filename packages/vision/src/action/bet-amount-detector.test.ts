@@ -17,18 +17,126 @@ import {
   BetAmountDetector
 } from "./bet-amount-detector.js";
 
-function createFrame(
-  pixels: number[]
+function createSolidFrame(
+  width: number,
+  height: number,
+  pixel: [
+    number,
+    number,
+    number
+  ]
 ): CroppedFrame {
+  const data =
+    new Uint8Array(
+      width *
+      height *
+      3
+    );
+
+  for (
+    let index = 0;
+    index < width * height;
+    index += 1
+  ) {
+    const dataIndex =
+      index * 3;
+
+    data[dataIndex] =
+      pixel[0];
+
+    data[dataIndex + 1] =
+      pixel[1];
+
+    data[dataIndex + 2] =
+      pixel[2];
+  }
+
   return {
-    width: 1,
-    height: 1,
+    width,
+    height,
     channels: 3,
-    data:
-      new Uint8Array(
-        pixels
-      )
+    data
   };
+}
+
+function createChipFrame(): CroppedFrame {
+  const frame =
+    createSolidFrame(
+      10,
+      10,
+      [
+        40,
+        40,
+        40
+      ]
+    );
+
+  for (
+    let y = 3;
+    y <= 6;
+    y += 1
+  ) {
+    for (
+      let x = 3;
+      x <= 6;
+      x += 1
+    ) {
+      const index =
+        (
+          y *
+          frame.width +
+          x
+        ) * 3;
+
+      frame.data[index] =
+        20;
+
+      frame.data[index + 1] =
+        100;
+
+      frame.data[index + 2] =
+        220;
+    }
+  }
+
+  return frame;
+}
+
+function createNoChipFrame(): CroppedFrame {
+  return createSolidFrame(
+    4,
+    4,
+    [
+      40,
+      40,
+      40
+    ]
+  );
+}
+
+function createTinyBlueNoiseFrame():
+  CroppedFrame {
+  const frame =
+    createNoChipFrame();
+
+  frame.data[0] = 20;
+  frame.data[1] = 100;
+  frame.data[2] = 220;
+
+  return frame;
+}
+
+function createAmountFrame():
+  CroppedFrame {
+  return createSolidFrame(
+    4,
+    4,
+    [
+      255,
+      255,
+      255
+    ]
+  );
 }
 
 describe(
@@ -49,30 +157,20 @@ describe(
             ocr
           );
 
-        const actionFrame =
-          createFrame([
-            40,
-            40,
-            40
-          ]);
-
-        const amountFrame =
-          createFrame([
-            255,
-            255,
-            255
-          ]);
-
         const result =
           await detector.detect(
-            actionFrame,
-            amountFrame,
+            createNoChipFrame(),
+            createAmountFrame(),
             0
           );
 
         expect(
           result.chipPresent
         ).toBe(false);
+
+        expect(
+          result.chipRegion
+        ).toBeNull();
 
         expect(
           result.amount
@@ -93,7 +191,47 @@ describe(
     );
 
     it(
-      "runs OCR when a bet chip is present",
+      "does not run OCR when blue pixels do not form a valid chip component",
+      async () => {
+        const recognize =
+          vi.fn();
+
+        const ocr: BetAmountOcr = {
+          recognize
+        };
+
+        const detector =
+          new BetAmountDetector(
+            ocr
+          );
+
+        const result =
+          await detector.detect(
+            createTinyBlueNoiseFrame(),
+            createAmountFrame(),
+            0
+          );
+
+        expect(
+          result.chipPresent
+        ).toBe(false);
+
+        expect(
+          result.chipRegion
+        ).toBeNull();
+
+        expect(
+          result.amount
+        ).toBeNull();
+
+        expect(
+          recognize
+        ).not.toHaveBeenCalled();
+      }
+    );
+
+    it(
+      "runs OCR when a valid bet chip component is present",
       async () => {
         const recognize =
           vi.fn(
@@ -118,30 +256,25 @@ describe(
             ocr
           );
 
-        const actionFrame =
-          createFrame([
-            20,
-            100,
-            220
-          ]);
-
-        const amountFrame =
-          createFrame([
-            255,
-            255,
-            255
-          ]);
-
         const result =
           await detector.detect(
-            actionFrame,
-            amountFrame,
+            createChipFrame(),
+            createAmountFrame(),
             4
           );
 
         expect(
           result.chipPresent
         ).toBe(true);
+
+        expect(
+          result.chipRegion
+        ).toEqual({
+          x: 3,
+          y: 3,
+          width: 4,
+          height: 4
+        });
 
         expect(
           result.amount
@@ -187,24 +320,10 @@ describe(
             ocr
           );
 
-        const actionFrame =
-          createFrame([
-            20,
-            100,
-            220
-          ]);
-
-        const amountFrame =
-          createFrame([
-            255,
-            255,
-            255
-          ]);
-
         const result =
           await detector.detect(
-            actionFrame,
-            amountFrame,
+            createChipFrame(),
+            createAmountFrame(),
             4
           );
 
@@ -252,26 +371,16 @@ describe(
             ocr
           );
 
-        const actionFrame =
-          createFrame([
-            20,
-            100,
-            220
-          ]);
-
-        const amountFrame =
-          createFrame([
-            255,
-            255,
-            255
-          ]);
-
         const result =
           await detector.detect(
-            actionFrame,
-            amountFrame,
+            createChipFrame(),
+            createAmountFrame(),
             5
           );
+
+        expect(
+          result.chipPresent
+        ).toBe(true);
 
         expect(
           result.amount
@@ -309,24 +418,10 @@ describe(
             ocr
           );
 
-        const actionFrame =
-          createFrame([
-            20,
-            100,
-            220
-          ]);
-
-        const amountFrame =
-          createFrame([
-            255,
-            255,
-            255
-          ]);
-
         const result =
           await detector.detect(
-            actionFrame,
-            amountFrame,
+            createChipFrame(),
+            createAmountFrame(),
             4
           );
 

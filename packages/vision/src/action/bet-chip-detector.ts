@@ -9,7 +9,7 @@ export interface BetChipRegion {
   height: number;
 }
 
-interface BetChipComponent {
+export interface BetChipComponent {
   pixelCount: number;
   region: BetChipRegion;
 }
@@ -23,6 +23,12 @@ export interface BetChipDetection {
 export interface BetChipDetectorOptions {
   minimumBlueRatio?: number;
   minimumPixelRatio?: number;
+}
+
+interface BlueMaskResult {
+  mask: Uint8Array;
+  matchingPixels: number;
+  pixelCount: number;
 }
 
 export class BetChipDetector {
@@ -46,7 +52,6 @@ export class BetChipDetector {
     frame: CroppedFrame
   ): BetChipDetection {
     const {
-      data,
       width,
       height,
       channels
@@ -66,7 +71,116 @@ export class BetChipDetector {
       };
     }
 
-    const blueMask =
+    const maskResult =
+      this.createBlueMask(
+        frame
+      );
+
+    const matchingPixelRatio =
+      maskResult.matchingPixels /
+      maskResult.pixelCount;
+
+    const present =
+      matchingPixelRatio >=
+      this.minimumPixelRatio;
+
+    if (
+      !present ||
+      maskResult.matchingPixels === 0
+    ) {
+      return {
+        present,
+        matchingPixelRatio,
+        region: null
+      };
+    }
+
+    const components =
+      this.findComponents(
+        maskResult.mask,
+        width,
+        height
+      );
+
+    const largestComponent =
+      components.reduce<
+        BetChipComponent | null
+      >(
+        (
+          largest,
+          component
+        ) => {
+          if (
+            largest === null ||
+            component.pixelCount >
+            largest.pixelCount
+          ) {
+            return component;
+          }
+
+          return largest;
+        },
+        null
+      );
+
+    return {
+      present,
+      matchingPixelRatio,
+
+      region:
+        largestComponent?.region ??
+        null
+    };
+  }
+
+  detectComponents(
+    frame: CroppedFrame
+  ): BetChipComponent[] {
+    const {
+      width,
+      height,
+      channels
+    } = frame;
+
+    if (
+      width * height === 0 ||
+      channels < 3
+    ) {
+      return [];
+    }
+
+    const maskResult =
+      this.createBlueMask(
+        frame
+      );
+
+    if (
+      maskResult.matchingPixels === 0
+    ) {
+      return [];
+    }
+
+    return this.findComponents(
+      maskResult.mask,
+      width,
+      height
+    );
+  }
+
+  private createBlueMask(
+    frame: CroppedFrame
+  ): BlueMaskResult {
+    const {
+      data,
+      width,
+      height,
+      channels
+    } = frame;
+
+    const pixelCount =
+      width * height;
+
+    const mask =
       new Uint8Array(
         pixelCount
       );
@@ -128,65 +242,15 @@ export class BetChipDetector {
           continue;
         }
 
-        blueMask[pixelIndex] = 1;
+        mask[pixelIndex] = 1;
         matchingPixels += 1;
       }
     }
 
-    const matchingPixelRatio =
-      matchingPixels /
-      pixelCount;
-
-    const present =
-      matchingPixelRatio >=
-      this.minimumPixelRatio;
-
-    if (
-      !present ||
-      matchingPixels === 0
-    ) {
-      return {
-        present,
-        matchingPixelRatio,
-        region: null
-      };
-    }
-
-    const components =
-      this.findComponents(
-        blueMask,
-        width,
-        height
-      );
-
-    const largestComponent =
-      components.reduce<
-        BetChipComponent | null
-      >(
-        (
-          largest,
-          component
-        ) => {
-          if (
-            largest === null ||
-            component.pixelCount >
-            largest.pixelCount
-          ) {
-            return component;
-          }
-
-          return largest;
-        },
-        null
-      );
-
     return {
-      present,
-      matchingPixelRatio,
-
-      region:
-        largestComponent?.region ??
-        null
+      mask,
+      matchingPixels,
+      pixelCount
     };
   }
 

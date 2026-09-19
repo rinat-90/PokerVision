@@ -10,6 +10,10 @@ import type {
   BetChipRegion
 } from "./bet-chip-detector.js";
 
+import {
+  BetChipComponentSelector
+} from "./bet-chip-component-selector.js";
+
 import type {
   BetAmountOcr,
   BetAmountOcrResult
@@ -31,12 +35,16 @@ export interface BetAmountDetection {
 
 export interface BetAmountDetectorOptions {
   chipDetector?: BetChipDetector;
+  chipSelector?: BetChipComponentSelector;
   preprocessor?: BetAmountOcrPreprocessor;
 }
 
 export class BetAmountDetector {
   private readonly chipDetector:
     BetChipDetector;
+
+  private readonly chipSelector:
+    BetChipComponentSelector;
 
   private readonly preprocessor:
     BetAmountOcrPreprocessor;
@@ -56,6 +64,10 @@ export class BetAmountDetector {
       options.chipDetector ??
       new BetChipDetector();
 
+    this.chipSelector =
+      options.chipSelector ??
+      new BetChipComponentSelector();
+
     this.preprocessor =
       options.preprocessor ??
       new BetAmountOcrPreprocessor();
@@ -71,7 +83,28 @@ export class BetAmountDetector {
         actionFrame
       );
 
-    if (!chipDetection.present) {
+    const components =
+      this.chipDetector.detectComponents(
+        actionFrame
+      );
+
+    const selectedComponent =
+      this.chipSelector.select({
+        components,
+        seatIndex,
+
+        frameWidth:
+        actionFrame.width,
+
+        frameHeight:
+        actionFrame.height
+      });
+
+    const chipPresent =
+      chipDetection.present &&
+      selectedComponent !== null;
+
+    if (!chipPresent) {
       return {
         seatIndex,
 
@@ -117,7 +150,7 @@ export class BetAmountDetector {
       chipDetection.matchingPixelRatio,
 
       chipRegion:
-      chipDetection.region,
+      selectedComponent.region,
 
       amount:
       ocrResult.parsed.value,

@@ -29,6 +29,10 @@ import type {
 } from "../table/crop-frame.js";
 
 import {
+  createPlayerActionRegions
+} from "../action/player-action-region.js";
+
+import {
   LivePlayerActionProcessor,
   type LiveBetAmountDetector,
   type LiveActionLabelRecognizer
@@ -98,14 +102,87 @@ class FakeImageDecoder
     const height = 1080;
     const channels = 3;
 
-    return {
-      data:
-        new Uint8Array(
-          width *
-          height *
-          channels
-        ),
+    const data =
+      new Uint8Array(
+        width *
+        height *
+        channels
+      );
 
+    const tableRegion = {
+      x: 192,
+      y: 324,
+      width: 1536,
+      height: 540
+    };
+
+    const actionRegions =
+      createPlayerActionRegions(
+        tableRegion
+      );
+
+    for (
+      const region
+      of actionRegions
+      ) {
+      /*
+       * Give every action region one small,
+       * connected blue component.
+       *
+       * This satisfies the real live chip gate.
+       * FakeAmountDetector still decides whether
+       * the seat actually has an observed amount.
+       */
+      const chipWidth = 8;
+      const chipHeight = 8;
+
+      const startX =
+        Math.round(
+          region.x +
+          region.width / 2 -
+          chipWidth / 2
+        );
+
+      const startY =
+        Math.round(
+          region.y +
+          region.height / 2 -
+          chipHeight / 2
+        );
+
+      for (
+        let y = 0;
+        y < chipHeight;
+        y += 1
+      ) {
+        for (
+          let x = 0;
+          x < chipWidth;
+          x += 1
+        ) {
+          const pixelX =
+            startX + x;
+
+          const pixelY =
+            startY + y;
+
+          const index =
+            (
+              pixelY *
+              width +
+              pixelX
+            ) *
+            channels;
+
+          data[index] = 20;
+          data[index + 1] = 100;
+          data[index + 2] = 220;
+        }
+      }
+    }
+
+    return {
+      data,
       width,
       height,
       channels
