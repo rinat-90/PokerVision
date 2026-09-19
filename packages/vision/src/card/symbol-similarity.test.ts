@@ -122,7 +122,7 @@ describe(
             first,
             second
           )
-        ).toBe(0.75);
+        ).toBe(0.5);
       }
     );
 

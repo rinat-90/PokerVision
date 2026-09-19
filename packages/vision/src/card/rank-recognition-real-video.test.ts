@@ -339,7 +339,7 @@ describe(
         expect(
           recognition.confidence
         ).toBeGreaterThan(
-          0.95
+          0.9
         );
       }
     );

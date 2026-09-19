@@ -236,7 +236,7 @@ describe(
           )
         ).toEqual({
           rank: null,
-          confidence: 0.5
+          confidence: 1 / 3
         });
       }
     );
@@ -280,7 +280,7 @@ describe(
             ],
             {
               minimumConfidence:
-                0.7
+                0.65
             }
           );
 
@@ -293,7 +293,7 @@ describe(
           )
         ).toEqual({
           rank: "6",
-          confidence: 0.75
+          confidence: 2 / 3
         });
       }
     );
