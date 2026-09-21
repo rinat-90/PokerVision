@@ -382,12 +382,18 @@ function orderPreflopPlayers(
           "BTN"
       );
 
+    /*
+     * Heads-up preflop:
+     *
+     * BTN is also the small blind and acts first.
+     * BB acts second.
+     */
     return [
-      ...(bigBlind !== undefined
-        ? [bigBlind]
-        : []),
       ...(button !== undefined
         ? [button]
+        : []),
+      ...(bigBlind !== undefined
+        ? [bigBlind]
         : [])
     ];
   }
@@ -423,7 +429,8 @@ function orderPostflopPlayers(
    * Heads-up:
    *
    * BTN is also the small blind.
-   * Therefore BTN acts first postflop.
+   * Therefore BB acts first postflop
+   * and BTN acts second.
    *
    * Important:
    * We cannot use players.length === 2 here.
@@ -455,8 +462,8 @@ function orderPostflopPlayers(
     bigBlind !== undefined
   ) {
     return [
-      button,
-      bigBlind
+      bigBlind,
+      button
     ];
   }
 

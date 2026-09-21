@@ -421,7 +421,7 @@ describe(
         );
 
         it(
-          "starts with BB in heads-up preflop",
+          "starts with BTN in heads-up preflop",
           () => {
             const players = [
               createPlayer(
@@ -439,7 +439,7 @@ describe(
                 players,
                 [],
                 "preflop",
-                1,
+                2,
                 {
                   btn: 1,
                   bb: 2
@@ -448,7 +448,61 @@ describe(
 
             expect(
               result.currentPlayerId
+            ).toBe("btn");
+
+            expect(
+              result.playersToAct
+            ).toEqual([
+              "btn",
+              "bb"
+            ]);
+
+            expect(
+              result.bettingRoundComplete
+            ).toBe(false);
+          }
+        );
+
+        it(
+          "starts with BB in heads-up postflop",
+          () => {
+            const players = [
+              createPlayer(
+                "btn",
+                "BTN"
+              ),
+              createPlayer(
+                "bb",
+                "BB"
+              )
+            ];
+
+            const result =
+              reconstructBettingState(
+                players,
+                [],
+                "flop",
+                0,
+                {
+                  btn: 0,
+                  bb: 0
+                }
+              );
+
+            expect(
+              result.currentPlayerId
             ).toBe("bb");
+
+            expect(
+              result.playersToAct
+            ).toEqual([
+              "bb",
+              "btn"
+            ]);
+
+            expect(
+              result.bettingRoundComplete
+            ).toBe(false);
           }
         );
 

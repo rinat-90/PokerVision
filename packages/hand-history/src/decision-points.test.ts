@@ -220,7 +220,7 @@ describe("findDecisionPoints", () => {
     expect(result[0]?.action.type).toBe("call");
   });
 
-  it("ignores an action when the player is not expected to act", () => {
+  it("ignores actions when the requested player is not expected to act", () => {
     const hand: HandHistory = {
       id: "invalid-order-hand",
       gameFormat: "cash",
@@ -281,7 +281,7 @@ describe("findDecisionPoints", () => {
       findDecisionPoints(
         hand,
         {
-          playerId: "hero"
+          playerId: "villain"
         }
       );
 

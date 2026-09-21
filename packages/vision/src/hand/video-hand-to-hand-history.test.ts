@@ -5,6 +5,7 @@ import {
 } from "vitest";
 
 import {
+  findDecisionPoints,
   replayHandToAction,
   validateHandHistory
 } from "@poker-vision/hand-history";
@@ -84,6 +85,13 @@ describe(
               type: "check",
               amount: null,
               timestampSeconds: 13
+            },
+            {
+              seatIndex: 1,
+              street: "flop",
+              type: "check",
+              amount: null,
+              timestampSeconds: 21
             },
             {
               seatIndex: 0,
@@ -220,6 +228,13 @@ describe(
           ],
           actions: [
             {
+              playerId: "villain",
+              type: "check",
+              amount: 0,
+              amountType: "total",
+              street: "flop"
+            },
+            {
               playerId: "hero",
               type: "bet",
               amount: 200,
@@ -313,6 +328,65 @@ describe(
           amount: 0,
           street: "preflop"
         });
+
+        const heroDecisionPoints =
+          findDecisionPoints(
+            result,
+            {
+              playerId: "hero"
+            }
+          );
+
+        expect(
+          heroDecisionPoints
+        ).toEqual([
+          {
+            actionIndex: 0,
+
+            playerId:
+              "hero",
+
+            street:
+              "preflop",
+
+            action: {
+              playerId:
+                "hero",
+
+              type:
+                "call",
+
+              amount:
+                100,
+
+              street:
+                "preflop"
+            }
+          },
+          {
+            actionIndex: 3,
+
+            playerId:
+              "hero",
+
+            street:
+              "flop",
+
+            action: {
+              playerId:
+                "hero",
+
+              type:
+                "bet",
+
+              amount:
+                200,
+
+              street:
+                "flop"
+            }
+          }
+        ]);
       }
     );
 
