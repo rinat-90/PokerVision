@@ -1,17 +1,29 @@
-import type {
-  AnalysisReport,
-  AnalysisReportDecision
-} from "@poker-vision/hand-history";
-
-import {
-  sampleReport
-} from "./sample-report";
-
 import {
   useState
 } from "react";
 
+import type {
+  Card
+} from "@poker-vision/poker-engine";
+
+import type {
+  HandReview,
+  HandReviewDecision,
+  HandReviewPlayer
+} from "./model/hand-review";
+
+import {
+  sampleHandReview
+} from "./sample-hand-review";
+
 import "./App.css";
+
+const suitSymbols = {
+  clubs: "♣",
+  diamonds: "♦",
+  hearts: "♥",
+  spades: "♠"
+} as const;
 
 function formatAction(
   action: string
@@ -29,6 +41,15 @@ function formatStreet(
     street.charAt(0).toUpperCase() +
     street.slice(1)
   );
+}
+
+function formatGameFormat(
+  gameFormat: string
+): string {
+  return gameFormat
+    .split("_")
+    .map(formatAction)
+    .join(" ");
 }
 
 function formatPercentage(
@@ -51,10 +72,84 @@ function formatNumber(
   return value.toFixed(2);
 }
 
+function formatCard(
+  card: Card
+): string {
+  return `${card.rank}${suitSymbols[card.suit]}`;
+}
+
+function CardView({
+                    card
+                  }: {
+  card: Card;
+}) {
+  const isRed =
+    card.suit === "hearts" ||
+    card.suit === "diamonds";
+
+  return (
+    <span
+      className={
+        isRed
+          ? "card card-red"
+          : "card"
+      }
+    >
+      {formatCard(card)}
+    </span>
+  );
+}
+
+function PlayerView({
+                      player,
+                      placement,
+                      showCards
+                    }: {
+  player: HandReviewPlayer;
+  placement: "top" | "bottom";
+  showCards: boolean;
+}) {
+  return (
+    <div
+      className={
+        placement === "top"
+          ? "player player-top"
+          : "player player-bottom"
+      }
+    >
+      {showCards &&
+      player.holeCards !== undefined ? (
+        <div className="cards">
+          {player.holeCards.map(
+            (card, index) => (
+              <CardView
+                key={`${card.rank}-${card.suit}-${index}`}
+                card={card}
+              />
+            )
+          )}
+        </div>
+      ) : null}
+
+      <span className="player-name">
+        {player.name}
+      </span>
+
+      <strong>
+        {player.startingStack.toLocaleString()}
+      </strong>
+
+      <span className="position">
+        {player.position}
+      </span>
+    </div>
+  );
+}
+
 function DecisionDetails({
                            decision
                          }: {
-  decision: AnalysisReportDecision;
+  decision: HandReviewDecision;
 }) {
   return (
     <section className="panel analysis-panel">
@@ -183,9 +278,9 @@ function DecisionDetails({
 }
 
 function ReviewApp({
-                     report
+                     review
                    }: {
-  report: AnalysisReport;
+  review: HandReview;
 }) {
   const [
     activeDecisionIndex,
@@ -193,9 +288,31 @@ function ReviewApp({
   ] = useState(0);
 
   const activeDecision =
-    report.decisions[
+    review.decisions[
       activeDecisionIndex
       ];
+
+  const hero =
+    review.players.find(
+      player =>
+        player.holeCards !== undefined
+    ) ??
+    review.players[0];
+
+  const opponent =
+    review.players.find(
+      player =>
+        player.id !== hero?.id
+    );
+
+  const activeStreet =
+    activeDecision !== undefined
+      ? review.streets.find(
+        street =>
+          street.street ===
+          activeDecision.street
+      )
+      : undefined;
 
   return (
     <div className="app">
@@ -218,7 +335,10 @@ function ReviewApp({
 
         <div className="topbar-actions">
           <span className="status">
-            {report.summary.analyzedDecisionPoints}{" "}
+            {
+              review.summary
+                .analyzedDecisionPoints
+            }{" "}
             analyzed
           </span>
 
@@ -247,31 +367,31 @@ function ReviewApp({
           >
             <div className="hand-item-top">
               <strong>
-                {report.handId}
+                {review.id}
               </strong>
 
               <span>
-                Review
+                {formatGameFormat(
+                  review.gameFormat
+                )}
               </span>
             </div>
 
             <div className="hand-item-meta">
-              {
-                report.summary
-                  .totalDecisionPoints
-              }{" "}
-              decision
-              {report.summary.totalDecisionPoints === 1
-                ? ""
-                : "s"}
+              {hero !== undefined
+                ? `${hero.name} · ${hero.position}`
+                : "Unknown hero"}
             </div>
 
             <div className="hand-item-result">
               {
-                report.summary
-                  .analyzedDecisionPoints
+                review.summary
+                  .totalDecisionPoints
               }{" "}
-              analyzed
+              decision
+              {review.summary.totalDecisionPoints === 1
+                ? ""
+                : "s"}
             </div>
           </button>
         </aside>
@@ -280,7 +400,7 @@ function ReviewApp({
           <div className="review-header">
             <div>
               <div className="eyebrow">
-                {report.handId}
+                {review.id}
               </div>
 
               <h1>
@@ -295,35 +415,30 @@ function ReviewApp({
 
             <div className="hand-summary">
               <div>
-                <span>Decisions</span>
+                <span>Game</span>
 
                 <strong>
-                  {
-                    report.summary
-                      .totalDecisionPoints
-                  }
+                  {formatGameFormat(
+                    review.gameFormat
+                  )}
                 </strong>
               </div>
 
               <div>
-                <span>Analyzed</span>
+                <span>Blinds</span>
 
                 <strong>
-                  {
-                    report.summary
-                      .analyzedDecisionPoints
-                  }
+                  {review.blinds.smallBlind}
+                  {" / "}
+                  {review.blinds.bigBlind}
                 </strong>
               </div>
 
               <div>
-                <span>Skipped</span>
+                <span>Hero</span>
 
                 <strong>
-                  {
-                    report.summary
-                      .skippedDecisionPoints
-                  }
+                  {hero?.position ?? "—"}
                 </strong>
               </div>
             </div>
@@ -352,44 +467,45 @@ function ReviewApp({
                   </div>
 
                   <div className="poker-table">
-                    <div className="player player-top">
-                      <span className="player-name">
-                        Villain
-                      </span>
-
-                      <strong>
-                        —
-                      </strong>
-
-                      <span className="position">
-                        Opponent
-                      </span>
-                    </div>
+                    {opponent !== undefined ? (
+                      <PlayerView
+                        player={opponent}
+                        placement="top"
+                        showCards={false}
+                      />
+                    ) : null}
 
                     <div className="felt">
-                      <div className="board-placeholder">
-                        Board data will be
-                        connected next
-                      </div>
+                      {activeStreet !== undefined &&
+                      activeStreet.board.length > 0 ? (
+                        <div className="board">
+                          {activeStreet.board.map(
+                            (card, index) => (
+                              <CardView
+                                key={`${card.rank}-${card.suit}-${index}`}
+                                card={card}
+                              />
+                            )
+                          )}
+                        </div>
+                      ) : (
+                        <div className="board-placeholder">
+                          Preflop
+                        </div>
+                      )}
 
                       <div className="pot-chip">
                         {activeDecision.pot}
                       </div>
                     </div>
 
-                    <div className="player player-bottom">
-                      <span className="player-name">
-                        Hero
-                      </span>
-
-                      <strong>
-                        —
-                      </strong>
-
-                      <span className="position">
-                        Hero
-                      </span>
-                    </div>
+                    {hero !== undefined ? (
+                      <PlayerView
+                        player={hero}
+                        placement="bottom"
+                        showCards
+                      />
+                    ) : null}
                   </div>
                 </section>
 
@@ -414,7 +530,7 @@ function ReviewApp({
                 </div>
 
                 <div className="timeline">
-                  {report.decisions.map(
+                  {review.decisions.map(
                     (
                       decision,
                       index
@@ -426,20 +542,24 @@ function ReviewApp({
                             : "timeline-action"
                         }
                         type="button"
-                        key={decision.actionIndex}
+                        key={
+                          decision.actionIndex
+                        }
                         onClick={() =>
-                          setActiveDecisionIndex(index)
+                          setActiveDecisionIndex(
+                            index
+                          )
                         }
                       >
-      <span className="timeline-index">
-        {index + 1}
-      </span>
+                        <span className="timeline-index">
+                          {index + 1}
+                        </span>
 
                         <span className="timeline-player">
-        {formatStreet(
-          decision.street
-        )}
-      </span>
+                          {formatStreet(
+                            decision.street
+                          )}
+                        </span>
 
                         <strong>
                           {formatAction(
@@ -448,8 +568,8 @@ function ReviewApp({
                         </strong>
 
                         <span className="timeline-amount">
-        {decision.amount}
-      </span>
+                          {decision.amount}
+                        </span>
                       </button>
                     )
                   )}
@@ -470,7 +590,7 @@ function ReviewApp({
 function App() {
   return (
     <ReviewApp
-      report={sampleReport}
+      review={sampleHandReview}
     />
   );
 }
