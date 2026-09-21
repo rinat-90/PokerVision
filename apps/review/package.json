@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@poker-vision/hand-history": "workspace:*",
+    "@poker-vision/hand-review": "workspace:*",
     "@poker-vision/poker-engine": "workspace:*",
     "@poker-vision/vision": "workspace:*",
     "react": "^19.2.8",

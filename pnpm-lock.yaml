@@ -26,6 +26,9 @@ importers:
       '@poker-vision/hand-history':
         specifier: workspace:*
         version: link:../../packages/hand-history
+      '@poker-vision/hand-review':
+        specifier: workspace:*
+        version: link:../../packages/hand-review
       '@poker-vision/poker-engine':
         specifier: workspace:*
         version: link:../../packages/poker-engine
@@ -45,6 +48,9 @@ importers:
       '@poker-vision/hand-history':
         specifier: workspace:*
         version: link:../../packages/hand-history
+      '@poker-vision/hand-review':
+        specifier: workspace:*
+        version: link:../../packages/hand-review
       '@poker-vision/poker-engine':
         specifier: workspace:*
         version: link:../../packages/poker-engine
@@ -116,6 +122,15 @@ importers:
       tsx:
         specifier: ^4.23.13
         version: 4.23.13
+
+  packages/hand-review:
+    dependencies:
+      '@poker-vision/hand-history':
+        specifier: workspace:*
+        version: link:../hand-history
+      '@poker-vision/poker-engine':
+        specifier: workspace:*
+        version: link:../poker-engine
 
   packages/poker-engine: {}
 

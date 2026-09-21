@@ -4,7 +4,7 @@ import {
 
 import type {
   HandReview
-} from "./model/hand-review";
+} from "@poker-vision/hand-review";
 
 import {
   ActionTimeline
@@ -28,10 +28,12 @@ import {
 
 interface ReviewAppProps {
   review: HandReview;
+  onOpenHand: () => void;
 }
 
 export function ReviewApp({
-                            review
+                            review,
+                            onOpenHand
                           }: ReviewAppProps) {
   const allActions =
     review.streets.flatMap(
@@ -115,6 +117,7 @@ export function ReviewApp({
           <button
             className="primary-button"
             type="button"
+            onClick={onOpenHand}
           >
             Open hand
           </button>

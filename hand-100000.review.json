@@ -1,0 +1,2510 @@
+{
+  "id": "100000",
+  "gameFormat": "cash",
+  "blinds": {
+    "smallBlind": 50,
+    "bigBlind": 100,
+    "ante": 0
+  },
+  "players": [
+    {
+      "id": "MrBlue",
+      "name": "MrBlue",
+      "position": "SB",
+      "startingStack": 10000,
+      "holeCards": [
+        {
+          "rank": "T",
+          "suit": "clubs"
+        },
+        {
+          "rank": "Q",
+          "suit": "clubs"
+        }
+      ]
+    },
+    {
+      "id": "MrBlonde",
+      "name": "MrBlonde",
+      "position": "BB",
+      "startingStack": 10000,
+      "holeCards": [
+        {
+          "rank": "8",
+          "suit": "spades"
+        },
+        {
+          "rank": "4",
+          "suit": "clubs"
+        }
+      ]
+    },
+    {
+      "id": "MrWhite",
+      "name": "MrWhite",
+      "position": "UTG",
+      "startingStack": 10000,
+      "holeCards": [
+        {
+          "rank": "9",
+          "suit": "clubs"
+        },
+        {
+          "rank": "3",
+          "suit": "diamonds"
+        }
+      ]
+    },
+    {
+      "id": "MrPink",
+      "name": "MrPink",
+      "position": "UTG+1",
+      "startingStack": 10000,
+      "holeCards": [
+        {
+          "rank": "A",
+          "suit": "hearts"
+        },
+        {
+          "rank": "4",
+          "suit": "hearts"
+        }
+      ]
+    },
+    {
+      "id": "MrBrown",
+      "name": "MrBrown",
+      "position": "MP",
+      "startingStack": 10000,
+      "holeCards": [
+        {
+          "rank": "T",
+          "suit": "hearts"
+        },
+        {
+          "rank": "5",
+          "suit": "spades"
+        }
+      ]
+    },
+    {
+      "id": "Pluribus",
+      "name": "Pluribus",
+      "position": "BTN",
+      "startingStack": 10000,
+      "holeCards": [
+        {
+          "rank": "6",
+          "suit": "clubs"
+        },
+        {
+          "rank": "7",
+          "suit": "spades"
+        }
+      ]
+    }
+  ],
+  "streets": [
+    {
+      "street": "preflop",
+      "board": [],
+      "actions": [
+        {
+          "actionIndex": 0,
+          "playerId": "MrWhite",
+          "street": "preflop",
+          "type": "fold",
+          "amount": 0,
+          "state": {
+            "street": "preflop",
+            "board": [],
+            "players": [
+              {
+                "id": "MrBlue",
+                "name": "MrBlue",
+                "position": "SB",
+                "stack": 9950,
+                "status": "active",
+                "holeCards": [
+                  {
+                    "rank": "T",
+                    "suit": "clubs"
+                  },
+                  {
+                    "rank": "Q",
+                    "suit": "clubs"
+                  }
+                ]
+              },
+              {
+                "id": "MrBlonde",
+                "name": "MrBlonde",
+                "position": "BB",
+                "stack": 9900,
+                "status": "active",
+                "holeCards": [
+                  {
+                    "rank": "8",
+                    "suit": "spades"
+                  },
+                  {
+                    "rank": "4",
+                    "suit": "clubs"
+                  }
+                ]
+              },
+              {
+                "id": "MrWhite",
+                "name": "MrWhite",
+                "position": "UTG",
+                "stack": 10000,
+                "status": "active",
+                "holeCards": [
+                  {
+                    "rank": "9",
+                    "suit": "clubs"
+                  },
+                  {
+                    "rank": "3",
+                    "suit": "diamonds"
+                  }
+                ]
+              },
+              {
+                "id": "MrPink",
+                "name": "MrPink",
+                "position": "UTG+1",
+                "stack": 10000,
+                "status": "active",
+                "holeCards": [
+                  {
+                    "rank": "A",
+                    "suit": "hearts"
+                  },
+                  {
+                    "rank": "4",
+                    "suit": "hearts"
+                  }
+                ]
+              },
+              {
+                "id": "MrBrown",
+                "name": "MrBrown",
+                "position": "MP",
+                "stack": 10000,
+                "status": "active",
+                "holeCards": [
+                  {
+                    "rank": "T",
+                    "suit": "hearts"
+                  },
+                  {
+                    "rank": "5",
+                    "suit": "spades"
+                  }
+                ]
+              },
+              {
+                "id": "Pluribus",
+                "name": "Pluribus",
+                "position": "BTN",
+                "stack": 10000,
+                "status": "active",
+                "holeCards": [
+                  {
+                    "rank": "6",
+                    "suit": "clubs"
+                  },
+                  {
+                    "rank": "7",
+                    "suit": "spades"
+                  }
+                ]
+              }
+            ],
+            "pot": 150,
+            "currentBet": 100,
+            "minimumRaise": 100,
+            "playerContributions": {
+              "MrBlue": 50,
+              "MrBlonde": 100,
+              "MrWhite": 0,
+              "MrPink": 0,
+              "MrBrown": 0,
+              "Pluribus": 0
+            },
+            "totalContributions": {
+              "MrBlue": 50,
+              "MrBlonde": 100,
+              "MrWhite": 0,
+              "MrPink": 0,
+              "MrBrown": 0,
+              "Pluribus": 0
+            }
+          }
+        },
+        {
+          "actionIndex": 1,
+          "playerId": "MrPink",
+          "street": "preflop",
+          "type": "raise",
+          "amount": 210,
+          "state": {
+            "street": "preflop",
+            "board": [],
+            "players": [
+              {
+                "id": "MrBlue",
+                "name": "MrBlue",
+                "position": "SB",
+                "stack": 9950,
+                "status": "active",
+                "holeCards": [
+                  {
+                    "rank": "T",
+                    "suit": "clubs"
+                  },
+                  {
+                    "rank": "Q",
+                    "suit": "clubs"
+                  }
+                ]
+              },
+              {
+                "id": "MrBlonde",
+                "name": "MrBlonde",
+                "position": "BB",
+                "stack": 9900,
+                "status": "active",
+                "holeCards": [
+                  {
+                    "rank": "8",
+                    "suit": "spades"
+                  },
+                  {
+                    "rank": "4",
+                    "suit": "clubs"
+                  }
+                ]
+              },
+              {
+                "id": "MrWhite",
+                "name": "MrWhite",
+                "position": "UTG",
+                "stack": 10000,
+                "status": "folded",
+                "holeCards": [
+                  {
+                    "rank": "9",
+                    "suit": "clubs"
+                  },
+                  {
+                    "rank": "3",
+                    "suit": "diamonds"
+                  }
+                ]
+              },
+              {
+                "id": "MrPink",
+                "name": "MrPink",
+                "position": "UTG+1",
+                "stack": 10000,
+                "status": "active",
+                "holeCards": [
+                  {
+                    "rank": "A",
+                    "suit": "hearts"
+                  },
+                  {
+                    "rank": "4",
+                    "suit": "hearts"
+                  }
+                ]
+              },
+              {
+                "id": "MrBrown",
+                "name": "MrBrown",
+                "position": "MP",
+                "stack": 10000,
+                "status": "active",
+                "holeCards": [
+                  {
+                    "rank": "T",
+                    "suit": "hearts"
+                  },
+                  {
+                    "rank": "5",
+                    "suit": "spades"
+                  }
+                ]
+              },
+              {
+                "id": "Pluribus",
+                "name": "Pluribus",
+                "position": "BTN",
+                "stack": 10000,
+                "status": "active",
+                "holeCards": [
+                  {
+                    "rank": "6",
+                    "suit": "clubs"
+                  },
+                  {
+                    "rank": "7",
+                    "suit": "spades"
+                  }
+                ]
+              }
+            ],
+            "pot": 150,
+            "currentBet": 100,
+            "minimumRaise": 100,
+            "playerContributions": {
+              "MrBlue": 50,
+              "MrBlonde": 100,
+              "MrWhite": 0,
+              "MrPink": 0,
+              "MrBrown": 0,
+              "Pluribus": 0
+            },
+            "totalContributions": {
+              "MrBlue": 50,
+              "MrBlonde": 100,
+              "MrWhite": 0,
+              "MrPink": 0,
+              "MrBrown": 0,
+              "Pluribus": 0
+            }
+          }
+        },
+        {
+          "actionIndex": 2,
+          "playerId": "MrBrown",
+          "street": "preflop",
+          "type": "fold",
+          "amount": 0,
+          "state": {
+            "street": "preflop",
+            "board": [],
+            "players": [
+              {
+                "id": "MrBlue",
+                "name": "MrBlue",
+                "position": "SB",
+                "stack": 9950,
+                "status": "active",
+                "holeCards": [
+                  {
+                    "rank": "T",
+                    "suit": "clubs"
+                  },
+                  {
+                    "rank": "Q",
+                    "suit": "clubs"
+                  }
+                ]
+              },
+              {
+                "id": "MrBlonde",
+                "name": "MrBlonde",
+                "position": "BB",
+                "stack": 9900,
+                "status": "active",
+                "holeCards": [
+                  {
+                    "rank": "8",
+                    "suit": "spades"
+                  },
+                  {
+                    "rank": "4",
+                    "suit": "clubs"
+                  }
+                ]
+              },
+              {
+                "id": "MrWhite",
+                "name": "MrWhite",
+                "position": "UTG",
+                "stack": 10000,
+                "status": "folded",
+                "holeCards": [
+                  {
+                    "rank": "9",
+                    "suit": "clubs"
+                  },
+                  {
+                    "rank": "3",
+                    "suit": "diamonds"
+                  }
+                ]
+              },
+              {
+                "id": "MrPink",
+                "name": "MrPink",
+                "position": "UTG+1",
+                "stack": 9790,
+                "status": "active",
+                "holeCards": [
+                  {
+                    "rank": "A",
+                    "suit": "hearts"
+                  },
+                  {
+                    "rank": "4",
+                    "suit": "hearts"
+                  }
+                ]
+              },
+              {
+                "id": "MrBrown",
+                "name": "MrBrown",
+                "position": "MP",
+                "stack": 10000,
+                "status": "active",
+                "holeCards": [
+                  {
+                    "rank": "T",
+                    "suit": "hearts"
+                  },
+                  {
+                    "rank": "5",
+                    "suit": "spades"
+                  }
+                ]
+              },
+              {
+                "id": "Pluribus",
+                "name": "Pluribus",
+                "position": "BTN",
+                "stack": 10000,
+                "status": "active",
+                "holeCards": [
+                  {
+                    "rank": "6",
+                    "suit": "clubs"
+                  },
+                  {
+                    "rank": "7",
+                    "suit": "spades"
+                  }
+                ]
+              }
+            ],
+            "pot": 360,
+            "currentBet": 210,
+            "minimumRaise": 100,
+            "playerContributions": {
+              "MrBlue": 50,
+              "MrBlonde": 100,
+              "MrWhite": 0,
+              "MrPink": 210,
+              "MrBrown": 0,
+              "Pluribus": 0
+            },
+            "totalContributions": {
+              "MrBlue": 50,
+              "MrBlonde": 100,
+              "MrWhite": 0,
+              "MrPink": 210,
+              "MrBrown": 0,
+              "Pluribus": 0
+            }
+          }
+        },
+        {
+          "actionIndex": 3,
+          "playerId": "Pluribus",
+          "street": "preflop",
+          "type": "fold",
+          "amount": 0,
+          "state": {
+            "street": "preflop",
+            "board": [],
+            "players": [
+              {
+                "id": "MrBlue",
+                "name": "MrBlue",
+                "position": "SB",
+                "stack": 9950,
+                "status": "active",
+                "holeCards": [
+                  {
+                    "rank": "T",
+                    "suit": "clubs"
+                  },
+                  {
+                    "rank": "Q",
+                    "suit": "clubs"
+                  }
+                ]
+              },
+              {
+                "id": "MrBlonde",
+                "name": "MrBlonde",
+                "position": "BB",
+                "stack": 9900,
+                "status": "active",
+                "holeCards": [
+                  {
+                    "rank": "8",
+                    "suit": "spades"
+                  },
+                  {
+                    "rank": "4",
+                    "suit": "clubs"
+                  }
+                ]
+              },
+              {
+                "id": "MrWhite",
+                "name": "MrWhite",
+                "position": "UTG",
+                "stack": 10000,
+                "status": "folded",
+                "holeCards": [
+                  {
+                    "rank": "9",
+                    "suit": "clubs"
+                  },
+                  {
+                    "rank": "3",
+                    "suit": "diamonds"
+                  }
+                ]
+              },
+              {
+                "id": "MrPink",
+                "name": "MrPink",
+                "position": "UTG+1",
+                "stack": 9790,
+                "status": "active",
+                "holeCards": [
+                  {
+                    "rank": "A",
+                    "suit": "hearts"
+                  },
+                  {
+                    "rank": "4",
+                    "suit": "hearts"
+                  }
+                ]
+              },
+              {
+                "id": "MrBrown",
+                "name": "MrBrown",
+                "position": "MP",
+                "stack": 10000,
+                "status": "folded",
+                "holeCards": [
+                  {
+                    "rank": "T",
+                    "suit": "hearts"
+                  },
+                  {
+                    "rank": "5",
+                    "suit": "spades"
+                  }
+                ]
+              },
+              {
+                "id": "Pluribus",
+                "name": "Pluribus",
+                "position": "BTN",
+                "stack": 10000,
+                "status": "active",
+                "holeCards": [
+                  {
+                    "rank": "6",
+                    "suit": "clubs"
+                  },
+                  {
+                    "rank": "7",
+                    "suit": "spades"
+                  }
+                ]
+              }
+            ],
+            "pot": 360,
+            "currentBet": 210,
+            "minimumRaise": 100,
+            "playerContributions": {
+              "MrBlue": 50,
+              "MrBlonde": 100,
+              "MrWhite": 0,
+              "MrPink": 210,
+              "MrBrown": 0,
+              "Pluribus": 0
+            },
+            "totalContributions": {
+              "MrBlue": 50,
+              "MrBlonde": 100,
+              "MrWhite": 0,
+              "MrPink": 210,
+              "MrBrown": 0,
+              "Pluribus": 0
+            }
+          }
+        },
+        {
+          "actionIndex": 4,
+          "playerId": "MrBlue",
+          "street": "preflop",
+          "type": "call",
+          "amount": 160,
+          "state": {
+            "street": "preflop",
+            "board": [],
+            "players": [
+              {
+                "id": "MrBlue",
+                "name": "MrBlue",
+                "position": "SB",
+                "stack": 9950,
+                "status": "active",
+                "holeCards": [
+                  {
+                    "rank": "T",
+                    "suit": "clubs"
+                  },
+                  {
+                    "rank": "Q",
+                    "suit": "clubs"
+                  }
+                ]
+              },
+              {
+                "id": "MrBlonde",
+                "name": "MrBlonde",
+                "position": "BB",
+                "stack": 9900,
+                "status": "active",
+                "holeCards": [
+                  {
+                    "rank": "8",
+                    "suit": "spades"
+                  },
+                  {
+                    "rank": "4",
+                    "suit": "clubs"
+                  }
+                ]
+              },
+              {
+                "id": "MrWhite",
+                "name": "MrWhite",
+                "position": "UTG",
+                "stack": 10000,
+                "status": "folded",
+                "holeCards": [
+                  {
+                    "rank": "9",
+                    "suit": "clubs"
+                  },
+                  {
+                    "rank": "3",
+                    "suit": "diamonds"
+                  }
+                ]
+              },
+              {
+                "id": "MrPink",
+                "name": "MrPink",
+                "position": "UTG+1",
+                "stack": 9790,
+                "status": "active",
+                "holeCards": [
+                  {
+                    "rank": "A",
+                    "suit": "hearts"
+                  },
+                  {
+                    "rank": "4",
+                    "suit": "hearts"
+                  }
+                ]
+              },
+              {
+                "id": "MrBrown",
+                "name": "MrBrown",
+                "position": "MP",
+                "stack": 10000,
+                "status": "folded",
+                "holeCards": [
+                  {
+                    "rank": "T",
+                    "suit": "hearts"
+                  },
+                  {
+                    "rank": "5",
+                    "suit": "spades"
+                  }
+                ]
+              },
+              {
+                "id": "Pluribus",
+                "name": "Pluribus",
+                "position": "BTN",
+                "stack": 10000,
+                "status": "folded",
+                "holeCards": [
+                  {
+                    "rank": "6",
+                    "suit": "clubs"
+                  },
+                  {
+                    "rank": "7",
+                    "suit": "spades"
+                  }
+                ]
+              }
+            ],
+            "pot": 360,
+            "currentBet": 210,
+            "minimumRaise": 100,
+            "playerContributions": {
+              "MrBlue": 50,
+              "MrBlonde": 100,
+              "MrWhite": 0,
+              "MrPink": 210,
+              "MrBrown": 0,
+              "Pluribus": 0
+            },
+            "totalContributions": {
+              "MrBlue": 50,
+              "MrBlonde": 100,
+              "MrWhite": 0,
+              "MrPink": 210,
+              "MrBrown": 0,
+              "Pluribus": 0
+            }
+          }
+        },
+        {
+          "actionIndex": 5,
+          "playerId": "MrBlonde",
+          "street": "preflop",
+          "type": "fold",
+          "amount": 0,
+          "state": {
+            "street": "preflop",
+            "board": [],
+            "players": [
+              {
+                "id": "MrBlue",
+                "name": "MrBlue",
+                "position": "SB",
+                "stack": 9790,
+                "status": "active",
+                "holeCards": [
+                  {
+                    "rank": "T",
+                    "suit": "clubs"
+                  },
+                  {
+                    "rank": "Q",
+                    "suit": "clubs"
+                  }
+                ]
+              },
+              {
+                "id": "MrBlonde",
+                "name": "MrBlonde",
+                "position": "BB",
+                "stack": 9900,
+                "status": "active",
+                "holeCards": [
+                  {
+                    "rank": "8",
+                    "suit": "spades"
+                  },
+                  {
+                    "rank": "4",
+                    "suit": "clubs"
+                  }
+                ]
+              },
+              {
+                "id": "MrWhite",
+                "name": "MrWhite",
+                "position": "UTG",
+                "stack": 10000,
+                "status": "folded",
+                "holeCards": [
+                  {
+                    "rank": "9",
+                    "suit": "clubs"
+                  },
+                  {
+                    "rank": "3",
+                    "suit": "diamonds"
+                  }
+                ]
+              },
+              {
+                "id": "MrPink",
+                "name": "MrPink",
+                "position": "UTG+1",
+                "stack": 9790,
+                "status": "active",
+                "holeCards": [
+                  {
+                    "rank": "A",
+                    "suit": "hearts"
+                  },
+                  {
+                    "rank": "4",
+                    "suit": "hearts"
+                  }
+                ]
+              },
+              {
+                "id": "MrBrown",
+                "name": "MrBrown",
+                "position": "MP",
+                "stack": 10000,
+                "status": "folded",
+                "holeCards": [
+                  {
+                    "rank": "T",
+                    "suit": "hearts"
+                  },
+                  {
+                    "rank": "5",
+                    "suit": "spades"
+                  }
+                ]
+              },
+              {
+                "id": "Pluribus",
+                "name": "Pluribus",
+                "position": "BTN",
+                "stack": 10000,
+                "status": "folded",
+                "holeCards": [
+                  {
+                    "rank": "6",
+                    "suit": "clubs"
+                  },
+                  {
+                    "rank": "7",
+                    "suit": "spades"
+                  }
+                ]
+              }
+            ],
+            "pot": 520,
+            "currentBet": 210,
+            "minimumRaise": 100,
+            "playerContributions": {
+              "MrBlue": 210,
+              "MrBlonde": 100,
+              "MrWhite": 0,
+              "MrPink": 210,
+              "MrBrown": 0,
+              "Pluribus": 0
+            },
+            "totalContributions": {
+              "MrBlue": 210,
+              "MrBlonde": 100,
+              "MrWhite": 0,
+              "MrPink": 210,
+              "MrBrown": 0,
+              "Pluribus": 0
+            }
+          }
+        }
+      ]
+    },
+    {
+      "street": "flop",
+      "board": [
+        {
+          "rank": "7",
+          "suit": "diamonds"
+        },
+        {
+          "rank": "5",
+          "suit": "hearts"
+        },
+        {
+          "rank": "9",
+          "suit": "diamonds"
+        }
+      ],
+      "actions": [
+        {
+          "actionIndex": 6,
+          "playerId": "MrBlue",
+          "street": "flop",
+          "type": "check",
+          "amount": 0,
+          "state": {
+            "street": "flop",
+            "board": [
+              {
+                "rank": "7",
+                "suit": "diamonds"
+              },
+              {
+                "rank": "5",
+                "suit": "hearts"
+              },
+              {
+                "rank": "9",
+                "suit": "diamonds"
+              }
+            ],
+            "players": [
+              {
+                "id": "MrBlue",
+                "name": "MrBlue",
+                "position": "SB",
+                "stack": 9790,
+                "status": "active",
+                "holeCards": [
+                  {
+                    "rank": "T",
+                    "suit": "clubs"
+                  },
+                  {
+                    "rank": "Q",
+                    "suit": "clubs"
+                  }
+                ]
+              },
+              {
+                "id": "MrBlonde",
+                "name": "MrBlonde",
+                "position": "BB",
+                "stack": 9900,
+                "status": "folded",
+                "holeCards": [
+                  {
+                    "rank": "8",
+                    "suit": "spades"
+                  },
+                  {
+                    "rank": "4",
+                    "suit": "clubs"
+                  }
+                ]
+              },
+              {
+                "id": "MrWhite",
+                "name": "MrWhite",
+                "position": "UTG",
+                "stack": 10000,
+                "status": "folded",
+                "holeCards": [
+                  {
+                    "rank": "9",
+                    "suit": "clubs"
+                  },
+                  {
+                    "rank": "3",
+                    "suit": "diamonds"
+                  }
+                ]
+              },
+              {
+                "id": "MrPink",
+                "name": "MrPink",
+                "position": "UTG+1",
+                "stack": 9790,
+                "status": "active",
+                "holeCards": [
+                  {
+                    "rank": "A",
+                    "suit": "hearts"
+                  },
+                  {
+                    "rank": "4",
+                    "suit": "hearts"
+                  }
+                ]
+              },
+              {
+                "id": "MrBrown",
+                "name": "MrBrown",
+                "position": "MP",
+                "stack": 10000,
+                "status": "folded",
+                "holeCards": [
+                  {
+                    "rank": "T",
+                    "suit": "hearts"
+                  },
+                  {
+                    "rank": "5",
+                    "suit": "spades"
+                  }
+                ]
+              },
+              {
+                "id": "Pluribus",
+                "name": "Pluribus",
+                "position": "BTN",
+                "stack": 10000,
+                "status": "folded",
+                "holeCards": [
+                  {
+                    "rank": "6",
+                    "suit": "clubs"
+                  },
+                  {
+                    "rank": "7",
+                    "suit": "spades"
+                  }
+                ]
+              }
+            ],
+            "pot": 520,
+            "currentBet": 0,
+            "minimumRaise": 100,
+            "playerContributions": {
+              "MrBlue": 0,
+              "MrBlonde": 0,
+              "MrWhite": 0,
+              "MrPink": 0,
+              "MrBrown": 0,
+              "Pluribus": 0
+            },
+            "totalContributions": {
+              "MrBlue": 210,
+              "MrBlonde": 100,
+              "MrWhite": 0,
+              "MrPink": 210,
+              "MrBrown": 0,
+              "Pluribus": 0
+            }
+          }
+        },
+        {
+          "actionIndex": 7,
+          "playerId": "MrPink",
+          "street": "flop",
+          "type": "check",
+          "amount": 0,
+          "state": {
+            "street": "flop",
+            "board": [
+              {
+                "rank": "7",
+                "suit": "diamonds"
+              },
+              {
+                "rank": "5",
+                "suit": "hearts"
+              },
+              {
+                "rank": "9",
+                "suit": "diamonds"
+              }
+            ],
+            "players": [
+              {
+                "id": "MrBlue",
+                "name": "MrBlue",
+                "position": "SB",
+                "stack": 9790,
+                "status": "active",
+                "holeCards": [
+                  {
+                    "rank": "T",
+                    "suit": "clubs"
+                  },
+                  {
+                    "rank": "Q",
+                    "suit": "clubs"
+                  }
+                ]
+              },
+              {
+                "id": "MrBlonde",
+                "name": "MrBlonde",
+                "position": "BB",
+                "stack": 9900,
+                "status": "folded",
+                "holeCards": [
+                  {
+                    "rank": "8",
+                    "suit": "spades"
+                  },
+                  {
+                    "rank": "4",
+                    "suit": "clubs"
+                  }
+                ]
+              },
+              {
+                "id": "MrWhite",
+                "name": "MrWhite",
+                "position": "UTG",
+                "stack": 10000,
+                "status": "folded",
+                "holeCards": [
+                  {
+                    "rank": "9",
+                    "suit": "clubs"
+                  },
+                  {
+                    "rank": "3",
+                    "suit": "diamonds"
+                  }
+                ]
+              },
+              {
+                "id": "MrPink",
+                "name": "MrPink",
+                "position": "UTG+1",
+                "stack": 9790,
+                "status": "active",
+                "holeCards": [
+                  {
+                    "rank": "A",
+                    "suit": "hearts"
+                  },
+                  {
+                    "rank": "4",
+                    "suit": "hearts"
+                  }
+                ]
+              },
+              {
+                "id": "MrBrown",
+                "name": "MrBrown",
+                "position": "MP",
+                "stack": 10000,
+                "status": "folded",
+                "holeCards": [
+                  {
+                    "rank": "T",
+                    "suit": "hearts"
+                  },
+                  {
+                    "rank": "5",
+                    "suit": "spades"
+                  }
+                ]
+              },
+              {
+                "id": "Pluribus",
+                "name": "Pluribus",
+                "position": "BTN",
+                "stack": 10000,
+                "status": "folded",
+                "holeCards": [
+                  {
+                    "rank": "6",
+                    "suit": "clubs"
+                  },
+                  {
+                    "rank": "7",
+                    "suit": "spades"
+                  }
+                ]
+              }
+            ],
+            "pot": 520,
+            "currentBet": 0,
+            "minimumRaise": 100,
+            "playerContributions": {
+              "MrBlue": 0,
+              "MrBlonde": 0,
+              "MrWhite": 0,
+              "MrPink": 0,
+              "MrBrown": 0,
+              "Pluribus": 0
+            },
+            "totalContributions": {
+              "MrBlue": 210,
+              "MrBlonde": 100,
+              "MrWhite": 0,
+              "MrPink": 210,
+              "MrBrown": 0,
+              "Pluribus": 0
+            }
+          }
+        }
+      ]
+    },
+    {
+      "street": "turn",
+      "board": [
+        {
+          "rank": "7",
+          "suit": "diamonds"
+        },
+        {
+          "rank": "5",
+          "suit": "hearts"
+        },
+        {
+          "rank": "9",
+          "suit": "diamonds"
+        },
+        {
+          "rank": "7",
+          "suit": "clubs"
+        }
+      ],
+      "actions": [
+        {
+          "actionIndex": 8,
+          "playerId": "MrBlue",
+          "street": "turn",
+          "type": "check",
+          "amount": 0,
+          "state": {
+            "street": "turn",
+            "board": [
+              {
+                "rank": "7",
+                "suit": "diamonds"
+              },
+              {
+                "rank": "5",
+                "suit": "hearts"
+              },
+              {
+                "rank": "9",
+                "suit": "diamonds"
+              },
+              {
+                "rank": "7",
+                "suit": "clubs"
+              }
+            ],
+            "players": [
+              {
+                "id": "MrBlue",
+                "name": "MrBlue",
+                "position": "SB",
+                "stack": 9790,
+                "status": "active",
+                "holeCards": [
+                  {
+                    "rank": "T",
+                    "suit": "clubs"
+                  },
+                  {
+                    "rank": "Q",
+                    "suit": "clubs"
+                  }
+                ]
+              },
+              {
+                "id": "MrBlonde",
+                "name": "MrBlonde",
+                "position": "BB",
+                "stack": 9900,
+                "status": "folded",
+                "holeCards": [
+                  {
+                    "rank": "8",
+                    "suit": "spades"
+                  },
+                  {
+                    "rank": "4",
+                    "suit": "clubs"
+                  }
+                ]
+              },
+              {
+                "id": "MrWhite",
+                "name": "MrWhite",
+                "position": "UTG",
+                "stack": 10000,
+                "status": "folded",
+                "holeCards": [
+                  {
+                    "rank": "9",
+                    "suit": "clubs"
+                  },
+                  {
+                    "rank": "3",
+                    "suit": "diamonds"
+                  }
+                ]
+              },
+              {
+                "id": "MrPink",
+                "name": "MrPink",
+                "position": "UTG+1",
+                "stack": 9790,
+                "status": "active",
+                "holeCards": [
+                  {
+                    "rank": "A",
+                    "suit": "hearts"
+                  },
+                  {
+                    "rank": "4",
+                    "suit": "hearts"
+                  }
+                ]
+              },
+              {
+                "id": "MrBrown",
+                "name": "MrBrown",
+                "position": "MP",
+                "stack": 10000,
+                "status": "folded",
+                "holeCards": [
+                  {
+                    "rank": "T",
+                    "suit": "hearts"
+                  },
+                  {
+                    "rank": "5",
+                    "suit": "spades"
+                  }
+                ]
+              },
+              {
+                "id": "Pluribus",
+                "name": "Pluribus",
+                "position": "BTN",
+                "stack": 10000,
+                "status": "folded",
+                "holeCards": [
+                  {
+                    "rank": "6",
+                    "suit": "clubs"
+                  },
+                  {
+                    "rank": "7",
+                    "suit": "spades"
+                  }
+                ]
+              }
+            ],
+            "pot": 520,
+            "currentBet": 0,
+            "minimumRaise": 100,
+            "playerContributions": {
+              "MrBlue": 0,
+              "MrBlonde": 0,
+              "MrWhite": 0,
+              "MrPink": 0,
+              "MrBrown": 0,
+              "Pluribus": 0
+            },
+            "totalContributions": {
+              "MrBlue": 210,
+              "MrBlonde": 100,
+              "MrWhite": 0,
+              "MrPink": 210,
+              "MrBrown": 0,
+              "Pluribus": 0
+            }
+          }
+        },
+        {
+          "actionIndex": 9,
+          "playerId": "MrPink",
+          "street": "turn",
+          "type": "check",
+          "amount": 0,
+          "state": {
+            "street": "turn",
+            "board": [
+              {
+                "rank": "7",
+                "suit": "diamonds"
+              },
+              {
+                "rank": "5",
+                "suit": "hearts"
+              },
+              {
+                "rank": "9",
+                "suit": "diamonds"
+              },
+              {
+                "rank": "7",
+                "suit": "clubs"
+              }
+            ],
+            "players": [
+              {
+                "id": "MrBlue",
+                "name": "MrBlue",
+                "position": "SB",
+                "stack": 9790,
+                "status": "active",
+                "holeCards": [
+                  {
+                    "rank": "T",
+                    "suit": "clubs"
+                  },
+                  {
+                    "rank": "Q",
+                    "suit": "clubs"
+                  }
+                ]
+              },
+              {
+                "id": "MrBlonde",
+                "name": "MrBlonde",
+                "position": "BB",
+                "stack": 9900,
+                "status": "folded",
+                "holeCards": [
+                  {
+                    "rank": "8",
+                    "suit": "spades"
+                  },
+                  {
+                    "rank": "4",
+                    "suit": "clubs"
+                  }
+                ]
+              },
+              {
+                "id": "MrWhite",
+                "name": "MrWhite",
+                "position": "UTG",
+                "stack": 10000,
+                "status": "folded",
+                "holeCards": [
+                  {
+                    "rank": "9",
+                    "suit": "clubs"
+                  },
+                  {
+                    "rank": "3",
+                    "suit": "diamonds"
+                  }
+                ]
+              },
+              {
+                "id": "MrPink",
+                "name": "MrPink",
+                "position": "UTG+1",
+                "stack": 9790,
+                "status": "active",
+                "holeCards": [
+                  {
+                    "rank": "A",
+                    "suit": "hearts"
+                  },
+                  {
+                    "rank": "4",
+                    "suit": "hearts"
+                  }
+                ]
+              },
+              {
+                "id": "MrBrown",
+                "name": "MrBrown",
+                "position": "MP",
+                "stack": 10000,
+                "status": "folded",
+                "holeCards": [
+                  {
+                    "rank": "T",
+                    "suit": "hearts"
+                  },
+                  {
+                    "rank": "5",
+                    "suit": "spades"
+                  }
+                ]
+              },
+              {
+                "id": "Pluribus",
+                "name": "Pluribus",
+                "position": "BTN",
+                "stack": 10000,
+                "status": "folded",
+                "holeCards": [
+                  {
+                    "rank": "6",
+                    "suit": "clubs"
+                  },
+                  {
+                    "rank": "7",
+                    "suit": "spades"
+                  }
+                ]
+              }
+            ],
+            "pot": 520,
+            "currentBet": 0,
+            "minimumRaise": 100,
+            "playerContributions": {
+              "MrBlue": 0,
+              "MrBlonde": 0,
+              "MrWhite": 0,
+              "MrPink": 0,
+              "MrBrown": 0,
+              "Pluribus": 0
+            },
+            "totalContributions": {
+              "MrBlue": 210,
+              "MrBlonde": 100,
+              "MrWhite": 0,
+              "MrPink": 210,
+              "MrBrown": 0,
+              "Pluribus": 0
+            }
+          }
+        }
+      ]
+    },
+    {
+      "street": "river",
+      "board": [
+        {
+          "rank": "7",
+          "suit": "diamonds"
+        },
+        {
+          "rank": "5",
+          "suit": "hearts"
+        },
+        {
+          "rank": "9",
+          "suit": "diamonds"
+        },
+        {
+          "rank": "7",
+          "suit": "clubs"
+        },
+        {
+          "rank": "Q",
+          "suit": "hearts"
+        }
+      ],
+      "actions": [
+        {
+          "actionIndex": 10,
+          "playerId": "MrBlue",
+          "street": "river",
+          "type": "bet",
+          "amount": 230,
+          "state": {
+            "street": "river",
+            "board": [
+              {
+                "rank": "7",
+                "suit": "diamonds"
+              },
+              {
+                "rank": "5",
+                "suit": "hearts"
+              },
+              {
+                "rank": "9",
+                "suit": "diamonds"
+              },
+              {
+                "rank": "7",
+                "suit": "clubs"
+              },
+              {
+                "rank": "Q",
+                "suit": "hearts"
+              }
+            ],
+            "players": [
+              {
+                "id": "MrBlue",
+                "name": "MrBlue",
+                "position": "SB",
+                "stack": 9790,
+                "status": "active",
+                "holeCards": [
+                  {
+                    "rank": "T",
+                    "suit": "clubs"
+                  },
+                  {
+                    "rank": "Q",
+                    "suit": "clubs"
+                  }
+                ]
+              },
+              {
+                "id": "MrBlonde",
+                "name": "MrBlonde",
+                "position": "BB",
+                "stack": 9900,
+                "status": "folded",
+                "holeCards": [
+                  {
+                    "rank": "8",
+                    "suit": "spades"
+                  },
+                  {
+                    "rank": "4",
+                    "suit": "clubs"
+                  }
+                ]
+              },
+              {
+                "id": "MrWhite",
+                "name": "MrWhite",
+                "position": "UTG",
+                "stack": 10000,
+                "status": "folded",
+                "holeCards": [
+                  {
+                    "rank": "9",
+                    "suit": "clubs"
+                  },
+                  {
+                    "rank": "3",
+                    "suit": "diamonds"
+                  }
+                ]
+              },
+              {
+                "id": "MrPink",
+                "name": "MrPink",
+                "position": "UTG+1",
+                "stack": 9790,
+                "status": "active",
+                "holeCards": [
+                  {
+                    "rank": "A",
+                    "suit": "hearts"
+                  },
+                  {
+                    "rank": "4",
+                    "suit": "hearts"
+                  }
+                ]
+              },
+              {
+                "id": "MrBrown",
+                "name": "MrBrown",
+                "position": "MP",
+                "stack": 10000,
+                "status": "folded",
+                "holeCards": [
+                  {
+                    "rank": "T",
+                    "suit": "hearts"
+                  },
+                  {
+                    "rank": "5",
+                    "suit": "spades"
+                  }
+                ]
+              },
+              {
+                "id": "Pluribus",
+                "name": "Pluribus",
+                "position": "BTN",
+                "stack": 10000,
+                "status": "folded",
+                "holeCards": [
+                  {
+                    "rank": "6",
+                    "suit": "clubs"
+                  },
+                  {
+                    "rank": "7",
+                    "suit": "spades"
+                  }
+                ]
+              }
+            ],
+            "pot": 520,
+            "currentBet": 0,
+            "minimumRaise": 100,
+            "playerContributions": {
+              "MrBlue": 0,
+              "MrBlonde": 0,
+              "MrWhite": 0,
+              "MrPink": 0,
+              "MrBrown": 0,
+              "Pluribus": 0
+            },
+            "totalContributions": {
+              "MrBlue": 210,
+              "MrBlonde": 100,
+              "MrWhite": 0,
+              "MrPink": 210,
+              "MrBrown": 0,
+              "Pluribus": 0
+            }
+          }
+        },
+        {
+          "actionIndex": 11,
+          "playerId": "MrPink",
+          "street": "river",
+          "type": "fold",
+          "amount": 0,
+          "state": {
+            "street": "river",
+            "board": [
+              {
+                "rank": "7",
+                "suit": "diamonds"
+              },
+              {
+                "rank": "5",
+                "suit": "hearts"
+              },
+              {
+                "rank": "9",
+                "suit": "diamonds"
+              },
+              {
+                "rank": "7",
+                "suit": "clubs"
+              },
+              {
+                "rank": "Q",
+                "suit": "hearts"
+              }
+            ],
+            "players": [
+              {
+                "id": "MrBlue",
+                "name": "MrBlue",
+                "position": "SB",
+                "stack": 9560,
+                "status": "active",
+                "holeCards": [
+                  {
+                    "rank": "T",
+                    "suit": "clubs"
+                  },
+                  {
+                    "rank": "Q",
+                    "suit": "clubs"
+                  }
+                ]
+              },
+              {
+                "id": "MrBlonde",
+                "name": "MrBlonde",
+                "position": "BB",
+                "stack": 9900,
+                "status": "folded",
+                "holeCards": [
+                  {
+                    "rank": "8",
+                    "suit": "spades"
+                  },
+                  {
+                    "rank": "4",
+                    "suit": "clubs"
+                  }
+                ]
+              },
+              {
+                "id": "MrWhite",
+                "name": "MrWhite",
+                "position": "UTG",
+                "stack": 10000,
+                "status": "folded",
+                "holeCards": [
+                  {
+                    "rank": "9",
+                    "suit": "clubs"
+                  },
+                  {
+                    "rank": "3",
+                    "suit": "diamonds"
+                  }
+                ]
+              },
+              {
+                "id": "MrPink",
+                "name": "MrPink",
+                "position": "UTG+1",
+                "stack": 9790,
+                "status": "active",
+                "holeCards": [
+                  {
+                    "rank": "A",
+                    "suit": "hearts"
+                  },
+                  {
+                    "rank": "4",
+                    "suit": "hearts"
+                  }
+                ]
+              },
+              {
+                "id": "MrBrown",
+                "name": "MrBrown",
+                "position": "MP",
+                "stack": 10000,
+                "status": "folded",
+                "holeCards": [
+                  {
+                    "rank": "T",
+                    "suit": "hearts"
+                  },
+                  {
+                    "rank": "5",
+                    "suit": "spades"
+                  }
+                ]
+              },
+              {
+                "id": "Pluribus",
+                "name": "Pluribus",
+                "position": "BTN",
+                "stack": 10000,
+                "status": "folded",
+                "holeCards": [
+                  {
+                    "rank": "6",
+                    "suit": "clubs"
+                  },
+                  {
+                    "rank": "7",
+                    "suit": "spades"
+                  }
+                ]
+              }
+            ],
+            "pot": 750,
+            "currentBet": 230,
+            "minimumRaise": 100,
+            "playerContributions": {
+              "MrBlue": 230,
+              "MrBlonde": 0,
+              "MrWhite": 0,
+              "MrPink": 0,
+              "MrBrown": 0,
+              "Pluribus": 0
+            },
+            "totalContributions": {
+              "MrBlue": 440,
+              "MrBlonde": 100,
+              "MrWhite": 0,
+              "MrPink": 210,
+              "MrBrown": 0,
+              "Pluribus": 0
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "decisions": [
+    {
+      "actionIndex": 4,
+      "street": "preflop",
+      "action": "call",
+      "amount": 160,
+      "pot": 360,
+      "callAmount": 160,
+      "status": "analyzed",
+      "equity": 0.30078947368421055,
+      "potOdds": 0.3076923076923077,
+      "expectedValue": -3.5894736842105175,
+      "decision": "unprofitable",
+      "state": {
+        "street": "preflop",
+        "board": [],
+        "players": [
+          {
+            "id": "MrBlue",
+            "name": "MrBlue",
+            "position": "SB",
+            "stack": 9950,
+            "status": "active",
+            "holeCards": [
+              {
+                "rank": "T",
+                "suit": "clubs"
+              },
+              {
+                "rank": "Q",
+                "suit": "clubs"
+              }
+            ]
+          },
+          {
+            "id": "MrBlonde",
+            "name": "MrBlonde",
+            "position": "BB",
+            "stack": 9900,
+            "status": "active",
+            "holeCards": [
+              {
+                "rank": "8",
+                "suit": "spades"
+              },
+              {
+                "rank": "4",
+                "suit": "clubs"
+              }
+            ]
+          },
+          {
+            "id": "MrWhite",
+            "name": "MrWhite",
+            "position": "UTG",
+            "stack": 10000,
+            "status": "folded",
+            "holeCards": [
+              {
+                "rank": "9",
+                "suit": "clubs"
+              },
+              {
+                "rank": "3",
+                "suit": "diamonds"
+              }
+            ]
+          },
+          {
+            "id": "MrPink",
+            "name": "MrPink",
+            "position": "UTG+1",
+            "stack": 9790,
+            "status": "active",
+            "holeCards": [
+              {
+                "rank": "A",
+                "suit": "hearts"
+              },
+              {
+                "rank": "4",
+                "suit": "hearts"
+              }
+            ]
+          },
+          {
+            "id": "MrBrown",
+            "name": "MrBrown",
+            "position": "MP",
+            "stack": 10000,
+            "status": "folded",
+            "holeCards": [
+              {
+                "rank": "T",
+                "suit": "hearts"
+              },
+              {
+                "rank": "5",
+                "suit": "spades"
+              }
+            ]
+          },
+          {
+            "id": "Pluribus",
+            "name": "Pluribus",
+            "position": "BTN",
+            "stack": 10000,
+            "status": "folded",
+            "holeCards": [
+              {
+                "rank": "6",
+                "suit": "clubs"
+              },
+              {
+                "rank": "7",
+                "suit": "spades"
+              }
+            ]
+          }
+        ],
+        "pot": 360,
+        "currentBet": 210,
+        "minimumRaise": 100,
+        "playerContributions": {
+          "MrBlue": 50,
+          "MrBlonde": 100,
+          "MrWhite": 0,
+          "MrPink": 210,
+          "MrBrown": 0,
+          "Pluribus": 0
+        },
+        "totalContributions": {
+          "MrBlue": 50,
+          "MrBlonde": 100,
+          "MrWhite": 0,
+          "MrPink": 210,
+          "MrBrown": 0,
+          "Pluribus": 0
+        }
+      }
+    },
+    {
+      "actionIndex": 6,
+      "street": "flop",
+      "action": "check",
+      "amount": 0,
+      "pot": 520,
+      "callAmount": 0,
+      "status": "analyzed",
+      "equity": 0.15068421052631578,
+      "expectedValue": 0,
+      "decision": "break_even",
+      "state": {
+        "street": "flop",
+        "board": [
+          {
+            "rank": "7",
+            "suit": "diamonds"
+          },
+          {
+            "rank": "5",
+            "suit": "hearts"
+          },
+          {
+            "rank": "9",
+            "suit": "diamonds"
+          }
+        ],
+        "players": [
+          {
+            "id": "MrBlue",
+            "name": "MrBlue",
+            "position": "SB",
+            "stack": 9790,
+            "status": "active",
+            "holeCards": [
+              {
+                "rank": "T",
+                "suit": "clubs"
+              },
+              {
+                "rank": "Q",
+                "suit": "clubs"
+              }
+            ]
+          },
+          {
+            "id": "MrBlonde",
+            "name": "MrBlonde",
+            "position": "BB",
+            "stack": 9900,
+            "status": "folded",
+            "holeCards": [
+              {
+                "rank": "8",
+                "suit": "spades"
+              },
+              {
+                "rank": "4",
+                "suit": "clubs"
+              }
+            ]
+          },
+          {
+            "id": "MrWhite",
+            "name": "MrWhite",
+            "position": "UTG",
+            "stack": 10000,
+            "status": "folded",
+            "holeCards": [
+              {
+                "rank": "9",
+                "suit": "clubs"
+              },
+              {
+                "rank": "3",
+                "suit": "diamonds"
+              }
+            ]
+          },
+          {
+            "id": "MrPink",
+            "name": "MrPink",
+            "position": "UTG+1",
+            "stack": 9790,
+            "status": "active",
+            "holeCards": [
+              {
+                "rank": "A",
+                "suit": "hearts"
+              },
+              {
+                "rank": "4",
+                "suit": "hearts"
+              }
+            ]
+          },
+          {
+            "id": "MrBrown",
+            "name": "MrBrown",
+            "position": "MP",
+            "stack": 10000,
+            "status": "folded",
+            "holeCards": [
+              {
+                "rank": "T",
+                "suit": "hearts"
+              },
+              {
+                "rank": "5",
+                "suit": "spades"
+              }
+            ]
+          },
+          {
+            "id": "Pluribus",
+            "name": "Pluribus",
+            "position": "BTN",
+            "stack": 10000,
+            "status": "folded",
+            "holeCards": [
+              {
+                "rank": "6",
+                "suit": "clubs"
+              },
+              {
+                "rank": "7",
+                "suit": "spades"
+              }
+            ]
+          }
+        ],
+        "pot": 520,
+        "currentBet": 0,
+        "minimumRaise": 100,
+        "playerContributions": {
+          "MrBlue": 0,
+          "MrBlonde": 0,
+          "MrWhite": 0,
+          "MrPink": 0,
+          "MrBrown": 0,
+          "Pluribus": 0
+        },
+        "totalContributions": {
+          "MrBlue": 210,
+          "MrBlonde": 100,
+          "MrWhite": 0,
+          "MrPink": 210,
+          "MrBrown": 0,
+          "Pluribus": 0
+        }
+      }
+    },
+    {
+      "actionIndex": 8,
+      "street": "turn",
+      "action": "check",
+      "amount": 0,
+      "pot": 520,
+      "callAmount": 0,
+      "status": "analyzed",
+      "equity": 0.06631578947368422,
+      "expectedValue": 0,
+      "decision": "break_even",
+      "state": {
+        "street": "turn",
+        "board": [
+          {
+            "rank": "7",
+            "suit": "diamonds"
+          },
+          {
+            "rank": "5",
+            "suit": "hearts"
+          },
+          {
+            "rank": "9",
+            "suit": "diamonds"
+          },
+          {
+            "rank": "7",
+            "suit": "clubs"
+          }
+        ],
+        "players": [
+          {
+            "id": "MrBlue",
+            "name": "MrBlue",
+            "position": "SB",
+            "stack": 9790,
+            "status": "active",
+            "holeCards": [
+              {
+                "rank": "T",
+                "suit": "clubs"
+              },
+              {
+                "rank": "Q",
+                "suit": "clubs"
+              }
+            ]
+          },
+          {
+            "id": "MrBlonde",
+            "name": "MrBlonde",
+            "position": "BB",
+            "stack": 9900,
+            "status": "folded",
+            "holeCards": [
+              {
+                "rank": "8",
+                "suit": "spades"
+              },
+              {
+                "rank": "4",
+                "suit": "clubs"
+              }
+            ]
+          },
+          {
+            "id": "MrWhite",
+            "name": "MrWhite",
+            "position": "UTG",
+            "stack": 10000,
+            "status": "folded",
+            "holeCards": [
+              {
+                "rank": "9",
+                "suit": "clubs"
+              },
+              {
+                "rank": "3",
+                "suit": "diamonds"
+              }
+            ]
+          },
+          {
+            "id": "MrPink",
+            "name": "MrPink",
+            "position": "UTG+1",
+            "stack": 9790,
+            "status": "active",
+            "holeCards": [
+              {
+                "rank": "A",
+                "suit": "hearts"
+              },
+              {
+                "rank": "4",
+                "suit": "hearts"
+              }
+            ]
+          },
+          {
+            "id": "MrBrown",
+            "name": "MrBrown",
+            "position": "MP",
+            "stack": 10000,
+            "status": "folded",
+            "holeCards": [
+              {
+                "rank": "T",
+                "suit": "hearts"
+              },
+              {
+                "rank": "5",
+                "suit": "spades"
+              }
+            ]
+          },
+          {
+            "id": "Pluribus",
+            "name": "Pluribus",
+            "position": "BTN",
+            "stack": 10000,
+            "status": "folded",
+            "holeCards": [
+              {
+                "rank": "6",
+                "suit": "clubs"
+              },
+              {
+                "rank": "7",
+                "suit": "spades"
+              }
+            ]
+          }
+        ],
+        "pot": 520,
+        "currentBet": 0,
+        "minimumRaise": 100,
+        "playerContributions": {
+          "MrBlue": 0,
+          "MrBlonde": 0,
+          "MrWhite": 0,
+          "MrPink": 0,
+          "MrBrown": 0,
+          "Pluribus": 0
+        },
+        "totalContributions": {
+          "MrBlue": 210,
+          "MrBlonde": 100,
+          "MrWhite": 0,
+          "MrPink": 210,
+          "MrBrown": 0,
+          "Pluribus": 0
+        }
+      }
+    },
+    {
+      "actionIndex": 10,
+      "street": "river",
+      "action": "bet",
+      "amount": 230,
+      "pot": 520,
+      "callAmount": 0,
+      "status": "analyzed",
+      "equity": 0.8125,
+      "expectedValue": 557,
+      "decision": "profitable",
+      "state": {
+        "street": "river",
+        "board": [
+          {
+            "rank": "7",
+            "suit": "diamonds"
+          },
+          {
+            "rank": "5",
+            "suit": "hearts"
+          },
+          {
+            "rank": "9",
+            "suit": "diamonds"
+          },
+          {
+            "rank": "7",
+            "suit": "clubs"
+          },
+          {
+            "rank": "Q",
+            "suit": "hearts"
+          }
+        ],
+        "players": [
+          {
+            "id": "MrBlue",
+            "name": "MrBlue",
+            "position": "SB",
+            "stack": 9790,
+            "status": "active",
+            "holeCards": [
+              {
+                "rank": "T",
+                "suit": "clubs"
+              },
+              {
+                "rank": "Q",
+                "suit": "clubs"
+              }
+            ]
+          },
+          {
+            "id": "MrBlonde",
+            "name": "MrBlonde",
+            "position": "BB",
+            "stack": 9900,
+            "status": "folded",
+            "holeCards": [
+              {
+                "rank": "8",
+                "suit": "spades"
+              },
+              {
+                "rank": "4",
+                "suit": "clubs"
+              }
+            ]
+          },
+          {
+            "id": "MrWhite",
+            "name": "MrWhite",
+            "position": "UTG",
+            "stack": 10000,
+            "status": "folded",
+            "holeCards": [
+              {
+                "rank": "9",
+                "suit": "clubs"
+              },
+              {
+                "rank": "3",
+                "suit": "diamonds"
+              }
+            ]
+          },
+          {
+            "id": "MrPink",
+            "name": "MrPink",
+            "position": "UTG+1",
+            "stack": 9790,
+            "status": "active",
+            "holeCards": [
+              {
+                "rank": "A",
+                "suit": "hearts"
+              },
+              {
+                "rank": "4",
+                "suit": "hearts"
+              }
+            ]
+          },
+          {
+            "id": "MrBrown",
+            "name": "MrBrown",
+            "position": "MP",
+            "stack": 10000,
+            "status": "folded",
+            "holeCards": [
+              {
+                "rank": "T",
+                "suit": "hearts"
+              },
+              {
+                "rank": "5",
+                "suit": "spades"
+              }
+            ]
+          },
+          {
+            "id": "Pluribus",
+            "name": "Pluribus",
+            "position": "BTN",
+            "stack": 10000,
+            "status": "folded",
+            "holeCards": [
+              {
+                "rank": "6",
+                "suit": "clubs"
+              },
+              {
+                "rank": "7",
+                "suit": "spades"
+              }
+            ]
+          }
+        ],
+        "pot": 520,
+        "currentBet": 0,
+        "minimumRaise": 100,
+        "playerContributions": {
+          "MrBlue": 0,
+          "MrBlonde": 0,
+          "MrWhite": 0,
+          "MrPink": 0,
+          "MrBrown": 0,
+          "Pluribus": 0
+        },
+        "totalContributions": {
+          "MrBlue": 210,
+          "MrBlonde": 100,
+          "MrWhite": 0,
+          "MrPink": 210,
+          "MrBrown": 0,
+          "Pluribus": 0
+        }
+      }
+    }
+  ],
+  "summary": {
+    "totalDecisionPoints": 4,
+    "analyzedDecisionPoints": 4,
+    "skippedDecisionPoints": 0,
+    "callDecisions": 1
+  }
+}

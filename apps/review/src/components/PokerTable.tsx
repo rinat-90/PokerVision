@@ -2,7 +2,7 @@ import type {
   HandReviewAction,
   HandReviewDecisionState,
   HandReviewPlayer
-} from "../model/hand-review";
+} from "@poker-vision/hand-review";
 
 import {
   formatStreet

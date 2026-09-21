@@ -1,7 +1,7 @@
 import type {
   HandReview,
   HandReviewPlayer
-} from "../model/hand-review";
+} from "@poker-vision/hand-review";
 
 import {
   formatGameFormat

@@ -11,7 +11,7 @@ import type {
 
 import {
   createHandReview
-} from "./create-hand-review";
+} from "@poker-vision/hand-review";
 
 describe(
   "createHandReview",

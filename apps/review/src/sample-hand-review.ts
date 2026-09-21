@@ -5,7 +5,7 @@ import type {
 
 import {
   createHandReview
-} from "./model/create-hand-review";
+} from "@poker-vision/hand-review";
 
 const history: HandHistory = {
   id: "video-e2e-analysis",

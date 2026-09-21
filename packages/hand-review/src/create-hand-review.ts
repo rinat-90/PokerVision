@@ -11,7 +11,7 @@ import type {
   HandReview,
   HandReviewAction,
   HandReviewStreet
-} from "./hand-review";
+} from "./hand-review.js";
 
 export function createHandReview(
   history: HandHistory,

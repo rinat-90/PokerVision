@@ -1,6 +1,6 @@
 import type {
   HandReviewPlayer
-} from "../model/hand-review";
+} from "@poker-vision/hand-review";
 
 import {
   CardView

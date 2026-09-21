@@ -1,6 +1,6 @@
 import type {
   HandReview
-} from "../model/hand-review";
+} from "@poker-vision/hand-review";
 
 import {
   formatAction,
