@@ -128,5 +128,84 @@ describe(
         });
       }
     );
+    it(
+      "normalizes a total raise amount in the target action",
+      () => {
+        const hand: HandHistory = {
+          id: "total-raise",
+          gameFormat: "cash",
+          smallBlind: 25,
+          bigBlind: 50,
+          ante: 0,
+
+          players: [
+            {
+              id: "hero",
+              name: "Hero",
+              position: "BTN",
+              startingStack: 5000
+            },
+            {
+              id: "villain",
+              name: "Villain",
+              position: "BB",
+              startingStack: 5000
+            }
+          ],
+
+          forcedBets: [
+            {
+              playerId: "hero",
+              type: "small_blind",
+              amount: 25
+            },
+            {
+              playerId: "villain",
+              type: "big_blind",
+              amount: 50
+            }
+          ],
+
+          streets: [
+            {
+              street: "preflop",
+              board: [],
+
+              actions: [
+                {
+                  playerId: "hero",
+                  type: "raise",
+                  amount: 150,
+                  amountType: "total",
+                  street: "preflop"
+                }
+              ]
+            }
+          ]
+        };
+
+        const snapshot =
+          replayHandToAction(
+            hand,
+            0
+          );
+
+        expect(
+          snapshot.playerContributions
+        ).toEqual({
+          hero: 25,
+          villain: 50
+        });
+
+        expect(
+          snapshot.targetAction
+        ).toEqual({
+          playerId: "hero",
+          type: "raise",
+          amount: 125,
+          street: "preflop"
+        });
+      }
+    );
   }
 );

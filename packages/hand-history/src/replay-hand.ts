@@ -79,7 +79,8 @@ export function replayHandToAction(
   hand: HandHistory,
   actionIndex: number
 ): HandStateSnapshot {
-  const allActions = flattenActions(hand);
+  const allActions =
+    flattenActions(hand);
 
   if (actionIndex < 0) {
     throw new Error(
@@ -104,10 +105,10 @@ export function replayHandToAction(
   }
 
   const actionsBeforeDecision =
-    allActions.slice(0, actionIndex);
-
-  const targetAction =
-    toEngineAction(targetHistoryAction);
+    allActions.slice(
+      0,
+      actionIndex
+    );
 
   const street =
     targetHistoryAction.street;
@@ -131,12 +132,25 @@ export function replayHandToAction(
       street
     );
 
+  const previousContribution =
+    playerContributions[
+      targetHistoryAction.playerId
+      ] ?? 0;
+
+  const targetAction =
+    toEngineAction(
+      targetHistoryAction,
+      previousContribution
+    );
+
   const pot =
-    Object.values(totalContributions)
-      .reduce(
-        (sum, amount) => sum + amount,
-        0
-      );
+    Object.values(
+      totalContributions
+    ).reduce(
+      (sum, amount) =>
+        sum + amount,
+      0
+    );
 
   const players =
     createPlayers(
@@ -157,7 +171,8 @@ export function replayHandToAction(
     reconstructBettingState(
       players,
       actionsBeforeDecision.map(
-        toEngineAction
+        action =>
+          toEngineAction(action)
       ),
       street,
       currentBet,
@@ -170,20 +185,29 @@ export function replayHandToAction(
     street,
     board,
     players,
+
     playersToAct:
     bettingState.playersToAct,
+
     currentPlayerId:
     bettingState.currentPlayerId,
+
     bettingRoundComplete:
     bettingState.bettingRoundComplete,
+
     pot,
     currentBet,
-    minimumRaise: hand.bigBlind,
+
+    minimumRaise:
+    hand.bigBlind,
+
     playerContributions,
     totalContributions,
+
     actions:
       actionsBeforeDecision.map(
-        toEngineAction
+        action =>
+          toEngineAction(action)
       )
   };
 }
@@ -192,7 +216,8 @@ function flattenActions(
   hand: HandHistory
 ): HandHistoryAction[] {
   return hand.streets.flatMap(
-    (street) => street.actions
+    street =>
+      street.actions
   );
 }
 
@@ -202,7 +227,8 @@ function getBoardForStreet(
 ): Card[] {
   const streetData =
     hand.streets.find(
-      (item) => item.street === street
+      item =>
+        item.street === street
     );
 
   return streetData?.board ?? [];
@@ -219,9 +245,18 @@ function calculateTotalContributions(
     contributions[player.id] = 0;
   }
 
-  for (const forcedBet of hand.forcedBets ?? []) {
-    contributions[forcedBet.playerId] =
-      (contributions[forcedBet.playerId] ?? 0) +
+  for (
+    const forcedBet of
+  hand.forcedBets ?? []
+    ) {
+    contributions[
+      forcedBet.playerId
+      ] =
+      (
+        contributions[
+          forcedBet.playerId
+          ] ?? 0
+      ) +
       forcedBet.amount;
   }
 
@@ -229,12 +264,23 @@ function calculateTotalContributions(
     Record<string, number> = {};
 
   for (const player of hand.players) {
-    streetContributions[player.id] = 0;
+    streetContributions[
+      player.id
+      ] = 0;
   }
 
-  for (const forcedBet of hand.forcedBets ?? []) {
-    streetContributions[forcedBet.playerId] =
-      (streetContributions[forcedBet.playerId] ?? 0) +
+  for (
+    const forcedBet of
+  hand.forcedBets ?? []
+    ) {
+    streetContributions[
+      forcedBet.playerId
+      ] =
+      (
+        streetContributions[
+          forcedBet.playerId
+          ] ?? 0
+      ) +
       forcedBet.amount;
   }
 
@@ -243,12 +289,20 @@ function calculateTotalContributions(
     "preflop";
 
   for (const action of actions) {
-    if (action.street !== currentStreet) {
+    if (
+      action.street !==
+      currentStreet
+    ) {
       currentStreet =
         action.street;
 
-      for (const player of hand.players) {
-        streetContributions[player.id] = 0;
+      for (
+        const player of
+        hand.players
+        ) {
+        streetContributions[
+          player.id
+          ] = 0;
       }
     }
 
@@ -260,7 +314,9 @@ function calculateTotalContributions(
     }
 
     const previousStreetContribution =
-      streetContributions[action.playerId] ?? 0;
+      streetContributions[
+        action.playerId
+        ] ?? 0;
 
     const contributionAmount =
       normalizeActionAmount(
@@ -268,11 +324,19 @@ function calculateTotalContributions(
         previousStreetContribution
       );
 
-    contributions[action.playerId] =
-      (contributions[action.playerId] ?? 0) +
+    contributions[
+      action.playerId
+      ] =
+      (
+        contributions[
+          action.playerId
+          ] ?? 0
+      ) +
       contributionAmount;
 
-    streetContributions[action.playerId] =
+    streetContributions[
+      action.playerId
+      ] =
       previousStreetContribution +
       contributionAmount;
   }
@@ -293,15 +357,26 @@ function calculateStreetContributions(
   }
 
   if (street === "preflop") {
-    for (const forcedBet of hand.forcedBets ?? []) {
-      contributions[forcedBet.playerId] =
-        (contributions[forcedBet.playerId] ?? 0) +
+    for (
+      const forcedBet of
+    hand.forcedBets ?? []
+      ) {
+      contributions[
+        forcedBet.playerId
+        ] =
+        (
+          contributions[
+            forcedBet.playerId
+            ] ?? 0
+        ) +
         forcedBet.amount;
     }
   }
 
   for (const action of actions) {
-    if (action.street !== street) {
+    if (
+      action.street !== street
+    ) {
       continue;
     }
 
@@ -313,7 +388,9 @@ function calculateStreetContributions(
     }
 
     const previousContribution =
-      contributions[action.playerId] ?? 0;
+      contributions[
+        action.playerId
+        ] ?? 0;
 
     const contributionAmount =
       normalizeActionAmount(
@@ -321,7 +398,9 @@ function calculateStreetContributions(
         previousContribution
       );
 
-    contributions[action.playerId] =
+    contributions[
+      action.playerId
+      ] =
       previousContribution +
       contributionAmount;
   }
@@ -331,47 +410,79 @@ function calculateStreetContributions(
 
 function createPlayers(
   hand: HandHistory,
-  totalContributions: Record<string, number>,
+  totalContributions:
+  Record<string, number>,
   actions: HandHistoryAction[]
 ): Player[] {
-  return hand.players.map((player) => {
-    const contribution =
-      totalContributions[player.id] ?? 0;
+  return hand.players.map(
+    player => {
+      const contribution =
+        totalContributions[
+          player.id
+          ] ?? 0;
 
-    const status =
-      derivePlayerStatus(
+      const status =
+        derivePlayerStatus(
+          player.id,
+          actions
+        );
+
+      const basePlayer: Player = {
+        id:
         player.id,
-        actions
-      );
 
-    const basePlayer: Player = {
-      id: player.id,
-      name: player.name,
-      position: player.position,
-      stack:
-        player.startingStack -
-        contribution,
-      status
-    };
+        name:
+        player.name,
 
-    if (player.holeCards !== undefined) {
-      return {
-        ...basePlayer,
-        holeCards: player.holeCards
+        position:
+        player.position,
+
+        stack:
+          player.startingStack -
+          contribution,
+
+        status
       };
-    }
 
-    return basePlayer;
-  });
+      if (
+        player.holeCards !==
+        undefined
+      ) {
+        return {
+          ...basePlayer,
+          holeCards:
+          player.holeCards
+        };
+      }
+
+      return basePlayer;
+    }
+  );
 }
 
 function toEngineAction(
-  action: HandHistoryAction
+  action: HandHistoryAction,
+  previousContribution = 0
 ): PlayerAction {
+  const amount =
+    action.type === "fold" ||
+    action.type === "check"
+      ? action.amount
+      : normalizeActionAmount(
+        action,
+        previousContribution
+      );
+
   return {
-    playerId: action.playerId,
-    type: action.type,
-    amount: action.amount,
-    street: action.street
+    playerId:
+    action.playerId,
+
+    type:
+    action.type,
+
+    amount,
+
+    street:
+    action.street
   };
 }
