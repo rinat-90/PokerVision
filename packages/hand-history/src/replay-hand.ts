@@ -1,3 +1,7 @@
+import {
+  normalizeActionAmount
+} from "./normalize-action.js";
+
 import type {
   Card,
   HandState,
@@ -208,7 +212,8 @@ function calculateTotalContributions(
   hand: HandHistory,
   actions: HandHistoryAction[]
 ): Record<string, number> {
-  const contributions: Record<string, number> = {};
+  const contributions:
+    Record<string, number> = {};
 
   for (const player of hand.players) {
     contributions[player.id] = 0;
@@ -220,13 +225,33 @@ function calculateTotalContributions(
       forcedBet.amount;
   }
 
-  const streetContributions: Record<string, number> = {};
+  const streetContributions:
+    Record<string, number> = {};
 
   for (const player of hand.players) {
     streetContributions[player.id] = 0;
   }
 
+  for (const forcedBet of hand.forcedBets ?? []) {
+    streetContributions[forcedBet.playerId] =
+      (streetContributions[forcedBet.playerId] ?? 0) +
+      forcedBet.amount;
+  }
+
+  let currentStreet:
+    HandHistoryAction["street"] =
+    "preflop";
+
   for (const action of actions) {
+    if (action.street !== currentStreet) {
+      currentStreet =
+        action.street;
+
+      for (const player of hand.players) {
+        streetContributions[player.id] = 0;
+      }
+    }
+
     if (
       action.type === "fold" ||
       action.type === "check"
@@ -237,19 +262,11 @@ function calculateTotalContributions(
     const previousStreetContribution =
       streetContributions[action.playerId] ?? 0;
 
-    let contributionAmount: number;
-
-    if (action.amountType === "total") {
-      contributionAmount =
-        Math.max(
-          0,
-          action.amount -
-          previousStreetContribution
-        );
-    } else {
-      contributionAmount =
-        action.amount;
-    }
+    const contributionAmount =
+      normalizeActionAmount(
+        action,
+        previousStreetContribution
+      );
 
     contributions[action.playerId] =
       (contributions[action.playerId] ?? 0) +
@@ -268,15 +285,13 @@ function calculateStreetContributions(
   actions: HandHistoryAction[],
   street: HandState["street"]
 ): Record<string, number> {
-  const contributions: Record<string, number> = {};
+  const contributions:
+    Record<string, number> = {};
 
   for (const player of hand.players) {
     contributions[player.id] = 0;
   }
 
-  /**
-   * Forced bets belong to the preflop street.
-   */
   if (street === "preflop") {
     for (const forcedBet of hand.forcedBets ?? []) {
       contributions[forcedBet.playerId] =
@@ -297,9 +312,18 @@ function calculateStreetContributions(
       continue;
     }
 
+    const previousContribution =
+      contributions[action.playerId] ?? 0;
+
+    const contributionAmount =
+      normalizeActionAmount(
+        action,
+        previousContribution
+      );
+
     contributions[action.playerId] =
-      (contributions[action.playerId] ?? 0) +
-      action.amount;
+      previousContribution +
+      contributionAmount;
   }
 
   return contributions;

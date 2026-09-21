@@ -68,6 +68,12 @@ importers:
 
   packages/vision:
     dependencies:
+      '@poker-vision/hand-history':
+        specifier: workspace:*
+        version: link:../hand-history
+      '@poker-vision/poker-engine':
+        specifier: workspace:*
+        version: link:../poker-engine
       '@poker-vision/video':
         specifier: workspace:*
         version: link:../video
