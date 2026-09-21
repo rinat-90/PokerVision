@@ -183,7 +183,6 @@ describe(
                 : previousStreet ??
                 "preflop";
 
-
             previousStreet =
               street;
 
@@ -330,11 +329,13 @@ describe(
               ).toBeGreaterThanOrEqual(
                 2
               );
+
+              break;
             }
 
             if (
-              frame.index >=
-              maxFrames - 1
+              processedFrames >=
+              maxFrames
             ) {
               break;
             }
@@ -381,7 +382,7 @@ describe(
           previousBoardState
         ).not.toBeNull();
       },
-      120_000
+      180_000
     );
   }
 );

@@ -26,3 +26,7 @@ videos/
 *.avi
 *.mkv
 *.webm
+
+# macOS screen capture build artifacts
+packages/screen-capture-macos/bin/
+packages/screen-capture-macos/.build/

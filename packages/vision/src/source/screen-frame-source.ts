@@ -48,7 +48,7 @@ export class ScreenFrameSource
       options.executablePath ??
       resolve(
         process.cwd(),
-        "packages/screen-capture-macos/.build/debug/screen-capture-macos"
+        "packages/screen-capture-macos/bin/screen-capture-macos"
       );
   }
 
