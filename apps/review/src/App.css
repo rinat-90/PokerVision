@@ -620,3 +620,34 @@
   letter-spacing: 0.05em;
   opacity: 0.75;
 }
+
+.timeline-navigation {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.timeline-navigation span {
+  min-width: 42px;
+  text-align: center;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.secondary-button {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 7px 10px;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+}
+
+.secondary-button:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.secondary-button:disabled {
+  opacity: 0.35;
+  cursor: default;
+}

@@ -30,22 +30,69 @@ export function createHandReview(
       street => {
         const actions: HandReviewAction[] =
           street.actions.map(
-            action => ({
-              actionIndex:
-                actionIndex++,
+            action => {
+              const currentActionIndex =
+                actionIndex++;
 
-              playerId:
-              action.playerId,
+              const snapshot =
+                replayHandToAction(
+                  history,
+                  currentActionIndex
+                );
 
-              street:
-              action.street,
+              return {
+                actionIndex:
+                currentActionIndex,
 
-              type:
-              action.type,
+                playerId:
+                action.playerId,
 
-              amount:
-              action.amount
-            })
+                street:
+                action.street,
+
+                type:
+                action.type,
+
+                amount:
+                action.amount,
+
+                state: {
+                  street:
+                  snapshot.street,
+
+                  board:
+                    snapshot.board.map(
+                      card => ({
+                        ...card
+                      })
+                    ),
+
+                  players:
+                    snapshot.players.map(
+                      player => ({
+                        ...player
+                      })
+                    ),
+
+                  pot:
+                  snapshot.pot,
+
+                  currentBet:
+                  snapshot.currentBet,
+
+                  minimumRaise:
+                  snapshot.minimumRaise,
+
+                  playerContributions: {
+                    ...snapshot.playerContributions
+                  },
+
+                  totalContributions: {
+                    ...snapshot.totalContributions
+                  }
+                }
+              };
+            }
           );
 
         return {

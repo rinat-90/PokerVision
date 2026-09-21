@@ -284,20 +284,138 @@ function DecisionDetails({
   );
 }
 
+function NoAnalysisDetails({
+                             playerName,
+                             action,
+                             amount
+                           }: {
+  playerName: string;
+  action: string;
+  amount: number;
+}) {
+  return (
+    <section className="panel analysis-panel">
+      <div className="panel-header">
+        <div>
+          <span className="panel-label">
+            Action
+          </span>
+
+          <h2>
+            {playerName}
+          </h2>
+        </div>
+      </div>
+
+      <div className="decision-action">
+        <span>
+          Action
+        </span>
+
+        <strong>
+          {formatAction(action)}
+          {amount > 0
+            ? ` ${amount}`
+            : ""}
+        </strong>
+      </div>
+
+      <div className="analysis-result">
+        <span className="panel-label">
+          Analysis
+        </span>
+
+        <strong>
+          No analysis for this action
+        </strong>
+      </div>
+    </section>
+  );
+}
+
 function ReviewApp({
                      review
                    }: {
   review: HandReview;
 }) {
+  const allActions =
+    review.streets.flatMap(
+      street => street.actions
+    );
+
   const [
-    activeDecisionIndex,
-    setActiveDecisionIndex
-  ] = useState(0);
+    activeActionIndex,
+    setActiveActionIndex
+  ] = useState(
+    allActions[0]?.actionIndex ?? 0
+  );
+
+  const activeAction =
+    allActions.find(
+      action =>
+        action.actionIndex ===
+        activeActionIndex
+    );
+
+  const activeActionPosition =
+    allActions.findIndex(
+      action =>
+        action.actionIndex ===
+        activeActionIndex
+    );
+
+  const hasPreviousAction =
+    activeActionPosition > 0;
+
+  const hasNextAction =
+    activeActionPosition >= 0 &&
+    activeActionPosition <
+    allActions.length - 1;
+
+  const selectPreviousAction = () => {
+    if (!hasPreviousAction) {
+      return;
+    }
+
+    const previousAction =
+      allActions[
+      activeActionPosition - 1
+        ];
+
+    if (previousAction === undefined) {
+      return;
+    }
+
+    setActiveActionIndex(
+      previousAction.actionIndex
+    );
+  };
+
+  const selectNextAction = () => {
+    if (!hasNextAction) {
+      return;
+    }
+
+    const nextAction =
+      allActions[
+      activeActionPosition + 1
+        ];
+
+    if (nextAction === undefined) {
+      return;
+    }
+
+    setActiveActionIndex(
+      nextAction.actionIndex
+    );
+  };
 
   const activeDecision =
-    review.decisions[
-      activeDecisionIndex
-      ];
+    review.decisions.find(
+      decision =>
+        decision.actionIndex ===
+        activeActionIndex
+    );
 
   const hero =
     review.players.find(
@@ -313,7 +431,7 @@ function ReviewApp({
     );
 
   const activeState =
-    activeDecision?.state;
+    activeAction?.state;
 
   const heroState =
     activeState?.players.find(
@@ -326,6 +444,15 @@ function ReviewApp({
       player =>
         player.id === opponent?.id
     );
+
+  const activePlayer =
+    activeAction !== undefined
+      ? review.players.find(
+        player =>
+          player.id ===
+          activeAction.playerId
+      )
+      : undefined;
 
   return (
     <div className="app">
@@ -457,7 +584,7 @@ function ReviewApp({
             </div>
           </div>
 
-          {activeDecision !== undefined ? (
+          {activeAction !== undefined ? (
             <>
               <div className="review-grid">
                 <section className="panel table-panel">
@@ -470,15 +597,14 @@ function ReviewApp({
                       <h2>
                         {formatStreet(
                           activeState?.street ??
-                          activeDecision.street
+                          activeAction.street
                         )}
                       </h2>
                     </div>
 
                     <span className="pot">
                       Pot{" "}
-                      {activeState?.pot ??
-                        activeDecision.pot}
+                      {activeState?.pot ?? 0}
                     </span>
                   </div>
 
@@ -514,8 +640,7 @@ function ReviewApp({
                       )}
 
                       <div className="pot-chip">
-                        {activeState?.pot ??
-                          activeDecision.pot}
+                        {activeState?.pot ?? 0}
                       </div>
                     </div>
 
@@ -532,11 +657,26 @@ function ReviewApp({
                   </div>
                 </section>
 
-                <DecisionDetails
-                  decision={
-                    activeDecision
-                  }
-                />
+                {activeDecision !== undefined ? (
+                  <DecisionDetails
+                    decision={
+                      activeDecision
+                    }
+                  />
+                ) : (
+                  <NoAnalysisDetails
+                    playerName={
+                      activePlayer?.name ??
+                      activeAction.playerId
+                    }
+                    action={
+                      activeAction.type
+                    }
+                    amount={
+                      activeAction.amount
+                    }
+                  />
+                )}
               </div>
 
               <section className="panel timeline-panel">
@@ -549,6 +689,40 @@ function ReviewApp({
                     <h2>
                       Hand actions
                     </h2>
+                  </div>
+
+                  <div className="timeline-navigation">
+                    <button
+                      type="button"
+                      className="secondary-button"
+                      disabled={
+                        !hasPreviousAction
+                      }
+                      onClick={
+                        selectPreviousAction
+                      }
+                    >
+                      ← Previous
+                    </button>
+
+                    <span>
+                      {activeActionPosition + 1}
+                      {" / "}
+                      {allActions.length}
+                    </span>
+
+                    <button
+                      type="button"
+                      className="secondary-button"
+                      disabled={
+                        !hasNextAction
+                      }
+                      onClick={
+                        selectNextAction
+                      }
+                    >
+                      Next →
+                    </button>
                   </div>
                 </div>
 
@@ -590,23 +764,16 @@ function ReviewApp({
                                     action.playerId
                                 );
 
-                              const decisionIndex =
-                                review.decisions.findIndex(
-                                  decision =>
-                                    decision.actionIndex ===
+                              const decision =
+                                review.decisions.find(
+                                  candidate =>
+                                    candidate.actionIndex ===
                                     action.actionIndex
                                 );
 
-                              const decision =
-                                decisionIndex >= 0
-                                  ? review.decisions[
-                                    decisionIndex
-                                    ]
-                                  : undefined;
-
                               const isActive =
-                                decisionIndex ===
-                                activeDecisionIndex;
+                                action.actionIndex ===
+                                activeActionIndex;
 
                               return (
                                 <button
@@ -625,17 +792,10 @@ function ReviewApp({
                                   key={
                                     action.actionIndex
                                   }
-                                  disabled={
-                                    decision === undefined
-                                  }
                                   onClick={() => {
-                                    if (
-                                      decisionIndex >= 0
-                                    ) {
-                                      setActiveDecisionIndex(
-                                        decisionIndex
-                                      );
-                                    }
+                                    setActiveActionIndex(
+                                      action.actionIndex
+                                    );
                                   }}
                                 >
                                   <span className="timeline-index">
@@ -677,7 +837,7 @@ function ReviewApp({
             </>
           ) : (
             <section className="panel empty-state">
-              No decision points found.
+              No actions found.
             </section>
           )}
         </section>

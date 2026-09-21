@@ -21,6 +21,8 @@ export interface HandReviewAction {
   street: Street;
   type: ActionType;
   amount: number;
+
+  state: HandReviewDecisionState;
 }
 
 export interface HandReviewStreet {
