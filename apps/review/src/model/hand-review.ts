@@ -2,6 +2,7 @@ import type {
   ActionType,
   Card,
   GameFormat,
+  Player,
   Position,
   Street
 } from "@poker-vision/poker-engine";
@@ -28,6 +29,26 @@ export interface HandReviewStreet {
   actions: HandReviewAction[];
 }
 
+export interface HandReviewDecisionState {
+  street: Street;
+
+  board: Card[];
+
+  players: Player[];
+
+  pot: number;
+
+  currentBet: number;
+
+  minimumRaise: number;
+
+  playerContributions:
+    Record<string, number>;
+
+  totalContributions:
+    Record<string, number>;
+}
+
 export interface HandReviewDecision {
   actionIndex: number;
   street: string;
@@ -48,6 +69,7 @@ export interface HandReviewDecision {
   potOdds?: number;
   expectedValue?: number;
   decision?: string;
+  state?: HandReviewDecisionState;
 }
 
 export interface HandReview {

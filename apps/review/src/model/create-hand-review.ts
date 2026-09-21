@@ -1,3 +1,7 @@
+import {
+  replayHandToAction
+} from "@poker-vision/hand-history";
+
 import type {
   AnalysisReport,
   HandHistory
@@ -96,8 +100,12 @@ export function createHandReview(
           ...(player.holeCards !== undefined
             ? {
               holeCards: [
-                { ...player.holeCards[0] },
-                { ...player.holeCards[1] }
+                {
+                  ...player.holeCards[0]
+                },
+                {
+                  ...player.holeCards[1]
+                }
               ] as [
                 typeof player.holeCards[0],
                 typeof player.holeCards[1]
@@ -111,9 +119,53 @@ export function createHandReview(
 
     decisions:
       report.decisions.map(
-        decision => ({
-          ...decision
-        })
+        decision => {
+          const snapshot =
+            replayHandToAction(
+              history,
+              decision.actionIndex
+            );
+
+          return {
+            ...decision,
+
+            state: {
+              street:
+              snapshot.street,
+
+              board:
+                snapshot.board.map(
+                  card => ({
+                    ...card
+                  })
+                ),
+
+              players:
+                snapshot.players.map(
+                  player => ({
+                    ...player
+                  })
+                ),
+
+              pot:
+              snapshot.pot,
+
+              currentBet:
+              snapshot.currentBet,
+
+              minimumRaise:
+              snapshot.minimumRaise,
+
+              playerContributions: {
+                ...snapshot.playerContributions
+              },
+
+              totalContributions: {
+                ...snapshot.totalContributions
+              }
+            }
+          };
+        }
       ),
 
     summary: {

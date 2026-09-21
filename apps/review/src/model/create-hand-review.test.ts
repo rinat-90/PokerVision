@@ -217,10 +217,87 @@ describe(
         ]);
 
         expect(
-          review.decisions
+          review.decisions.map(
+            ({
+               state: _state,
+               ...decision
+             }) => decision
+          )
         ).toEqual(
           report.decisions
         );
+
+        expect(
+          review.decisions[0]?.state
+        ).toMatchObject({
+          street: "preflop",
+          board: [],
+          pot: 0,
+          currentBet: 0,
+
+          playerContributions: {
+            hero: 0,
+            villain: 0
+          },
+
+          totalContributions: {
+            hero: 0,
+            villain: 0
+          }
+        });
+
+        expect(
+          review.decisions[1]?.state
+        ).toMatchObject({
+          street: "flop",
+
+          board: [
+            {
+              rank: "2",
+              suit: "clubs"
+            },
+            {
+              rank: "7",
+              suit: "diamonds"
+            },
+            {
+              rank: "K",
+              suit: "hearts"
+            }
+          ],
+
+          pot: 300,
+          currentBet: 0,
+
+          playerContributions: {
+            hero: 0,
+            villain: 0
+          },
+
+          totalContributions: {
+            hero: 150,
+            villain: 150
+          }
+        });
+
+        expect(
+          review.decisions[1]?.state
+            ?.players.map(
+            player => ({
+              id: player.id,
+              stack: player.stack
+            })
+          )
+        ).toEqual([
+          {
+            id: "hero",
+            stack: 4850
+          },
+          {
+            id: "villain",
+            stack: 4850
+          }
+        ]);
 
         expect(
           review.startedAt

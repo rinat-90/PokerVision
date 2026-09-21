@@ -103,11 +103,13 @@ function CardView({
 function PlayerView({
                       player,
                       placement,
-                      showCards
+                      showCards,
+                      stack
                     }: {
   player: HandReviewPlayer;
   placement: "top" | "bottom";
   showCards: boolean;
+  stack?: number;
 }) {
   return (
     <div
@@ -136,7 +138,10 @@ function PlayerView({
       </span>
 
       <strong>
-        {player.startingStack.toLocaleString()}
+        {(
+          stack ??
+          player.startingStack
+        ).toLocaleString()}
       </strong>
 
       <span className="position">
@@ -187,7 +192,8 @@ function DecisionDetails({
           <span>Pot</span>
 
           <strong>
-            {decision.pot}
+            {decision.state?.pot ??
+              decision.pot}
           </strong>
         </div>
 
@@ -212,6 +218,7 @@ function DecisionDetails({
 
           <strong>
             {formatStreet(
+              decision.state?.street ??
               decision.street
             )}
           </strong>
@@ -305,14 +312,20 @@ function ReviewApp({
         player.id !== hero?.id
     );
 
-  const activeStreet =
-    activeDecision !== undefined
-      ? review.streets.find(
-        street =>
-          street.street ===
-          activeDecision.street
-      )
-      : undefined;
+  const activeState =
+    activeDecision?.state;
+
+  const heroState =
+    activeState?.players.find(
+      player =>
+        player.id === hero?.id
+    );
+
+  const opponentState =
+    activeState?.players.find(
+      player =>
+        player.id === opponent?.id
+    );
 
   return (
     <div className="app">
@@ -456,13 +469,16 @@ function ReviewApp({
 
                       <h2>
                         {formatStreet(
+                          activeState?.street ??
                           activeDecision.street
                         )}
                       </h2>
                     </div>
 
                     <span className="pot">
-                      Pot {activeDecision.pot}
+                      Pot{" "}
+                      {activeState?.pot ??
+                        activeDecision.pot}
                     </span>
                   </div>
 
@@ -472,14 +488,17 @@ function ReviewApp({
                         player={opponent}
                         placement="top"
                         showCards={false}
+                        stack={
+                          opponentState?.stack
+                        }
                       />
                     ) : null}
 
                     <div className="felt">
-                      {activeStreet !== undefined &&
-                      activeStreet.board.length > 0 ? (
+                      {activeState !== undefined &&
+                      activeState.board.length > 0 ? (
                         <div className="board">
-                          {activeStreet.board.map(
+                          {activeState.board.map(
                             (card, index) => (
                               <CardView
                                 key={`${card.rank}-${card.suit}-${index}`}
@@ -495,7 +514,8 @@ function ReviewApp({
                       )}
 
                       <div className="pot-chip">
-                        {activeDecision.pot}
+                        {activeState?.pot ??
+                          activeDecision.pot}
                       </div>
                     </div>
 
@@ -504,6 +524,9 @@ function ReviewApp({
                         player={hero}
                         placement="bottom"
                         showCards
+                        stack={
+                          heroState?.stack
+                        }
                       />
                     ) : null}
                   </div>
@@ -519,9 +542,9 @@ function ReviewApp({
               <section className="panel timeline-panel">
                 <div className="panel-header">
                   <div>
-      <span className="panel-label">
-        Timeline
-      </span>
+                    <span className="panel-label">
+                      Timeline
+                    </span>
 
                     <h2>
                       Hand actions
@@ -599,7 +622,9 @@ function ReviewApp({
                                     .filter(Boolean)
                                     .join(" ")}
                                   type="button"
-                                  key={action.actionIndex}
+                                  key={
+                                    action.actionIndex
+                                  }
                                   disabled={
                                     decision === undefined
                                   }
@@ -613,14 +638,14 @@ function ReviewApp({
                                     }
                                   }}
                                 >
-                    <span className="timeline-index">
-                      {action.actionIndex + 1}
-                    </span>
+                                  <span className="timeline-index">
+                                    {action.actionIndex + 1}
+                                  </span>
 
                                   <span className="timeline-player">
-                      {player?.name ??
-                        action.playerId}
-                    </span>
+                                    {player?.name ??
+                                      action.playerId}
+                                  </span>
 
                                   <strong>
                                     {formatAction(
@@ -629,15 +654,15 @@ function ReviewApp({
                                   </strong>
 
                                   <span className="timeline-amount">
-                      {action.amount > 0
-                        ? action.amount
-                        : "—"}
-                    </span>
+                                    {action.amount > 0
+                                      ? action.amount
+                                      : "—"}
+                                  </span>
 
                                   {decision !== undefined ? (
                                     <span className="timeline-analysis-badge">
-                        {decision.status}
-                      </span>
+                                      {decision.status}
+                                    </span>
                                   ) : null}
                                 </button>
                               );
