@@ -87,3 +87,5 @@ export * from "./action/bet-amount-state-tracker.js";
 export * from "./action/bet-amount-ocr-preprocessor.js";
 
 export * from "./hand/video-hand-to-hand-history.js";
+
+export * from "./hand/analyze-video-hand.js";
