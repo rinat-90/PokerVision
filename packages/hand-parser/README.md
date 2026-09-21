@@ -1,8 +1,8 @@
 # @poker-vision/hand-parser
 
-Hand-history parsing layer for PokerVision.
+Source-specific hand-history parsing layer for PokerVision.
 
-The package converts raw poker hand-history files into the canonical `HandHistory` model used by `@poker-vision/hand-history`.
+The package converts raw poker hand-history files into the canonical `HandHistory` model used by the replay and decision-analysis pipeline.
 
 ```text
 Raw Hand History
@@ -13,9 +13,11 @@ Raw Hand History
        ↓
    HandHistory
        ↓
-  hand-history
+     Replay
        ↓
- poker-engine
+ Decision Points
+       ↓
+Decision Analysis
 ```
 
 ## Responsibilities
@@ -29,6 +31,7 @@ Raw Hand History
 * Parse streets and community cards
 * Parse showdown information
 * Parse multiple hands from a file
+* Produce canonical `HandHistory`
 * Validate parser output
 * Provide CLI access for testing and debugging
 
@@ -37,38 +40,41 @@ Raw Hand History
 This package does **not** handle:
 
 * Poker rules or hand evaluation
+* Hand replay
+* Betting-state reconstruction
 * Equity calculations
 * Pot odds or EV
-* Video processing
-* OCR / computer vision
+* Decision analysis
+* Video or live-screen processing
+* OCR or computer vision
 * UI
 * Database persistence
-* Decision analysis
+* AI-generated explanations
 
 Those responsibilities belong to other PokerVision packages.
 
 ## Core API
 
-```ts id="7qv5fs"
+```ts
 parsePokerStarsHand(input)
 parsePokerStarsHands(input)
 ```
 
-Both return the canonical `HandHistory` model.
+Both produce the canonical `HandHistory` model.
 
 Parsing errors are reported through `HandHistoryParserError`.
 
-## Supported Format
+## Supported Formats
 
 Currently supports **PokerStars hand histories**.
 
-The parser currently handles:
+The parser handles:
 
 * Cash-game headers
 * 2-max and 6-max tables
 * Player positions
 * Hole cards
-* Small/big blinds
+* Small and big blinds
 * Antes
 * Calls
 * Checks
@@ -78,35 +84,71 @@ The parser currently handles:
 * All-ins
 * Flop, turn, and river
 * Showdown
-* Multiple hands
+* Multiple hands per file
 
 ## Architecture
 
-```text id="yq3g5r"
+```text
 PokerStars TXT
       ↓
-    detect
+    Detect
       ↓
-    header
+    Header
       ↓
-   players
+   Players
       ↓
-  forced bets
+ Hole Cards
       ↓
-    streets
+ Forced Bets
       ↓
-    actions
+   Streets
       ↓
-   showdown
+   Actions
+      ↓
+  Showdown
       ↓
  HandHistory
 ```
 
-The parser is responsible only for translating the source format into the canonical model.
+The parser stops at the canonical `HandHistory` boundary.
+
+From there, other packages take over:
+
+```text
+@poker-vision/hand-parser
+           ↓
+      HandHistory
+           ↓
+@poker-vision/hand-history
+           ↓
+   Replay / Decision Points
+           ↓
+@poker-vision/poker-engine
+           ↓
+    Decision Analysis
+```
+
+This keeps platform-specific parsing separate from poker rules and analysis.
+
+## Canonical Hand Model
+
+All supported source formats should eventually converge on the same model:
+
+```text
+PokerStars TXT ─────┐
+                    │
+Future Platform ────┼──→ HandHistory
+                    │
+Video / Vision ─────┘
+```
+
+This means the replay and analysis pipeline does not need to know where a hand originated.
+
+For video-derived hands, `@poker-vision/vision` produces a `VideoHand` and adapts it to the same `HandHistory` model independently of this parser.
 
 ## Package Structure
 
-```text id="v4t2hh"
+```text
 src/
 ├── types.ts
 ├── parser-error.ts
@@ -127,36 +169,99 @@ src/
     └── parse-hands.ts
 ```
 
+## CLI
+
+The package includes CLI support for testing parsed hand histories against real fixtures.
+
+Example:
+
+```bash
+pnpm --filter @poker-vision/hand-parser analyze ./hand.txt MrBlue
+```
+
+The CLI can be used to verify the complete flow from a source hand history into the existing analysis pipeline.
+
 ## Testing
 
 Run the package tests:
 
-```bash id="y8i0sl"
+```bash
 pnpm --filter @poker-vision/hand-parser test
+```
+
+Type-check the package:
+
+```bash
+pnpm --filter @poker-vision/hand-parser exec tsc --noEmit
 ```
 
 Run the full repository test suite:
 
-```bash id="l7h2pj"
+```bash
 pnpm test
 ```
 
-The package also includes a real PokerStars hand-history fixture for end-to-end testing.
+The package includes real hand-history fixtures used for end-to-end parser and analysis testing.
 
 ## Current Status
 
-The parser currently provides a complete PokerStars → `HandHistory` pipeline for the supported formats.
+```text
+PokerStars Parser
+├── Format Detection       ✅
+├── Header Parsing         ✅
+├── Player Parsing         ✅
+├── Position Mapping       ✅
+├── Hole Cards             ✅
+├── Forced Bets            ✅
+├── Actions                ✅
+├── Streets / Board        ✅
+├── Showdown               ✅
+├── Multi-Hand Files       ✅
+└── Analysis Integration   ✅
+```
 
-Future work may include:
+The current PokerStars → `HandHistory` pipeline is complete for the supported formats.
+
+Future parser work may include:
 
 * Additional poker platforms
 * Tournament hand histories
 * 9-max tables
-* More PokerStars edge cases
+* Additional PokerStars edge cases
 * Additional source formats
 
-## Design Principle
+## Design Principles
 
-`hand-parser` should be **source-specific but model-independent**.
+### Source Specific
 
-Its job is to understand the syntax of a poker platform and produce a clean, validated `HandHistory` without implementing poker logic itself.
+Each parser understands the syntax and conventions of its poker platform.
+
+### Model Independent
+
+Platform-specific details are translated into the canonical `HandHistory` model rather than leaking into downstream packages.
+
+### No Poker Logic Duplication
+
+The parser records what happened in the source hand history. It does not independently implement betting rules, equity, EV, or decision analysis.
+
+### Deterministic
+
+The same source hand history should produce the same structured output.
+
+### Shared Analysis Pipeline
+
+Whether a hand originates from text or vision:
+
+```text
+Source
+  ↓
+HandHistory
+  ↓
+Replay
+  ↓
+Decision Points
+  ↓
+Decision Analysis
+```
+
+`hand-parser` owns only the source → `HandHistory` portion of that pipeline.
