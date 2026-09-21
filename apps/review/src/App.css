@@ -561,3 +561,62 @@
 .card-red {
   color: #dc2626;
 }
+
+.timeline-street {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.timeline-street + .timeline-street {
+  margin-top: 18px;
+  padding-top: 18px;
+  border-top: 1px solid var(--border);
+}
+
+.timeline-street-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.timeline-street-header > strong {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.timeline-board {
+  display: flex;
+  gap: 4px;
+}
+
+.timeline-board .card {
+  width: 25px;
+  height: 32px;
+  font-size: 9px;
+}
+
+.timeline-street-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.timeline-action-analyzed {
+  cursor: pointer;
+}
+
+.timeline-action:disabled {
+  cursor: default;
+  opacity: 0.7;
+}
+
+.timeline-analysis-badge {
+  margin-left: auto;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  opacity: 0.75;
+}

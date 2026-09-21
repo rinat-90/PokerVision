@@ -519,58 +519,132 @@ function ReviewApp({
               <section className="panel timeline-panel">
                 <div className="panel-header">
                   <div>
-                    <span className="panel-label">
-                      Timeline
-                    </span>
+      <span className="panel-label">
+        Timeline
+      </span>
 
                     <h2>
-                      Decisions
+                      Hand actions
                     </h2>
                   </div>
                 </div>
 
                 <div className="timeline">
-                  {review.decisions.map(
-                    (
-                      decision,
-                      index
-                    ) => (
-                      <button
-                        className={
-                          index === activeDecisionIndex
-                            ? "timeline-action timeline-action-active"
-                            : "timeline-action"
-                        }
-                        type="button"
-                        key={
-                          decision.actionIndex
-                        }
-                        onClick={() =>
-                          setActiveDecisionIndex(
-                            index
-                          )
-                        }
+                  {review.streets.map(
+                    street => (
+                      <div
+                        className="timeline-street"
+                        key={street.street}
                       >
-                        <span className="timeline-index">
-                          {index + 1}
-                        </span>
+                        <div className="timeline-street-header">
+                          <strong>
+                            {formatStreet(
+                              street.street
+                            )}
+                          </strong>
 
-                        <span className="timeline-player">
-                          {formatStreet(
-                            decision.street
+                          {street.board.length > 0 ? (
+                            <div className="timeline-board">
+                              {street.board.map(
+                                (card, index) => (
+                                  <CardView
+                                    key={`${card.rank}-${card.suit}-${index}`}
+                                    card={card}
+                                  />
+                                )
+                              )}
+                            </div>
+                          ) : null}
+                        </div>
+
+                        <div className="timeline-street-actions">
+                          {street.actions.map(
+                            action => {
+                              const player =
+                                review.players.find(
+                                  candidate =>
+                                    candidate.id ===
+                                    action.playerId
+                                );
+
+                              const decisionIndex =
+                                review.decisions.findIndex(
+                                  decision =>
+                                    decision.actionIndex ===
+                                    action.actionIndex
+                                );
+
+                              const decision =
+                                decisionIndex >= 0
+                                  ? review.decisions[
+                                    decisionIndex
+                                    ]
+                                  : undefined;
+
+                              const isActive =
+                                decisionIndex ===
+                                activeDecisionIndex;
+
+                              return (
+                                <button
+                                  className={[
+                                    "timeline-action",
+                                    decision !== undefined
+                                      ? "timeline-action-analyzed"
+                                      : "",
+                                    isActive
+                                      ? "timeline-action-active"
+                                      : ""
+                                  ]
+                                    .filter(Boolean)
+                                    .join(" ")}
+                                  type="button"
+                                  key={action.actionIndex}
+                                  disabled={
+                                    decision === undefined
+                                  }
+                                  onClick={() => {
+                                    if (
+                                      decisionIndex >= 0
+                                    ) {
+                                      setActiveDecisionIndex(
+                                        decisionIndex
+                                      );
+                                    }
+                                  }}
+                                >
+                    <span className="timeline-index">
+                      {action.actionIndex + 1}
+                    </span>
+
+                                  <span className="timeline-player">
+                      {player?.name ??
+                        action.playerId}
+                    </span>
+
+                                  <strong>
+                                    {formatAction(
+                                      action.type
+                                    )}
+                                  </strong>
+
+                                  <span className="timeline-amount">
+                      {action.amount > 0
+                        ? action.amount
+                        : "—"}
+                    </span>
+
+                                  {decision !== undefined ? (
+                                    <span className="timeline-analysis-badge">
+                        {decision.status}
+                      </span>
+                                  ) : null}
+                                </button>
+                              );
+                            }
                           )}
-                        </span>
-
-                        <strong>
-                          {formatAction(
-                            decision.action
-                          )}
-                        </strong>
-
-                        <span className="timeline-amount">
-                          {decision.amount}
-                        </span>
-                      </button>
+                        </div>
+                      </div>
                     )
                   )}
                 </div>
