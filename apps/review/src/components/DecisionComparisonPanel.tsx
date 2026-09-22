@@ -3,6 +3,10 @@ import type {
 } from "../model/session-decisions";
 
 import {
+  createDecisionComparisonDelta,
+} from "../model/decision-comparison-delta";
+
+import {
   formatAction,
   formatStreet,
 } from "../utils/format";
@@ -45,6 +49,37 @@ function formatExpectedValue(
   }
 
   return value.toFixed(1);
+}
+
+function formatDelta(
+  value: number | undefined,
+): string {
+  if (value === undefined) {
+    return "—";
+  }
+
+  if (value > 0) {
+    return `+${value.toFixed(1)}`;
+  }
+
+  return value.toFixed(1);
+}
+
+function formatPercentageDelta(
+  value: number | undefined,
+): string {
+  if (value === undefined) {
+    return "—";
+  }
+
+  const percentage =
+    value * 100;
+
+  if (percentage > 0) {
+    return `+${percentage.toFixed(1)}%`;
+  }
+
+  return `${percentage.toFixed(1)}%`;
 }
 
 function ComparisonDecision({
@@ -164,6 +199,15 @@ export function DecisionComparisonPanel({
     return null;
   }
 
+  const delta =
+    left !== undefined &&
+    right !== undefined
+      ? createDecisionComparisonDelta(
+        left,
+        right,
+      )
+      : undefined;
+
   return (
     <section className="panel decision-comparison-panel">
       <div className="panel-header">
@@ -197,6 +241,67 @@ export function DecisionComparisonPanel({
           value={right}
         />
       </div>
+
+      {delta !== undefined && (
+        <div className="comparison-delta">
+          <div className="comparison-delta-header">
+            <span className="panel-label">
+              Difference
+            </span>
+
+            <strong>
+              B − A
+            </strong>
+          </div>
+
+          <div className="comparison-delta-grid">
+            <div>
+              <span>Pot</span>
+              <strong>
+                {formatDelta(
+                  delta.pot,
+                )}
+              </strong>
+            </div>
+
+            <div>
+              <span>Call</span>
+              <strong>
+                {formatDelta(
+                  delta.callAmount,
+                )}
+              </strong>
+            </div>
+
+            <div>
+              <span>Equity</span>
+              <strong>
+                {formatPercentageDelta(
+                  delta.equity,
+                )}
+              </strong>
+            </div>
+
+            <div>
+              <span>Pot odds</span>
+              <strong>
+                {formatPercentageDelta(
+                  delta.potOdds,
+                )}
+              </strong>
+            </div>
+
+            <div>
+              <span>EV</span>
+              <strong>
+                {formatDelta(
+                  delta.expectedValue,
+                )}
+              </strong>
+            </div>
+          </div>
+        </div>
+      )}
     </section>
   );
 }

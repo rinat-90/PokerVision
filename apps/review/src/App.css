@@ -1181,3 +1181,66 @@
     grid-template-columns: 1fr;
   }
 }
+
+
+.comparison-delta {
+  margin-top: 12px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+}
+
+.comparison-delta-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border);
+}
+
+.comparison-delta-header strong {
+  font-size: 12px;
+}
+
+.comparison-delta-grid {
+  display: grid;
+  grid-template-columns:
+    repeat(5, minmax(0, 1fr));
+}
+
+.comparison-delta-grid > div {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 5px;
+  padding: 12px 14px;
+  border-right: 1px solid var(--border);
+}
+
+.comparison-delta-grid > div:last-child {
+  border-right: 0;
+}
+
+.comparison-delta-grid span {
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.comparison-delta-grid strong {
+  font-size: 14px;
+}
+
+@media (max-width: 900px) {
+  .comparison-delta-grid {
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+  }
+
+  .comparison-delta-grid > div {
+    border-bottom: 1px solid var(--border);
+  }
+}
