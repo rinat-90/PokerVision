@@ -39,6 +39,14 @@ import {
   SessionSummary,
 } from "./components/SessionSummary";
 
+import type {
+  ReviewSessionInsights,
+} from "./model/review-session-insights";
+
+import {
+  SessionInsights,
+} from "./components/SessionInsights";
+
 import {
   formatGameFormat,
 } from "./utils/format";
@@ -47,6 +55,7 @@ interface ReviewAppProps {
   review: HandReview;
   hands: HandReview[];
   sessionSummary: ReviewSessionSummary;
+  sessionInsights: ReviewSessionInsights;
   onOpenHand: () => void;
   onSelectHand: (
     handId: string,
@@ -63,6 +72,7 @@ export function ReviewApp({
                             review,
                             hands,
                             sessionSummary,
+                            sessionInsights,
                             onOpenHand,
                             onSelectHand,
                             onPreviousHand,
@@ -251,6 +261,10 @@ export function ReviewApp({
         <section className="review">
           <SessionSummary
             summary={sessionSummary}
+          />
+
+          <SessionInsights
+            insights={sessionInsights}
           />
 
           <div className="review-header">

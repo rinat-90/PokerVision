@@ -32,6 +32,10 @@ import {
 } from "./model/review-session-summary";
 
 import {
+  createReviewSessionInsights,
+} from "./model/review-session-insights";
+
+import {
   ReviewApp,
 } from "./ReviewApp";
 
@@ -66,6 +70,11 @@ function App() {
 
   const sessionSummary =
     createReviewSessionSummary(
+      session,
+    );
+
+  const sessionInsights =
+    createReviewSessionInsights(
       session,
     );
 
@@ -187,6 +196,9 @@ function App() {
           hands={session.hands}
           sessionSummary={
             sessionSummary
+          }
+          sessionInsights={
+            sessionInsights
           }
           onOpenHand={openHand}
           onSelectHand={selectHand}
