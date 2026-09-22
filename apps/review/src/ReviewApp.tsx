@@ -98,6 +98,20 @@ import {
 } from "./components/DecisionDetailPanel";
 
 import {
+  clearDecisionComparison,
+  createDecisionComparison,
+  selectComparisonDecision,
+} from "./model/decision-comparison";
+
+import {
+  DecisionComparisonPanel,
+} from "./components/DecisionComparisonPanel";
+
+import type {
+  DecisionComparison,
+} from "./model/decision-comparison";
+
+import {
   formatGameFormat,
 } from "./utils/format";
 
@@ -153,6 +167,13 @@ export function ReviewApp({
     setDecisionEvBucket,
   ] = useState<DecisionEvBucket>(
     "all",
+  );
+
+  const [
+    decisionComparison,
+    setDecisionComparison,
+  ] = useState<DecisionComparison>(
+    createDecisionComparison,
   );
 
   const allActions =
@@ -276,6 +297,42 @@ export function ReviewApp({
         action.actionIndex ===
         activeActionIndex,
     );
+
+  const comparisonActionIndexes =
+    new Set(
+      [
+        decisionComparison.left,
+        decisionComparison.right,
+      ]
+        .filter(
+          (
+            decision,
+          ): decision is SessionDecision =>
+            decision !== undefined,
+        )
+        .map(
+          ({ handId, decision }) =>
+            `${handId}-${decision.actionIndex}`,
+        ),
+    );
+
+  const toggleComparisonDecision = (
+    decision: SessionDecision,
+  ) => {
+    setDecisionComparison(
+      (current) =>
+        selectComparisonDecision(
+          current,
+          decision,
+        ),
+    );
+  };
+
+  const clearComparison = () => {
+    setDecisionComparison(
+      clearDecisionComparison(),
+    );
+  };
 
   const selectSessionDecision = (
     handId: string,
@@ -486,6 +543,9 @@ export function ReviewApp({
             sort={sessionDecisionSort}
             evSummary={decisionEvSummary}
             evBucket={decisionEvBucket}
+            comparisonActionIndexes={
+              comparisonActionIndexes
+            }
             onEvBucketChange={
               setDecisionEvBucket
             }
@@ -496,9 +556,18 @@ export function ReviewApp({
             onSelectDecision={
               selectSessionDecision
             }
+            onToggleComparison={
+              toggleComparisonDecision
+            }
             onSortChange={
               setSessionDecisionSort
             }
+          />
+
+          <DecisionComparisonPanel
+            left={decisionComparison.left}
+            right={decisionComparison.right}
+            onClear={clearComparison}
           />
 
           <DecisionDetailPanel

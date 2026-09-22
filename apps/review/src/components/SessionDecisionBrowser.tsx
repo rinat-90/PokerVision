@@ -1,4 +1,8 @@
 import type {
+  KeyboardEvent,
+} from "react";
+
+import type {
   SessionDecision,
 } from "../model/session-decisions";
 
@@ -23,6 +27,7 @@ interface SessionDecisionBrowserProps {
   sort: SessionDecisionSort;
   evSummary: DecisionEvSummary;
   evBucket: DecisionEvBucket;
+  comparisonActionIndexes: Set<string>;
   onEvBucketChange: (
     bucket: DecisionEvBucket,
   ) => void;
@@ -32,6 +37,9 @@ interface SessionDecisionBrowserProps {
   onSelectDecision: (
     handId: string,
     actionIndex: number,
+  ) => void;
+  onToggleComparison: (
+    decision: SessionDecision,
   ) => void;
 }
 
@@ -66,9 +74,11 @@ export function SessionDecisionBrowser({
                                          sort,
                                          evSummary,
                                          evBucket,
+                                         comparisonActionIndexes,
                                          onEvBucketChange,
                                          onSortChange,
                                          onSelectDecision,
+                                         onToggleComparison,
                                        }: SessionDecisionBrowserProps) {
   return (
     <section className="panel session-decision-browser">
@@ -197,6 +207,7 @@ export function SessionDecisionBrowser({
             <span>Equity</span>
             <span>Pot odds</span>
             <span>EV</span>
+            <span>Compare</span>
           </div>
 
           {decisions.map(
@@ -209,25 +220,54 @@ export function SessionDecisionBrowser({
                 decision.actionIndex ===
                 activeActionIndex;
 
+              const comparisonKey =
+                `${handId}-${decision.actionIndex}`;
+
+              const isCompared =
+                comparisonActionIndexes.has(
+                  comparisonKey,
+                );
+
+              const selectDecision = () => {
+                onSelectDecision(
+                  handId,
+                  decision.actionIndex,
+                );
+              };
+
+              const handleKeyDown = (
+                event: KeyboardEvent<HTMLDivElement>,
+              ) => {
+                if (
+                  event.key !== "Enter" &&
+                  event.key !== " "
+                ) {
+                  return;
+                }
+
+                event.preventDefault();
+
+                selectDecision();
+              };
+
               return (
-                <button
-                  key={`${handId}-${decision.actionIndex}`}
-                  type="button"
+                <div
+                  key={comparisonKey}
                   className={
                     isActive
                       ? "session-decision-item active"
                       : "session-decision-item"
                   }
+                  role="button"
+                  tabIndex={0}
                   aria-current={
                     isActive
                       ? "true"
                       : undefined
                   }
-                  onClick={() =>
-                    onSelectDecision(
-                      handId,
-                      decision.actionIndex,
-                    )
+                  onClick={selectDecision}
+                  onKeyDown={
+                    handleKeyDown
                   }
                 >
                   <span>
@@ -267,7 +307,31 @@ export function SessionDecisionBrowser({
                       decision.expectedValue,
                     )}
                   </span>
-                </button>
+
+                  <button
+                    type="button"
+                    className={
+                      isCompared
+                        ? "comparison-toggle active"
+                        : "comparison-toggle"
+                    }
+                    aria-pressed={
+                      isCompared
+                    }
+                    onClick={(event) => {
+                      event.stopPropagation();
+
+                      onToggleComparison({
+                        handId,
+                        decision,
+                      });
+                    }}
+                  >
+                    {isCompared
+                      ? "Selected"
+                      : "Compare"}
+                  </button>
+                </div>
               );
             },
           )}

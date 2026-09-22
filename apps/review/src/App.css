@@ -888,13 +888,14 @@
 .session-decision-columns {
   display: grid;
   grid-template-columns:
-    minmax(80px, 1fr)
-    80px
-    90px
-    90px
-    80px
-    80px
-    80px;
+  minmax(80px, 1fr)
+  80px
+  90px
+  90px
+  80px
+  80px
+  80px
+  90px;
   gap: 12px;
   padding: 0 12px 2px;
   color: var(--muted);
@@ -912,7 +913,8 @@
   90px
   80px
   80px
-  80px;
+  80px
+  90px;
   align-items: center;
   gap: 12px;
   width: 100%;
@@ -1069,4 +1071,113 @@
 
 .decision-detail-grid > div:last-child {
   border-right: 0;
+}
+
+.comparison-toggle {
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 5px 8px;
+  background: transparent;
+  color: var(--muted);
+  font: inherit;
+  font-size: 11px;
+  cursor: pointer;
+}
+
+.comparison-toggle:hover {
+  border-color: var(--accent-border);
+  color: inherit;
+}
+
+.comparison-toggle.active {
+  border-color: var(--accent);
+  background: var(--accent-bg);
+  color: var(--accent-light);
+}
+
+.decision-comparison-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.comparison-decision {
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--panel);
+}
+
+.comparison-decision.empty-state {
+  display: flex;
+  min-height: 160px;
+  align-items: center;
+  justify-content: center;
+}
+
+.comparison-decision-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--border);
+}
+
+.comparison-decision-header span {
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.comparison-decision-header strong {
+  font-size: 13px;
+}
+
+.comparison-metrics {
+  display: grid;
+  grid-template-columns:
+    repeat(2, minmax(0, 1fr));
+}
+
+.comparison-metrics > div {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 5px;
+  padding: 12px 14px;
+  border-right: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+}
+
+.comparison-metrics > div:nth-child(2n) {
+  border-right: 0;
+}
+
+.comparison-metrics > div:nth-last-child(-n + 2) {
+  border-bottom: 0;
+}
+
+.comparison-metrics span {
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.comparison-metrics strong {
+  overflow: hidden;
+  font-size: 14px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@media (max-width: 900px) {
+  .decision-comparison-grid {
+    grid-template-columns: 1fr;
+  }
 }
