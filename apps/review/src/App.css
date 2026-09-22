@@ -885,14 +885,34 @@
   margin-top: 12px;
 }
 
-.session-decision-item {
+.session-decision-columns {
   display: grid;
   grid-template-columns:
     minmax(80px, 1fr)
+    80px
     90px
     90px
-    90px
-    90px;
+    80px
+    80px
+    80px;
+  gap: 12px;
+  padding: 0 12px 2px;
+  color: var(--muted);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.session-decision-item {
+  display: grid;
+  grid-template-columns:
+  minmax(80px, 1fr)
+  80px
+  90px
+  90px
+  80px
+  80px
+  80px;
   align-items: center;
   gap: 12px;
   width: 100%;
@@ -907,8 +927,19 @@
   cursor: pointer;
 }
 
-.session-decision-item:hover {
-  background: rgba(255, 255, 255, 0.06);
+.session-decision-item.active {
+  border-color: var(--accent);
+  background: var(--accent-bg);
+  box-shadow: inset 3px 0 0 var(--accent);
+}
+
+.session-decision-item.active:hover {
+  border-color: var(--accent);
+  background: var(--accent-bg);
+}
+
+.session-decision-item.active strong {
+  color: var(--accent-light);
 }
 
 .session-decision-item span {
@@ -940,4 +971,26 @@
   .session-decision-item span:nth-of-type(3) {
     display: none;
   }
+}
+
+.session-decision-browser-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.session-decision-browser-actions select {
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  padding: 7px 10px;
+  background: var(--panel);
+  color: inherit;
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.session-decision-browser-actions select:focus {
+  outline: 1px solid var(--border);
+  outline-offset: 1px;
 }

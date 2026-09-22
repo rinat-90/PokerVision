@@ -2,6 +2,10 @@ import type {
   SessionDecision,
 } from "../model/session-decisions";
 
+import type {
+  SessionDecisionSort,
+} from "../model/session-decision-sort";
+
 import {
   formatAction,
   formatStreet,
@@ -9,14 +13,48 @@ import {
 
 interface SessionDecisionBrowserProps {
   decisions: SessionDecision[];
+  activeHandId: string;
+  activeActionIndex: number;
+  sort: SessionDecisionSort;
+  onSortChange: (
+    sort: SessionDecisionSort,
+  ) => void;
   onSelectDecision: (
     handId: string,
     actionIndex: number,
   ) => void;
 }
 
+function formatPercentage(
+  value: number | undefined,
+): string {
+  if (value === undefined) {
+    return "—";
+  }
+
+  return `${(value * 100).toFixed(1)}%`;
+}
+
+function formatExpectedValue(
+  value: number | undefined,
+): string {
+  if (value === undefined) {
+    return "—";
+  }
+
+  if (value > 0) {
+    return `+${value.toFixed(1)}`;
+  }
+
+  return value.toFixed(1);
+}
+
 export function SessionDecisionBrowser({
                                          decisions,
+                                         activeHandId,
+                                         activeActionIndex,
+                                         sort,
+                                         onSortChange,
                                          onSelectDecision,
                                        }: SessionDecisionBrowserProps) {
   return (
@@ -32,55 +70,119 @@ export function SessionDecisionBrowser({
           </h2>
         </div>
 
-        <span className="status">
-          {decisions.length} decisions
-        </span>
+        <div className="session-decision-browser-actions">
+  <span className="status">
+    {decisions.length} decisions
+  </span>
+
+          <select
+            aria-label="Sort decisions"
+            value={sort}
+            onChange={(event) =>
+              onSortChange(
+                event.target
+                  .value as SessionDecisionSort,
+              )
+            }
+          >
+            <option value="session">
+              Session order
+            </option>
+
+            <option value="ev-desc">
+              EV high → low
+            </option>
+
+            <option value="ev-asc">
+              EV low → high
+            </option>
+          </select>
+        </div>
       </div>
 
       {decisions.length > 0 ? (
         <div className="session-decision-list">
+          <div className="session-decision-columns">
+            <span>Hand</span>
+            <span>Street</span>
+            <span>Action</span>
+            <span>Status</span>
+            <span>Equity</span>
+            <span>Pot odds</span>
+            <span>EV</span>
+          </div>
+
           {decisions.map(
             ({
                handId,
                decision,
-             }) => (
-              <button
-                key={`${handId}-${decision.actionIndex}`}
-                type="button"
-                className="session-decision-item"
-                onClick={() =>
-                  onSelectDecision(
-                    handId,
-                    decision.actionIndex,
-                  )
-                }
-              >
-                <span>
-                  #{handId}
-                </span>
+             }) => {
+              const isActive =
+                handId === activeHandId &&
+                decision.actionIndex ===
+                activeActionIndex;
 
-                <strong>
-                  {formatStreet(
-                    decision.street,
-                  )}
-                </strong>
+              return (
+                <button
+                  key={`${handId}-${decision.actionIndex}`}
+                  type="button"
+                  className={
+                    isActive
+                      ? "session-decision-item active"
+                      : "session-decision-item"
+                  }
+                  aria-current={
+                    isActive
+                      ? "true"
+                      : undefined
+                  }
+                  onClick={() =>
+                    onSelectDecision(
+                      handId,
+                      decision.actionIndex,
+                    )
+                  }
+                >
+                  <span>
+                    #{handId}
+                  </span>
 
-                <strong>
-                  {formatAction(
-                    decision.action,
-                  )}
-                </strong>
+                  <strong>
+                    {formatStreet(
+                      decision.street,
+                    )}
+                  </strong>
 
-                <span>
-                  {decision.status}
-                </span>
+                  <strong>
+                    {formatAction(
+                      decision.action,
+                    )}
+                  </strong>
 
-                <span>
-                  Action{" "}
-                  {decision.actionIndex + 1}
-                </span>
-              </button>
-            ),
+                  <span>
+                    {decision.status}
+                  </span>
+
+                  <span>
+                    {formatPercentage(
+                      decision.equity,
+                    )}
+                  </span>
+
+                  <span>
+                    {formatPercentage(
+                      decision.potOdds,
+                    )}
+                  </span>
+
+                  <span>
+                    {formatExpectedValue(
+                      decision.expectedValue,
+                    )}
+                  </span>
+                </button>
+              );
+            },
           )}
         </div>
       ) : (

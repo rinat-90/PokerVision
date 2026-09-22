@@ -77,6 +77,14 @@ import {
 } from "./model/session-decisions";
 
 import {
+  sortSessionDecisions,
+} from "./model/session-decision-sort";
+
+import type {
+  SessionDecisionSort,
+} from "./model/session-decision-sort";
+
+import {
   formatGameFormat,
 } from "./utils/format";
 
@@ -120,6 +128,13 @@ export function ReviewApp({
     createDecisionFilter,
   );
 
+  const [
+    sessionDecisionSort,
+    setSessionDecisionSort,
+  ] = useState<SessionDecisionSort>(
+    "session",
+  );
+
   const allActions =
     review.streets.flatMap(
       (street) =>
@@ -136,6 +151,12 @@ export function ReviewApp({
     filterSessionDecisions(
       sessionDecisions,
       decisionFilter,
+    );
+
+  const sortedSessionDecisions =
+    sortSessionDecisions(
+      filteredSessionDecisions,
+      sessionDecisionSort,
     );
 
   const visibleActionIndexes =
@@ -429,10 +450,18 @@ export function ReviewApp({
 
           <SessionDecisionBrowser
             decisions={
-              filteredSessionDecisions
+              sortedSessionDecisions
+            }
+            sort={sessionDecisionSort}
+            activeHandId={review.id}
+            activeActionIndex={
+              activeActionIndex
             }
             onSelectDecision={
               selectSessionDecision
+            }
+            onSortChange={
+              setSessionDecisionSort
             }
           />
 
