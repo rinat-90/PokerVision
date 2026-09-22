@@ -56,6 +56,15 @@ import {
 } from "./components/DecisionQualitySummary";
 
 import {
+  DecisionFilters,
+} from "./components/DecisionFilters";
+
+import {
+  createDecisionFilter,
+  filterDecisions,
+} from "./model/decision-filter";
+
+import {
   formatGameFormat,
 } from "./utils/format";
 
@@ -90,11 +99,58 @@ export function ReviewApp({
                             onRemoveHand,
                             onClearSession,
                           }: ReviewAppProps) {
+  const [
+    decisionFilter,
+    setDecisionFilter,
+  ] = useState(
+    createDecisionFilter,
+  );
+
   const allActions =
     review.streets.flatMap(
       (street) =>
         street.actions,
     );
+
+  const filteredDecisions =
+    filterDecisions(
+      review.decisions,
+      decisionFilter,
+    );
+
+  const visibleActionIndexes =
+    new Set(
+      filteredDecisions.map(
+        (decision) =>
+          decision.actionIndex,
+      ),
+    );
+
+  const filteredActions =
+    allActions.filter(
+      (action) =>
+        visibleActionIndexes.has(
+          action.actionIndex,
+        ),
+    );
+
+  const streets = Array.from(
+    new Set(
+      review.decisions.map(
+        (decision) =>
+          decision.street,
+      ),
+    ),
+  );
+
+  const actions = Array.from(
+    new Set(
+      review.decisions.map(
+        (decision) =>
+          decision.action,
+      ),
+    ),
+  );
 
   const [
     activeActionIndex,
@@ -143,7 +199,7 @@ export function ReviewApp({
       : undefined;
 
   const activeActionPosition =
-    allActions.findIndex(
+    filteredActions.findIndex(
       (action) =>
         action.actionIndex ===
         activeActionIndex,
@@ -168,7 +224,7 @@ export function ReviewApp({
 
     if (event.key === "ArrowLeft") {
       const previousAction =
-        allActions[
+        filteredActions[
         activeActionPosition - 1
           ];
 
@@ -183,7 +239,7 @@ export function ReviewApp({
 
     if (event.key === "ArrowRight") {
       const nextAction =
-        allActions[
+        filteredActions[
         activeActionPosition + 1
           ];
 
@@ -202,6 +258,25 @@ export function ReviewApp({
       allActions[0]?.actionIndex ?? 0,
     );
   }, [review.id]);
+
+  useEffect(() => {
+    const activeIsVisible =
+      filteredActions.some(
+        (action) =>
+          action.actionIndex ===
+          activeActionIndex,
+      );
+
+    if (!activeIsVisible) {
+      setActiveActionIndex(
+        filteredActions[0]
+          ?.actionIndex ?? 0,
+      );
+    }
+  }, [
+    decisionFilter,
+    review.id,
+  ]);
 
   return (
     <div
@@ -281,6 +356,15 @@ export function ReviewApp({
             quality={decisionQuality}
           />
 
+          <DecisionFilters
+            filter={decisionFilter}
+            streets={streets}
+            actions={actions}
+            onChange={
+              setDecisionFilter
+            }
+          />
+
           <div className="review-header">
             <div>
               <div className="eyebrow">
@@ -355,6 +439,9 @@ export function ReviewApp({
                 review={review}
                 activeActionIndex={
                   activeActionIndex
+                }
+                visibleActionIndexes={
+                  visibleActionIndexes
                 }
                 onSelectAction={
                   setActiveActionIndex

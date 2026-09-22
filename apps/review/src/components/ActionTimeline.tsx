@@ -1,39 +1,57 @@
 import type {
-  HandReview
+  HandReview,
 } from "@poker-vision/hand-review";
 
 import {
   formatAction,
-  formatStreet
+  formatStreet,
 } from "../utils/format";
 
 import {
-  CardView
+  CardView,
 } from "./CardView";
 
 interface ActionTimelineProps {
   review: HandReview;
   activeActionIndex: number;
+  visibleActionIndexes?: Set<number>;
   onSelectAction: (
-    actionIndex: number
+    actionIndex: number,
   ) => void;
 }
 
 export function ActionTimeline({
                                  review,
                                  activeActionIndex,
-                                 onSelectAction
+                                 visibleActionIndexes,
+                                 onSelectAction,
                                }: ActionTimelineProps) {
-  const allActions =
-    review.streets.flatMap(
-      street => street.actions
+  const isVisible = (
+    actionIndex: number,
+  ) =>
+    visibleActionIndexes === undefined ||
+    visibleActionIndexes.has(
+      actionIndex,
     );
+
+  const allActions =
+    review.streets
+      .flatMap(
+        (street) =>
+          street.actions,
+      )
+      .filter(
+        (action) =>
+          isVisible(
+            action.actionIndex,
+          ),
+      );
 
   const activeActionPosition =
     allActions.findIndex(
-      action =>
+      (action) =>
         action.actionIndex ===
-        activeActionIndex
+        activeActionIndex,
     );
 
   const hasPreviousAction =
@@ -56,7 +74,7 @@ export function ActionTimeline({
 
     if (action !== undefined) {
       onSelectAction(
-        action.actionIndex
+        action.actionIndex,
       );
     }
   };
@@ -73,7 +91,7 @@ export function ActionTimeline({
 
     if (action !== undefined) {
       onSelectAction(
-        action.actionIndex
+        action.actionIndex,
       );
     }
   };
@@ -102,9 +120,9 @@ export function ActionTimeline({
           </button>
 
           <span>
-            {activeActionPosition + 1}
-            {" / "}
-            {allActions.length}
+            {allActions.length === 0
+              ? "0 / 0"
+              : `${activeActionPosition + 1} / ${allActions.length}`}
           </span>
 
           <button
@@ -120,109 +138,131 @@ export function ActionTimeline({
 
       <div className="timeline">
         {review.streets.map(
-          street => (
-            <div
-              className="timeline-street"
-              key={street.street}
-            >
-              <div className="timeline-street-header">
-                <strong>
-                  {formatStreet(
-                    street.street
-                  )}
-                </strong>
+          (street) => {
+            const visibleActions =
+              street.actions.filter(
+                (action) =>
+                  isVisible(
+                    action.actionIndex,
+                  ),
+              );
 
-                {street.board.length > 0 ? (
-                  <div className="timeline-board">
-                    {street.board.map(
-                      (card, index) => (
-                        <CardView
-                          key={`${card.rank}-${card.suit}-${index}`}
-                          card={card}
-                        />
-                      )
+            if (
+              visibleActions.length === 0
+            ) {
+              return null;
+            }
+
+            return (
+              <div
+                className="timeline-street"
+                key={street.street}
+              >
+                <div className="timeline-street-header">
+                  <strong>
+                    {formatStreet(
+                      street.street,
                     )}
-                  </div>
-                ) : null}
-              </div>
+                  </strong>
 
-              <div className="timeline-street-actions">
-                {street.actions.map(
-                  action => {
-                    const player =
-                      review.players.find(
-                        candidate =>
-                          candidate.id ===
-                          action.playerId
-                      );
+                  {street.board.length >
+                  0 ? (
+                    <div className="timeline-board">
+                      {street.board.map(
+                        (card, index) => (
+                          <CardView
+                            key={`${card.rank}-${card.suit}-${index}`}
+                            card={card}
+                          />
+                        ),
+                      )}
+                    </div>
+                  ) : null}
+                </div>
 
-                    const decision =
-                      review.decisions.find(
-                        candidate =>
-                          candidate.actionIndex ===
-                          action.actionIndex
-                      );
+                <div className="timeline-street-actions">
+                  {visibleActions.map(
+                    (action) => {
+                      const player =
+                        review.players.find(
+                          (candidate) =>
+                            candidate.id ===
+                            action.playerId,
+                        );
 
-                    const isActive =
-                      action.actionIndex ===
-                      activeActionIndex;
+                      const decision =
+                        review.decisions.find(
+                          (candidate) =>
+                            candidate.actionIndex ===
+                            action.actionIndex,
+                        );
 
-                    return (
-                      <button
-                        key={
-                          action.actionIndex
-                        }
-                        type="button"
-                        className={[
-                          "timeline-action",
-                          decision !== undefined
-                            ? "timeline-action-analyzed"
-                            : "",
-                          isActive
-                            ? "timeline-action-active"
-                            : ""
-                        ]
-                          .filter(Boolean)
-                          .join(" ")}
-                        onClick={() => {
-                          onSelectAction(
+                      const isActive =
+                        action.actionIndex ===
+                        activeActionIndex;
+
+                      return (
+                        <button
+                          key={
                             action.actionIndex
-                          );
-                        }}
-                      >
-                        <span className="timeline-index">
-                          {action.actionIndex + 1}
-                        </span>
-
-                        <span className="timeline-player">
-                          {player?.name ??
-                            action.playerId}
-                        </span>
-
-                        <strong>
-                          {formatAction(
-                            action.type
-                          )}
-                        </strong>
-
-                        <span className="timeline-amount">
-                          {action.amount > 0
-                            ? action.amount
-                            : "—"}
-                        </span>
-
-                        {decision !== undefined ? (
-                          <span className="timeline-analysis-badge">
-                            {decision.status}
+                          }
+                          type="button"
+                          className={[
+                            "timeline-action",
+                            decision !==
+                            undefined
+                              ? "timeline-action-analyzed"
+                              : "",
+                            isActive
+                              ? "timeline-action-active"
+                              : "",
+                          ]
+                            .filter(Boolean)
+                            .join(" ")}
+                          onClick={() =>
+                            onSelectAction(
+                              action.actionIndex,
+                            )
+                          }
+                        >
+                          <span className="timeline-index">
+                            {action.actionIndex +
+                              1}
                           </span>
-                        ) : null}
-                      </button>
-                    );
-                  }
-                )}
+
+                          <span className="timeline-player">
+                            {player?.name ??
+                              action.playerId}
+                          </span>
+
+                          <strong>
+                            {formatAction(
+                              action.type,
+                            )}
+                          </strong>
+
+                          <span className="timeline-amount">
+                            {action.amount > 0
+                              ? action.amount
+                              : "—"}
+                          </span>
+
+                          {decision !==
+                          undefined ? (
+                            <span className="timeline-analysis-badge">
+                              {
+                                decision.status
+                              }
+                            </span>
+                          ) : null}
+                        </button>
+                      );
+                    },
+                  )}
+                </div>
               </div>
-            </div>
-          )
+            );
+          },
         )}
       </div>
     </section>
