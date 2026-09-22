@@ -7,8 +7,11 @@ import {
 } from "vitest";
 
 import {
+  clearDecisionReviewState,
   clearReviewSession,
+  loadDecisionReviewState,
   loadReviewSession,
+  saveDecisionReviewState,
   saveReviewSession,
 } from "./review-session-storage";
 
@@ -86,4 +89,64 @@ describe("review session storage", () => {
       loadReviewSession(),
     ).toBeNull();
   });
+  it(
+    "saves and loads decision review state",
+    () => {
+      const state = {
+        "hand-1:4": {
+          reviewed: true,
+          note: "Loose flop call",
+        },
+      };
+
+      saveDecisionReviewState(
+        state,
+      );
+
+      expect(
+        loadDecisionReviewState(),
+      ).toEqual(state);
+    },
+  );
+
+  it(
+    "returns empty decision review state when none exists",
+    () => {
+      expect(
+        loadDecisionReviewState(),
+      ).toEqual({});
+    },
+  );
+
+  it(
+    "returns empty decision review state for invalid JSON",
+    () => {
+      localStorage.setItem(
+        "pokervision.decision-review-state",
+        "{invalid",
+      );
+
+      expect(
+        loadDecisionReviewState(),
+      ).toEqual({});
+    },
+  );
+
+  it(
+    "clears decision review state",
+    () => {
+      saveDecisionReviewState({
+        "hand-1:4": {
+          reviewed: true,
+          note: "Reviewed",
+        },
+      });
+
+      clearDecisionReviewState();
+
+      expect(
+        loadDecisionReviewState(),
+      ).toEqual({});
+    },
+  );
 });

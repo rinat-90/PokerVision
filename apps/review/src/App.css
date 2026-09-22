@@ -820,6 +820,7 @@
   80px
   80px
   80px
+  100px
   90px;
   gap: 12px;
   padding: 0 12px 2px;
@@ -839,6 +840,7 @@
   80px
   80px
   80px
+  100px
   90px;
   align-items: center;
   gap: 12px;
@@ -877,6 +879,16 @@
   font-weight: 600;
 }
 
+.decision-review-status {
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.decision-review-status.reviewed {
+  color: var(--accent-light);
+}
+
 .session-decision-browser .empty-state {
   margin-top: 12px;
   padding: 16px;
@@ -888,14 +900,23 @@
 }
 
 @media (max-width: 800px) {
+  .session-decision-columns {
+    display: none;
+  }
+
   .session-decision-item {
     grid-template-columns:
       minmax(80px, 1fr)
-      repeat(2, 70px);
+      90px
+      100px
+      90px;
   }
 
-  .session-decision-item span:nth-of-type(2),
-  .session-decision-item span:nth-of-type(3) {
+  .session-decision-item > :nth-child(2),
+  .session-decision-item > :nth-child(4),
+  .session-decision-item > :nth-child(5),
+  .session-decision-item > :nth-child(6),
+  .session-decision-item > :nth-child(7) {
     display: none;
   }
 }
@@ -996,6 +1017,71 @@
 
 .decision-detail-grid > div:last-child {
   border-right: 0;
+}
+
+.decision-review {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 18px;
+  border-top: 1px solid var(--border);
+}
+
+.decision-reviewed-toggle {
+  display: inline-flex;
+  width: fit-content;
+  align-items: center;
+  gap: 9px;
+  color: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.decision-reviewed-toggle input {
+  width: 16px;
+  height: 16px;
+  margin: 0;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+
+.decision-note {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.decision-note > span {
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.decision-note textarea {
+  width: 100%;
+  min-height: 88px;
+  box-sizing: border-box;
+  resize: vertical;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 12px;
+  background: var(--panel);
+  color: inherit;
+  font: inherit;
+  font-size: 13px;
+  line-height: 1.5;
+  outline: none;
+}
+
+.decision-note textarea::placeholder {
+  color: var(--muted);
+}
+
+.decision-note textarea:focus {
+  border-color: var(--accent);
 }
 
 .comparison-toggle {

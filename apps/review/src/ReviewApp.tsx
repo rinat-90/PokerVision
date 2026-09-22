@@ -107,6 +107,21 @@ import type {
   DecisionComparison,
 } from "./model/decision-comparison";
 
+import type {
+  DecisionReviewStateMap,
+} from "./model/decision-review-state";
+
+import {
+  getDecisionReviewState,
+  updateDecisionNote,
+  updateDecisionReviewed,
+} from "./model/decision-review-state";
+
+import {
+  loadDecisionReviewState,
+  saveDecisionReviewState,
+} from "./io/review-session-storage";
+
 import {
   formatGameFormat,
 } from "./utils/format";
@@ -170,6 +185,13 @@ export function ReviewApp({
     setDecisionComparison,
   ] = useState<DecisionComparison>(
     createDecisionComparison,
+  );
+
+  const [
+    decisionReviewState,
+    setDecisionReviewState,
+  ] = useState<DecisionReviewStateMap>(
+    loadDecisionReviewState,
   );
 
   const allActions =
@@ -261,6 +283,62 @@ export function ReviewApp({
         decision.actionIndex ===
         activeActionIndex,
     );
+
+  const activeSessionDecision =
+    activeDecision !== undefined
+      ? {
+        handId: review.id,
+        decision: activeDecision,
+      }
+      : undefined;
+
+  const activeDecisionReviewState =
+    activeSessionDecision !== undefined
+      ? getDecisionReviewState(
+        decisionReviewState,
+        activeSessionDecision,
+      )
+      : undefined;
+
+  const handleReviewedChange = (
+    reviewed: boolean,
+  ) => {
+    if (
+      activeSessionDecision ===
+      undefined
+    ) {
+      return;
+    }
+
+    setDecisionReviewState(
+      (current) =>
+        updateDecisionReviewed(
+          current,
+          activeSessionDecision,
+          reviewed,
+        ),
+    );
+  };
+
+  const handleNoteChange = (
+    note: string,
+  ) => {
+    if (
+      activeSessionDecision ===
+      undefined
+    ) {
+      return;
+    }
+
+    setDecisionReviewState(
+      (current) =>
+        updateDecisionNote(
+          current,
+          activeSessionDecision,
+          note,
+        ),
+    );
+  };
 
   const hero =
     review.players.find(
@@ -397,6 +475,15 @@ export function ReviewApp({
       }
     }
   };
+
+  useEffect(
+    () => {
+      saveDecisionReviewState(
+        decisionReviewState,
+      );
+    },
+    [decisionReviewState],
+  );
 
   useEffect(() => {
     const pendingActionIndex =
@@ -572,6 +659,9 @@ export function ReviewApp({
             onSortChange={
               setSessionDecisionSort
             }
+            decisionReviewState={
+              decisionReviewState
+            }
           />
 
           <DecisionComparisonPanel
@@ -584,6 +674,15 @@ export function ReviewApp({
 
           <DecisionDetailPanel
             decision={activeDecision}
+            reviewState={
+              activeDecisionReviewState
+            }
+            onReviewedChange={
+              handleReviewedChange
+            }
+            onNoteChange={
+              handleNoteChange
+            }
           />
 
           <DecisionFilters

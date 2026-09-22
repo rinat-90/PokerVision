@@ -15,6 +15,14 @@ import type {
   DecisionEvSummary,
 } from "../model/session-decision-ev";
 
+import type {
+  DecisionReviewStateMap,
+} from "../model/decision-review-state";
+
+import {
+  getDecisionReviewState,
+} from "../model/decision-review-state";
+
 import {
   formatAction,
   formatStreet,
@@ -28,6 +36,7 @@ interface SessionDecisionBrowserProps {
   evSummary: DecisionEvSummary;
   evBucket: DecisionEvBucket;
   comparisonActionIndexes: Set<string>;
+  decisionReviewState: DecisionReviewStateMap;
   onEvBucketChange: (
     bucket: DecisionEvBucket,
   ) => void;
@@ -79,6 +88,7 @@ export function SessionDecisionBrowser({
                                          onSortChange,
                                          onSelectDecision,
                                          onToggleComparison,
+                                         decisionReviewState,
                                        }: SessionDecisionBrowserProps) {
   return (
     <section className="panel session-decision-browser">
@@ -207,6 +217,7 @@ export function SessionDecisionBrowser({
             <span>Equity</span>
             <span>Pot odds</span>
             <span>EV</span>
+            <span>Review</span>
             <span>Compare</span>
           </div>
 
@@ -226,6 +237,15 @@ export function SessionDecisionBrowser({
               const isCompared =
                 comparisonActionIndexes.has(
                   comparisonKey,
+                );
+
+              const reviewState =
+                getDecisionReviewState(
+                  decisionReviewState,
+                  {
+                    handId,
+                    decision,
+                  },
                 );
 
               const selectDecision = () => {
@@ -307,6 +327,18 @@ export function SessionDecisionBrowser({
                       decision.expectedValue,
                     )}
                   </span>
+
+                  <span
+                    className={
+                      reviewState.reviewed
+                        ? "decision-review-status reviewed"
+                        : "decision-review-status"
+                    }
+                  >
+  {reviewState.reviewed
+    ? "✓ Reviewed"
+    : "—"}
+</span>
 
                   <button
                     type="button"

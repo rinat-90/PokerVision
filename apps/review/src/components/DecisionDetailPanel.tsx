@@ -2,6 +2,10 @@ import type {
   HandReviewDecision,
 } from "@poker-vision/hand-review";
 
+import type {
+  DecisionReviewState,
+} from "../model/decision-review-state";
+
 import {
   formatAction,
   formatStreet,
@@ -11,6 +15,15 @@ interface DecisionDetailPanelProps {
   decision:
     | HandReviewDecision
     | undefined;
+  reviewState:
+    | DecisionReviewState
+    | undefined;
+  onReviewedChange: (
+    reviewed: boolean,
+  ) => void;
+  onNoteChange: (
+    note: string,
+  ) => void;
 }
 
 function formatPercentage(
@@ -70,6 +83,9 @@ function formatSkipReason(
 
 export function DecisionDetailPanel({
                                       decision,
+                                      reviewState,
+                                      onReviewedChange,
+                                      onNoteChange,
                                     }: DecisionDetailPanelProps) {
   return (
     <section className="panel decision-detail-panel">
@@ -92,98 +108,143 @@ export function DecisionDetailPanel({
       </div>
 
       {decision ? (
-        <div className="decision-detail-grid">
-          <div>
-            <span>Street</span>
-            <strong>
-              {formatStreet(
-                decision.street,
+        <>
+          <div className="decision-detail-grid">
+            <div>
+              <span>Street</span>
+              <strong>
+                {formatStreet(
+                  decision.street,
+                )}
+              </strong>
+            </div>
+
+            <div>
+              <span>Action</span>
+              <strong>
+                {formatAction(
+                  decision.action,
+                )}
+              </strong>
+            </div>
+
+            <div>
+              <span>Amount</span>
+              <strong>
+                {formatNumber(
+                  decision.amount,
+                )}
+              </strong>
+            </div>
+
+            <div>
+              <span>Pot</span>
+              <strong>
+                {formatNumber(
+                  decision.pot,
+                )}
+              </strong>
+            </div>
+
+            <div>
+              <span>Call amount</span>
+              <strong>
+                {formatNumber(
+                  decision.callAmount,
+                )}
+              </strong>
+            </div>
+
+            <div>
+              <span>Equity</span>
+              <strong>
+                {formatPercentage(
+                  decision.equity,
+                )}
+              </strong>
+            </div>
+
+            <div>
+              <span>Pot odds</span>
+              <strong>
+                {formatPercentage(
+                  decision.potOdds,
+                )}
+              </strong>
+            </div>
+
+            <div>
+              <span>EV</span>
+              <strong>
+                {formatExpectedValue(
+                  decision.expectedValue,
+                )}
+              </strong>
+            </div>
+
+            <div>
+              <span>Decision</span>
+              <strong>
+                {decision.decision ?? "—"}
+              </strong>
+            </div>
+
+            {decision.status ===
+              "skipped" && (
+                <div>
+                  <span>
+                    Skip reason
+                  </span>
+
+                  <strong>
+                    {formatSkipReason(
+                      decision.skipReason,
+                    )}
+                  </strong>
+                </div>
               )}
-            </strong>
           </div>
 
-          <div>
-            <span>Action</span>
-            <strong>
-              {formatAction(
-                decision.action,
-              )}
-            </strong>
-          </div>
+          <div className="decision-review">
+            <label className="decision-reviewed-toggle">
+              <input
+                type="checkbox"
+                checked={
+                  reviewState?.reviewed ??
+                  false
+                }
+                onChange={(event) =>
+                  onReviewedChange(
+                    event.target.checked,
+                  )
+                }
+              />
 
-          <div>
-            <span>Amount</span>
-            <strong>
-              {formatNumber(
-                decision.amount,
-              )}
-            </strong>
-          </div>
+              <span>
+                Reviewed
+              </span>
+            </label>
 
-          <div>
-            <span>Pot</span>
-            <strong>
-              {formatNumber(
-                decision.pot,
-              )}
-            </strong>
-          </div>
+            <label className="decision-note">
+              <span>
+                Review note
+              </span>
 
-          <div>
-            <span>Call amount</span>
-            <strong>
-              {formatNumber(
-                decision.callAmount,
-              )}
-            </strong>
+              <textarea
+                value={
+                  reviewState?.note ?? ""
+                }
+                onChange={(event) =>
+                  onNoteChange(
+                    event.target.value,
+                  )
+                }
+                placeholder="Add a note about this decision..."
+                rows={4}
+              />
+            </label>
           </div>
-
-          <div>
-            <span>Equity</span>
-            <strong>
-              {formatPercentage(
-                decision.equity,
-              )}
-            </strong>
-          </div>
-
-          <div>
-            <span>Pot odds</span>
-            <strong>
-              {formatPercentage(
-                decision.potOdds,
-              )}
-            </strong>
-          </div>
-
-          <div>
-            <span>EV</span>
-            <strong>
-              {formatExpectedValue(
-                decision.expectedValue,
-              )}
-            </strong>
-          </div>
-
-          <div>
-            <span>Decision</span>
-            <strong>
-              {decision.decision ?? "—"}
-            </strong>
-          </div>
-
-          {decision.status ===
-            "skipped" && (
-              <div>
-                <span>Skip reason</span>
-                <strong>
-                  {formatSkipReason(
-                    decision.skipReason,
-                  )}
-                </strong>
-              </div>
-            )}
-        </div>
+        </>
       ) : (
         <div className="empty-state">
           Select a decision to inspect it.
