@@ -94,6 +94,10 @@ import type {
 } from "./model/session-decision-ev";
 
 import {
+  DecisionDetailPanel,
+} from "./components/DecisionDetailPanel";
+
+import {
   formatGameFormat,
 } from "./utils/format";
 
@@ -480,12 +484,12 @@ export function ReviewApp({
               sortedSessionDecisions
             }
             sort={sessionDecisionSort}
-            activeHandId={review.id}
             evSummary={decisionEvSummary}
             evBucket={decisionEvBucket}
             onEvBucketChange={
               setDecisionEvBucket
             }
+            activeHandId={review.id}
             activeActionIndex={
               activeActionIndex
             }
@@ -495,6 +499,10 @@ export function ReviewApp({
             onSortChange={
               setSessionDecisionSort
             }
+          />
+
+          <DecisionDetailPanel
+            decision={activeDecision}
           />
 
           <DecisionFilters
