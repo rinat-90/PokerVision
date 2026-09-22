@@ -382,7 +382,7 @@ function parseActionLine(
   }
 
   match = line.match(
-    /^(.+): calls ([\d,]+)$/
+    /^(.+): calls ([\d,]+)(?: and is all-in)?$/
   );
 
   if (match !== null) {
@@ -401,7 +401,7 @@ function parseActionLine(
   }
 
   match = line.match(
-    /^(.+): bets ([\d,]+)$/
+    /^(.+): bets ([\d,]+)(?: and is all-in)?$/
   );
 
   if (match !== null) {

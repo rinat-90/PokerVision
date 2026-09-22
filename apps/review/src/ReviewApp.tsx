@@ -748,8 +748,8 @@ export function ReviewApp({
                   <PokerTable
                     action={activeAction}
                     state={activeState}
+                    players={review.players}
                     hero={hero}
-                    opponent={opponent}
                   />
                 ) : null}
 
