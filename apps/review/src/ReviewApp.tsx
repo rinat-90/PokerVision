@@ -65,6 +65,18 @@ import {
 } from "./model/decision-filter";
 
 import {
+  SessionDecisionBrowser,
+} from "./components/SessionDecisionBrowser";
+
+import type {
+  SessionDecision,
+} from "./model/session-decisions";
+
+import {
+  filterSessionDecisions,
+} from "./model/session-decisions";
+
+import {
   formatGameFormat,
 } from "./utils/format";
 
@@ -74,6 +86,7 @@ interface ReviewAppProps {
   sessionSummary: ReviewSessionSummary;
   sessionInsights: ReviewSessionInsights;
   decisionQuality: ReviewDecisionQuality;
+  sessionDecisions: SessionDecision[];
   onOpenHand: () => void;
   onSelectHand: (
     handId: string,
@@ -92,6 +105,7 @@ export function ReviewApp({
                             sessionSummary,
                             sessionInsights,
                             decisionQuality,
+                            sessionDecisions,
                             onOpenHand,
                             onSelectHand,
                             onPreviousHand,
@@ -118,6 +132,12 @@ export function ReviewApp({
       decisionFilter,
     );
 
+  const filteredSessionDecisions =
+    filterSessionDecisions(
+      sessionDecisions,
+      decisionFilter,
+    );
+
   const visibleActionIndexes =
     new Set(
       filteredDecisions.map(
@@ -136,8 +156,8 @@ export function ReviewApp({
 
   const streets = Array.from(
     new Set(
-      review.decisions.map(
-        (decision) =>
+      sessionDecisions.map(
+        ({ decision }) =>
           decision.street,
       ),
     ),
@@ -145,8 +165,8 @@ export function ReviewApp({
 
   const actions = Array.from(
     new Set(
-      review.decisions.map(
-        (decision) =>
+      sessionDecisions.map(
+        ({ decision }) =>
           decision.action,
       ),
     ),
@@ -205,6 +225,26 @@ export function ReviewApp({
         activeActionIndex,
     );
 
+  const selectSessionDecision = (
+    handId: string,
+    actionIndex: number,
+  ) => {
+    if (handId === review.id) {
+      setActiveActionIndex(
+        actionIndex,
+      );
+
+      return;
+    }
+
+    onSelectHand(handId);
+
+    sessionStorage.setItem(
+      "pokervision.pending-action-index",
+      String(actionIndex),
+    );
+  };
+
   const handleKeyDown = (
     event: KeyboardEvent<HTMLDivElement>,
   ) => {
@@ -254,6 +294,37 @@ export function ReviewApp({
   };
 
   useEffect(() => {
+    const pendingActionIndex =
+      sessionStorage.getItem(
+        "pokervision.pending-action-index",
+      );
+
+    if (pendingActionIndex !== null) {
+      sessionStorage.removeItem(
+        "pokervision.pending-action-index",
+      );
+
+      const actionIndex =
+        Number(
+          pendingActionIndex,
+        );
+
+      const exists =
+        allActions.some(
+          (action) =>
+            action.actionIndex ===
+            actionIndex,
+        );
+
+      if (exists) {
+        setActiveActionIndex(
+          actionIndex,
+        );
+
+        return;
+      }
+    }
+
     setActiveActionIndex(
       allActions[0]?.actionIndex ?? 0,
     );
@@ -354,6 +425,15 @@ export function ReviewApp({
 
           <DecisionQualitySummary
             quality={decisionQuality}
+          />
+
+          <SessionDecisionBrowser
+            decisions={
+              filteredSessionDecisions
+            }
+            onSelectDecision={
+              selectSessionDecision
+            }
           />
 
           <DecisionFilters
