@@ -47,6 +47,14 @@ import {
   SessionInsights,
 } from "./components/SessionInsights";
 
+import type {
+  ReviewDecisionQuality,
+} from "./model/review-decision-quality";
+
+import {
+  DecisionQualitySummary,
+} from "./components/DecisionQualitySummary";
+
 import {
   formatGameFormat,
 } from "./utils/format";
@@ -56,6 +64,7 @@ interface ReviewAppProps {
   hands: HandReview[];
   sessionSummary: ReviewSessionSummary;
   sessionInsights: ReviewSessionInsights;
+  decisionQuality: ReviewDecisionQuality;
   onOpenHand: () => void;
   onSelectHand: (
     handId: string,
@@ -73,6 +82,7 @@ export function ReviewApp({
                             hands,
                             sessionSummary,
                             sessionInsights,
+                            decisionQuality,
                             onOpenHand,
                             onSelectHand,
                             onPreviousHand,
@@ -265,6 +275,10 @@ export function ReviewApp({
 
           <SessionInsights
             insights={sessionInsights}
+          />
+
+          <DecisionQualitySummary
+            quality={decisionQuality}
           />
 
           <div className="review-header">

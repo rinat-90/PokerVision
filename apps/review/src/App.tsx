@@ -36,6 +36,10 @@ import {
 } from "./model/review-session-insights";
 
 import {
+  createReviewDecisionQuality,
+} from "./model/review-decision-quality";
+
+import {
   ReviewApp,
 } from "./ReviewApp";
 
@@ -78,6 +82,10 @@ function App() {
       session,
     );
 
+  const decisionQuality =
+    createReviewDecisionQuality(
+      session,
+    );
   useEffect(() => {
     saveReviewSession(
       session,
@@ -199,6 +207,9 @@ function App() {
           }
           sessionInsights={
             sessionInsights
+          }
+          decisionQuality={
+            decisionQuality
           }
           onOpenHand={openHand}
           onSelectHand={selectHand}
