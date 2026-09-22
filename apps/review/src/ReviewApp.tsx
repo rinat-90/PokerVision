@@ -24,10 +24,6 @@ import {
 } from "./components/AnalysisPanel";
 
 import {
-  HandSidebar,
-} from "./components/HandSidebar";
-
-import {
   HandSwitcher,
 } from "./components/HandSwitcher";
 
@@ -536,10 +532,6 @@ export function ReviewApp({
       </header>
 
       <main className="workspace">
-        <HandSidebar
-          review={review}
-          hero={hero}
-        />
 
         <section className="review">
           <SessionSummary
