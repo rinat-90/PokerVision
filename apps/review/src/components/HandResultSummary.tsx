@@ -64,23 +64,29 @@ export function HandResultSummary({
                     <span>
                       Winner +{player.payout}
                     </span>
-                  ) : (
+                  ) : player.cards !== undefined ? (
                     <span>
                       Showdown
+                    </span>
+                  ) : (
+                    <span>
+                      No cards shown
                     </span>
                   )}
                 </div>
 
-                <div className="hand-result-cards">
-                  {player.cards.map(
-                    (card, index) => (
-                      <CardView
-                        key={`${card.rank}-${card.suit}-${index}`}
-                        card={card}
-                      />
-                    ),
-                  )}
-                </div>
+                {player.cards !== undefined && (
+                  <div className="hand-result-cards">
+                    {player.cards.map(
+                      (card, index) => (
+                        <CardView
+                          key={`${card.rank}-${card.suit}-${index}`}
+                          card={card}
+                        />
+                      ),
+                    )}
+                  </div>
+                )}
               </div>
             ),
           )}

@@ -13,8 +13,10 @@ import {
 export interface HandResultPlayer {
   playerId: string;
   name: string;
-  cards: [Card, Card];
+  cards?: [Card, Card];
   payout: number;
+  contribution: number;
+  netResult: number;
   isWinner: boolean;
 }
 
@@ -50,43 +52,54 @@ export function createHandResult(
     ) ?? [];
 
   const players =
-    review.showdown.players.map(
-      (shownPlayer) => {
-        const player =
-          review.players.find(
+    review.players.map(
+      (player) => {
+        const shownPlayer =
+          review.showdown?.players.find(
             (candidate) =>
-              candidate.id ===
-              shownPlayer.playerId,
+              candidate.playerId ===
+              player.id,
           );
 
         const payout =
           review.showdown?.payouts.find(
             (candidate) =>
               candidate.playerId ===
-              shownPlayer.playerId,
+              player.id,
           )?.amount ?? 0;
 
+        const contribution =
+          showdownState
+            .totalContributions[
+            player.id
+            ] ?? 0;
+
+        const netResult =
+          payout - contribution;
+
         return {
-          playerId:
-          shownPlayer.playerId,
+          playerId: player.id,
 
-          name:
-            player?.name ??
-            shownPlayer.playerId,
+          name: player.name,
 
-          cards: [
-            {
-              ...shownPlayer.cards[0],
-            },
-            {
-              ...shownPlayer.cards[1],
-            },
-          ] as [
-            typeof shownPlayer.cards[0],
-            typeof shownPlayer.cards[1],
-          ],
+          ...(shownPlayer === undefined
+            ? {}
+            : {
+              cards: [
+                {
+                  ...shownPlayer.cards[0],
+                },
+                {
+                  ...shownPlayer.cards[1],
+                },
+              ] as [Card, Card],
+            }),
 
           payout,
+
+          contribution,
+
+          netResult,
 
           isWinner:
             payout > 0,

@@ -6,6 +6,16 @@ interface SessionSummaryProps {
   summary: ReviewSessionSummary;
 }
 
+function formatNetResult(
+  value: number,
+): string {
+  if (value > 0) {
+    return `+${value}`;
+  }
+
+  return String(value);
+}
+
 export function SessionSummary({
                                  summary,
                                }: SessionSummaryProps) {
@@ -15,6 +25,24 @@ export function SessionSummary({
         <span>Hands</span>
         <strong>
           {summary.totalHands}
+        </strong>
+      </div>
+
+      <div className="session-summary-item">
+        <span>Results</span>
+        <strong>
+          {summary.completedHands}
+          /
+          {summary.totalHands}
+        </strong>
+      </div>
+
+      <div className="session-summary-item">
+        <span>Net P&amp;L</span>
+        <strong>
+          {formatNetResult(
+            summary.totalNetResult,
+          )}
         </strong>
       </div>
 

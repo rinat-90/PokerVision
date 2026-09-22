@@ -1,6 +1,5 @@
 import type {
-  HandReview,
-  HandReviewDecisionState
+  HandReview
 } from "@poker-vision/hand-review";
 
 import {
@@ -19,6 +18,9 @@ export interface ShowdownTableState {
   players: ShowdownTablePlayer[];
 
   playerContributions:
+    Record<string, number>;
+
+  totalContributions:
     Record<string, number>;
 }
 
@@ -61,6 +63,10 @@ export function getShowdownTableState(
 
     playerContributions: {
       ...displayed.playerContributions
+    },
+
+    totalContributions: {
+      ...displayed.totalContributions
     }
   };
 }

@@ -4,6 +4,7 @@ import type {
 
 export const sampleReport: AnalysisReport = {
   handId: "video-e2e-analysis",
+  heroPlayerId: "hero",
 
   summary: {
     totalDecisionPoints: 2,

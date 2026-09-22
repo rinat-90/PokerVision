@@ -375,9 +375,8 @@ export function ReviewApp({
   const hero =
     review.players.find(
       (player) =>
-        player.holeCards !== undefined,
-    ) ??
-    review.players[0];
+        player.id === review.heroPlayerId,
+    );
 
   const handResult =
     createHandResult(review);

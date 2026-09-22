@@ -92,6 +92,8 @@ export interface HandReviewShowdown {
 export interface HandReview {
   id: string;
 
+  heroPlayerId: string;
+
   gameFormat: GameFormat;
 
   blinds: {

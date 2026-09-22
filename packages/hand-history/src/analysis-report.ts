@@ -26,6 +26,7 @@ export interface AnalysisReportDecision {
 
 export interface AnalysisReport {
   handId: string;
+  heroPlayerId: string;
 
   summary: {
     totalDecisionPoints: number;
@@ -43,6 +44,9 @@ export function createAnalysisReport(
   return {
     handId:
     analysis.handId,
+
+    heroPlayerId:
+    analysis.heroPlayerId,
 
     summary: {
       ...analysis.summary

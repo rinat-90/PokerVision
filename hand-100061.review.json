@@ -1,5 +1,6 @@
 {
   "id": "100061",
+  "heroPlayerId": "MrBlue",
   "gameFormat": "cash",
   "blinds": {
     "smallBlind": 50,
@@ -2617,9 +2618,9 @@
       "pot": 350,
       "callAmount": 200,
       "status": "analyzed",
-      "equity": 0.2928846153846154,
+      "equity": 0.29023076923076924,
       "potOdds": 0.36363636363636365,
-      "expectedValue": -38.91346153846152,
+      "expectedValue": -40.37307692307691,
       "decision": "unprofitable",
       "state": {
         "street": "preflop",
@@ -2757,9 +2758,9 @@
       "pot": 2800,
       "callAmount": 1050,
       "status": "analyzed",
-      "equity": 0.2931923076923077,
+      "equity": 0.2908846153846154,
       "potOdds": 0.2727272727272727,
-      "expectedValue": 78.79038461538471,
+      "expectedValue": 69.90576923076935,
       "decision": "profitable",
       "state": {
         "street": "preflop",
@@ -2897,9 +2898,9 @@
       "pot": 5775,
       "callAmount": 1925,
       "status": "analyzed",
-      "equity": 0.7571428571428571,
+      "equity": 0.7574285714285715,
       "potOdds": 0.25,
-      "expectedValue": 3905,
+      "expectedValue": 3907.2000000000007,
       "decision": "profitable",
       "state": {
         "street": "flop",
@@ -3050,7 +3051,7 @@
       "pot": 7700,
       "callAmount": 0,
       "status": "analyzed",
-      "equity": 0.7688,
+      "equity": 0.7686,
       "expectedValue": 0,
       "decision": "break_even",
       "state": {

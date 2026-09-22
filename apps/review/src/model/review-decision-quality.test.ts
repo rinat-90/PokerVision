@@ -22,6 +22,7 @@ function createHand(
 ): HandReview {
   return {
     id,
+    heroPlayerId: "hero",
     gameFormat: "cash",
     blinds: {
       smallBlind: 50,

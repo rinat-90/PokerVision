@@ -116,6 +116,7 @@ describe(
 
     const report: AnalysisReport = {
       handId: "hand-1",
+      heroPlayerId: "hero",
 
       summary: {
         totalDecisionPoints: 2,

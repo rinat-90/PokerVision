@@ -136,6 +136,13 @@ describe("getShowdownTableState", () => {
       MrBlue: 6825,
       Pluribus: 6825
     });
+
+    expect(
+      state?.totalContributions
+    ).toEqual({
+      MrBlue: 10000,
+      Pluribus: 10000
+    });
   });
 
   it("returns undefined without showdown data", () => {

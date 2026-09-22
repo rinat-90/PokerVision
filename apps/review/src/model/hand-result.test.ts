@@ -15,6 +15,7 @@ import {
 function createReview(): HandReview {
   return {
     id: "100061",
+    heroPlayerId: "MrBlue",
 
     gameFormat: "cash",
 
@@ -208,27 +209,8 @@ describe("createHandResult", () => {
 
     expect(result?.players).toEqual([
       {
-        playerId: "MrBlue",
-        name: "MrBlue",
-
-        cards: [
-          {
-            rank: "5",
-            suit: "diamonds",
-          },
-          {
-            rank: "5",
-            suit: "clubs",
-          },
-        ],
-
-        payout: 21350,
-        isWinner: true,
-      },
-      {
         playerId: "Pluribus",
         name: "Pluribus",
-
         cards: [
           {
             rank: "A",
@@ -239,9 +221,28 @@ describe("createHandResult", () => {
             suit: "hearts",
           },
         ],
-
         payout: 0,
+        contribution: 10000,
+        netResult: -10000,
         isWinner: false,
+      },
+      {
+        playerId: "MrBlue",
+        name: "MrBlue",
+        cards: [
+          {
+            rank: "5",
+            suit: "diamonds",
+          },
+          {
+            rank: "5",
+            suit: "clubs",
+          },
+        ],
+        payout: 21350,
+        contribution: 10000,
+        netResult: 11350,
+        isWinner: true,
       },
     ]);
 
@@ -263,5 +264,52 @@ describe("createHandResult", () => {
     expect(
       createHandResult(review),
     ).toBeUndefined();
+  });
+
+  it("creates results when the hand ends without shown cards", () => {
+    const review =
+      createReview();
+
+    review.showdown = {
+      players: [],
+
+      payouts: [
+        {
+          playerId: "MrBlue",
+          amount: 21350,
+        },
+      ],
+    };
+
+    const result =
+      createHandResult(review);
+
+    expect(result?.players).toEqual([
+      {
+        playerId: "Pluribus",
+        name: "Pluribus",
+        payout: 0,
+        contribution: 10000,
+        netResult: -10000,
+        isWinner: false,
+      },
+      {
+        playerId: "MrBlue",
+        name: "MrBlue",
+        payout: 21350,
+        contribution: 10000,
+        netResult: 11350,
+        isWinner: true,
+      },
+    ]);
+
+    expect(result?.winners).toEqual([
+      expect.objectContaining({
+        playerId: "MrBlue",
+        payout: 21350,
+        netResult: 11350,
+        isWinner: true,
+      }),
+    ]);
   });
 });

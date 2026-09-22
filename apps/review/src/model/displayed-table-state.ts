@@ -7,6 +7,7 @@ export interface DisplayedTableState {
   pot: number;
   currentBet: number;
   playerContributions: Record<string, number>;
+  totalContributions: Record<string, number>;
   players: HandReviewDecisionState["players"];
 }
 
@@ -16,6 +17,10 @@ export function getDisplayedTableState(
 ): DisplayedTableState {
   const contributions = {
     ...state.playerContributions
+  };
+
+  const totalContributions = {
+    ...state.totalContributions
   };
 
   const previousContribution =
@@ -49,6 +54,14 @@ export function getDisplayedTableState(
   if (contributionDelta > 0) {
     contributions[action.playerId] =
       previousContribution +
+      contributionDelta;
+
+    totalContributions[action.playerId] =
+      (
+        totalContributions[
+          action.playerId
+          ] ?? 0
+      ) +
       contributionDelta;
   }
 
@@ -101,6 +114,8 @@ export function getDisplayedTableState(
 
     playerContributions:
     contributions,
+
+    totalContributions,
 
     players
   };

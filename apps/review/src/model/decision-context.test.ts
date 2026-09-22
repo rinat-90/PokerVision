@@ -36,6 +36,7 @@ function createSessionDecision(
 function createReview(): HandReview {
   return {
     id: "100000",
+    heroPlayerId: "hero",
 
     gameFormat: "cash",
 

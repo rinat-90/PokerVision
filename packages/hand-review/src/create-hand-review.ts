@@ -115,6 +115,9 @@ export function createHandReview(
     id:
     history.id,
 
+    heroPlayerId:
+    report.heroPlayerId,
+
     gameFormat:
     history.gameFormat,
 

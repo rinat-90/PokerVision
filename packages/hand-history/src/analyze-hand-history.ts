@@ -60,6 +60,7 @@ export interface HandHistoryAnalysisSummary {
 
 export interface HandHistoryAnalysis {
   handId: string;
+  heroPlayerId: string;
   summary: HandHistoryAnalysisSummary;
   decisions: HandDecisionAnalysis[];
 }
@@ -169,6 +170,9 @@ export function analyzeHandHistory(
   return {
     handId:
     hand.id,
+
+    heroPlayerId:
+    options.heroPlayerId,
 
     summary: {
       totalDecisionPoints,

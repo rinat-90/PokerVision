@@ -120,6 +120,7 @@ const history: HandHistory = {
 
 const report: AnalysisReport = {
   handId: "video-e2e-analysis",
+  heroPlayerId: "hero",
 
   summary: {
     totalDecisionPoints: 2,
