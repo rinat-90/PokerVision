@@ -6,6 +6,11 @@ import type {
   SessionDecisionSort,
 } from "../model/session-decision-sort";
 
+import type {
+  DecisionEvBucket,
+  DecisionEvSummary,
+} from "../model/session-decision-ev";
+
 import {
   formatAction,
   formatStreet,
@@ -16,6 +21,11 @@ interface SessionDecisionBrowserProps {
   activeHandId: string;
   activeActionIndex: number;
   sort: SessionDecisionSort;
+  evSummary: DecisionEvSummary;
+  evBucket: DecisionEvBucket;
+  onEvBucketChange: (
+    bucket: DecisionEvBucket,
+  ) => void;
   onSortChange: (
     sort: SessionDecisionSort,
   ) => void;
@@ -54,6 +64,9 @@ export function SessionDecisionBrowser({
                                          activeHandId,
                                          activeActionIndex,
                                          sort,
+                                         evSummary,
+                                         evBucket,
+                                         onEvBucketChange,
                                          onSortChange,
                                          onSelectDecision,
                                        }: SessionDecisionBrowserProps) {
@@ -71,9 +84,9 @@ export function SessionDecisionBrowser({
         </div>
 
         <div className="session-decision-browser-actions">
-  <span className="status">
-    {decisions.length} decisions
-  </span>
+          <span className="status">
+            {decisions.length} decisions
+          </span>
 
           <select
             aria-label="Sort decisions"
@@ -98,6 +111,80 @@ export function SessionDecisionBrowser({
             </option>
           </select>
         </div>
+      </div>
+
+      <div className="decision-ev-filters">
+        <button
+          type="button"
+          className={
+            evBucket === "all"
+              ? "active"
+              : undefined
+          }
+          onClick={() =>
+            onEvBucketChange("all")
+          }
+        >
+          All {evSummary.all}
+        </button>
+
+        <button
+          type="button"
+          className={
+            evBucket === "positive"
+              ? "active"
+              : undefined
+          }
+          onClick={() =>
+            onEvBucketChange("positive")
+          }
+        >
+          +EV {evSummary.positive}
+        </button>
+
+        <button
+          type="button"
+          className={
+            evBucket === "neutral"
+              ? "active"
+              : undefined
+          }
+          onClick={() =>
+            onEvBucketChange("neutral")
+          }
+        >
+          0 EV {evSummary.neutral}
+        </button>
+
+        <button
+          type="button"
+          className={
+            evBucket === "negative"
+              ? "active"
+              : undefined
+          }
+          onClick={() =>
+            onEvBucketChange("negative")
+          }
+        >
+          -EV {evSummary.negative}
+        </button>
+
+        <button
+          type="button"
+          className={
+            evBucket === "unavailable"
+              ? "active"
+              : undefined
+          }
+          onClick={() =>
+            onEvBucketChange(
+              "unavailable",
+            )
+          }
+        >
+          No EV {evSummary.unavailable}
+        </button>
       </div>
 
       {decisions.length > 0 ? (

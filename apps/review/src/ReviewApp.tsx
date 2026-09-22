@@ -85,6 +85,15 @@ import type {
 } from "./model/session-decision-sort";
 
 import {
+  createDecisionEvSummary,
+  filterSessionDecisionsByEv,
+} from "./model/session-decision-ev";
+
+import type {
+  DecisionEvBucket,
+} from "./model/session-decision-ev";
+
+import {
   formatGameFormat,
 } from "./utils/format";
 
@@ -135,6 +144,13 @@ export function ReviewApp({
     "session",
   );
 
+  const [
+    decisionEvBucket,
+    setDecisionEvBucket,
+  ] = useState<DecisionEvBucket>(
+    "all",
+  );
+
   const allActions =
     review.streets.flatMap(
       (street) =>
@@ -153,9 +169,20 @@ export function ReviewApp({
       decisionFilter,
     );
 
+  const decisionEvSummary =
+    createDecisionEvSummary(
+      filteredSessionDecisions,
+    );
+
+  const evFilteredSessionDecisions =
+    filterSessionDecisionsByEv(
+      filteredSessionDecisions,
+      decisionEvBucket,
+    );
+
   const sortedSessionDecisions =
     sortSessionDecisions(
-      filteredSessionDecisions,
+      evFilteredSessionDecisions,
       sessionDecisionSort,
     );
 
@@ -454,6 +481,11 @@ export function ReviewApp({
             }
             sort={sessionDecisionSort}
             activeHandId={review.id}
+            evSummary={decisionEvSummary}
+            evBucket={decisionEvBucket}
+            onEvBucketChange={
+              setDecisionEvBucket
+            }
             activeActionIndex={
               activeActionIndex
             }

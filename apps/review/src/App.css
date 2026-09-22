@@ -994,3 +994,32 @@
   outline: 1px solid var(--border);
   outline-offset: 1px;
 }
+
+.decision-ev-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.decision-ev-filters button {
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 6px 10px;
+  background: transparent;
+  color: var(--muted);
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.decision-ev-filters button:hover {
+  border-color: var(--accent-border);
+  color: inherit;
+}
+
+.decision-ev-filters button.active {
+  border-color: var(--accent);
+  background: var(--accent-bg);
+  color: var(--accent-light);
+}
