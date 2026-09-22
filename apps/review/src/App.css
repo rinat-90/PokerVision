@@ -1432,3 +1432,23 @@
   font-weight: 700;
   text-transform: uppercase;
 }
+
+
+@media (max-width: 800px) {
+  .decision-quality {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .decision-quality-item {
+    gap: 8px;
+  }
+
+  .decision-quality-item span {
+    min-width: 0;
+  }
+
+  .decision-quality-item strong {
+    flex-shrink: 0;
+    text-align: right;
+  }
+}
