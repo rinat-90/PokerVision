@@ -127,6 +127,14 @@ import {
 } from "./components/ShowdownTable";
 
 import {
+  HandResultSummary,
+} from "./components/HandResultSummary";
+
+import {
+  createHandResult,
+} from "./model/hand-result";
+
+import {
   formatGameFormat,
 } from "./utils/format";
 
@@ -371,11 +379,8 @@ export function ReviewApp({
     ) ??
     review.players[0];
 
-  const opponent =
-    review.players.find(
-      (player) =>
-        player.id !== hero?.id,
-    );
+  const handResult =
+    createHandResult(review);
 
   const activeState =
     activeAction?.state;
@@ -764,6 +769,12 @@ export function ReviewApp({
               </div>
             </div>
           </div>
+
+          {handResult !== undefined ? (
+            <HandResultSummary
+              result={handResult}
+            />
+          ) : null}
 
           {activeAction !== undefined ? (
             <>

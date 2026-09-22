@@ -1452,3 +1452,90 @@
     text-align: right;
   }
 }
+
+
+.hand-result-summary {
+  display: grid;
+  gap: 16px;
+  padding: 20px;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+}
+
+.hand-result-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.hand-result-content {
+  display: grid;
+  gap: 20px;
+}
+
+.hand-result-board {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.hand-result-board > span {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.hand-result-cards {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.hand-result-players {
+  display: grid;
+  grid-template-columns: repeat(
+    auto-fit,
+    minmax(180px, 1fr)
+  );
+  gap: 12px;
+}
+
+.hand-result-player {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+
+.hand-result-player-name {
+  display: grid;
+  gap: 4px;
+}
+
+.hand-result-player-name span {
+  font-size: 12px;
+  opacity: 0.7;
+}
+
+.hand-result-player-winner {
+  border-width: 2px;
+}
+
+@media (max-width: 800px) {
+  .hand-result-summary {
+    padding: 16px;
+  }
+
+  .hand-result-board {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .hand-result-players {
+    grid-template-columns: 1fr;
+  }
+}
