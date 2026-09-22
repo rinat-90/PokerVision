@@ -458,6 +458,24 @@ export function ReviewApp({
     review.id,
   ]);
 
+  const comparisonLeftReview =
+    decisionComparison.left
+      ? hands.find(
+        (hand) =>
+          hand.id ===
+          decisionComparison.left?.handId,
+      )
+      : undefined;
+
+  const comparisonRightReview =
+    decisionComparison.right
+      ? hands.find(
+        (hand) =>
+          hand.id ===
+          decisionComparison.right?.handId,
+      )
+      : undefined;
+
   return (
     <div
       className="app"
@@ -567,6 +585,8 @@ export function ReviewApp({
           <DecisionComparisonPanel
             left={decisionComparison.left}
             right={decisionComparison.right}
+            leftReview={comparisonLeftReview}
+            rightReview={comparisonRightReview}
             onClear={clearComparison}
           />
 

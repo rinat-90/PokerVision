@@ -1,10 +1,18 @@
 import type {
+  HandReview,
+} from "@poker-vision/hand-review";
+
+import type {
   SessionDecision,
 } from "../model/session-decisions";
 
 import {
   createDecisionComparisonDelta,
 } from "../model/decision-comparison-delta";
+
+import {
+  getDecisionContext,
+} from "../model/decision-context";
 
 import {
   formatAction,
@@ -14,6 +22,8 @@ import {
 interface DecisionComparisonPanelProps {
   left?: SessionDecision;
   right?: SessionDecision;
+  leftReview?: HandReview;
+  rightReview?: HandReview;
   onClear: () => void;
 }
 
@@ -82,12 +92,50 @@ function formatPercentageDelta(
   return `${percentage.toFixed(1)}%`;
 }
 
+function formatCard(
+  card: {
+    rank: string;
+    suit: string;
+  },
+): string {
+  const suits: Record<string, string> = {
+    hearts: "♥",
+    diamonds: "♦",
+    clubs: "♣",
+    spades: "♠",
+  };
+
+  return `${card.rank}${suits[card.suit] ?? card.suit}`;
+}
+
+function formatCards(
+  cards:
+    | Array<{
+    rank: string;
+    suit: string;
+  }>
+    | undefined,
+): string {
+  if (
+    cards === undefined ||
+    cards.length === 0
+  ) {
+    return "—";
+  }
+
+  return cards
+    .map(formatCard)
+    .join(" ");
+}
+
 function ComparisonDecision({
                               label,
                               value,
+                              review,
                             }: {
   label: string;
   value?: SessionDecision;
+  review?: HandReview;
 }) {
   if (value === undefined) {
     return (
@@ -102,6 +150,24 @@ function ComparisonDecision({
     decision,
   } = value;
 
+  const context =
+    review !== undefined
+      ? getDecisionContext(
+        value,
+        review,
+      )
+      : undefined;
+
+  const player =
+    context?.player;
+
+  const snapshotPlayer =
+    decision.state?.players.find(
+      (candidate) =>
+        candidate.id ===
+        context?.playerId,
+    );
+
   return (
     <div className="comparison-decision">
       <div className="comparison-decision-header">
@@ -113,6 +179,65 @@ function ComparisonDecision({
       </div>
 
       <div className="comparison-metrics">
+        <div>
+          <span>Player</span>
+          <strong>
+            {player?.name ?? "—"}
+          </strong>
+        </div>
+
+        <div>
+          <span>Position</span>
+          <strong>
+            {player?.position ?? "—"}
+          </strong>
+        </div>
+
+        <div>
+          <span>Hole cards</span>
+          <strong>
+            {formatCards(
+              player?.holeCards,
+            )}
+          </strong>
+        </div>
+
+        <div>
+          <span>Board</span>
+          <strong>
+            {formatCards(
+              decision.state?.board,
+            )}
+          </strong>
+        </div>
+
+        <div>
+          <span>Starting stack</span>
+          <strong>
+            {formatValue(
+              player?.startingStack,
+            )}
+          </strong>
+        </div>
+
+        <div>
+          <span>Current stack</span>
+          <strong>
+            {formatValue(
+              snapshotPlayer?.stack,
+            )}
+          </strong>
+        </div>
+
+        <div>
+          <span>Current bet</span>
+          <strong>
+            {formatValue(
+              decision.state?.currentBet,
+            )}
+          </strong>
+        </div>
+
         <div>
           <span>Street</span>
           <strong>
@@ -190,6 +315,8 @@ function ComparisonDecision({
 export function DecisionComparisonPanel({
                                           left,
                                           right,
+                                          leftReview,
+                                          rightReview,
                                           onClear,
                                         }: DecisionComparisonPanelProps) {
   if (
@@ -234,11 +361,13 @@ export function DecisionComparisonPanel({
         <ComparisonDecision
           label="Decision A"
           value={left}
+          review={leftReview}
         />
 
         <ComparisonDecision
           label="Decision B"
           value={right}
+          review={rightReview}
         />
       </div>
 
