@@ -1426,3 +1426,9 @@
     border-bottom: 1px solid var(--border);
   }
 }
+
+.table-player-winner {
+  margin-top: 8px;
+  font-weight: 700;
+  text-transform: uppercase;
+}

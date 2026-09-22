@@ -219,6 +219,43 @@ export function createHandReview(
       ...report.summary
     },
 
+    ...(history.showdown !== undefined
+      ? {
+        showdown: {
+          players:
+            history.showdown.players.map(
+              player => ({
+                playerId:
+                player.playerId,
+
+                cards: [
+                  {
+                    ...player.cards[0]
+                  },
+                  {
+                    ...player.cards[1]
+                  }
+                ] as [
+                  typeof player.cards[0],
+                  typeof player.cards[1]
+                ]
+              })
+            ),
+
+          payouts:
+            history.showdown.payouts.map(
+              payout => ({
+                playerId:
+                payout.playerId,
+
+                amount:
+                payout.amount
+              })
+            )
+        }
+      }
+      : {}),
+
     ...(history.startedAt !== undefined
       ? {
         startedAt:

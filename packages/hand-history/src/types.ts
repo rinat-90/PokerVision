@@ -43,6 +43,21 @@ export interface HandHistoryStreet {
   actions: HandHistoryAction[];
 }
 
+export interface HandHistoryShowdownPlayer {
+  playerId: string;
+  cards: [Card, Card];
+}
+
+export interface HandHistoryPayout {
+  playerId: string;
+  amount: number;
+}
+
+export interface HandHistoryShowdown {
+  players: HandHistoryShowdownPlayer[];
+  payouts: HandHistoryPayout[];
+}
+
 export interface HandHistory {
   id: string;
   gameFormat: GameFormat;
@@ -54,4 +69,5 @@ export interface HandHistory {
   streets: HandHistoryStreet[];
   startedAt?: number;
   completedAt?: number;
+  showdown?: HandHistoryShowdown;
 }

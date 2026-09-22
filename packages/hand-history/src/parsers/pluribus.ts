@@ -283,6 +283,81 @@ function parseHoleCards(
     cards: [first, second],
   };
 }
+function parseShownCards(
+  line: string
+): {
+  playerName: string;
+  cards: [Card, Card];
+} | null {
+  const match = line.match(
+    /^(?:Seat \d+: )?(.+?)(?::)? (?:shows|showed) \[([^\]]+)\]/
+  );
+
+  if (match === null) {
+    return null;
+  }
+
+  const playerName = getCapture(
+    match,
+    1,
+    "showdown player name"
+  );
+
+  const cards = parseCards(line);
+
+  if (cards.length !== 2) {
+    throw new Error(
+      `Expected two shown cards for ${playerName}`
+    );
+  }
+
+  const first = cards[0];
+  const second = cards[1];
+
+  if (
+    first === undefined ||
+    second === undefined
+  ) {
+    throw new Error(
+      `Could not parse shown cards for ${playerName}`
+    );
+  }
+
+  return {
+    playerName,
+    cards: [first, second],
+  };
+}
+
+function parseCollectedPot(
+  line: string
+): {
+  playerName: string;
+  amount: number;
+} | null {
+  const match = line.match(
+    /^(.+) collected ([\d,]+(?:\.\d+)?) from pot$/
+  );
+
+  if (match === null) {
+    return null;
+  }
+
+  return {
+    playerName: getCapture(
+      match,
+      1,
+      "winner name"
+    ),
+    amount: parseMoney(
+      getCapture(
+        match,
+        2,
+        "collected amount"
+      )
+    ),
+  };
+}
 
 function parseForcedBet(
   line: string
@@ -578,6 +653,16 @@ export function parsePluribusHand(
     [Card, Card]
   >();
 
+  const showdownPlayers: {
+    playerId: string;
+    cards: [Card, Card];
+  }[] = [];
+
+  const showdownPayouts: {
+    playerId: string;
+    amount: number;
+  }[] = [];
+
   const streets: HandHistoryStreet[] = [];
 
   let currentStreet: Street = "preflop";
@@ -625,6 +710,52 @@ export function parsePluribusHand(
     }
 
     const forcedBet = parseForcedBet(line);
+
+    const shownCards =
+      parseShownCards(line);
+
+    if (shownCards !== null) {
+      const player = players.find(
+        (candidate) =>
+          candidate.name ===
+          shownCards.playerName
+      );
+
+      if (
+        player !== undefined &&
+        !showdownPlayers.some(
+          (shownPlayer) =>
+            shownPlayer.playerId === player.id
+        )
+      ) {
+        showdownPlayers.push({
+          playerId: player.id,
+          cards: shownCards.cards,
+        });
+      }
+
+      continue;
+    }
+
+    const collectedPot =
+      parseCollectedPot(line);
+
+    if (collectedPot !== null) {
+      const player = players.find(
+        (candidate) =>
+          candidate.name ===
+          collectedPot.playerName
+      );
+
+      if (player !== undefined) {
+        showdownPayouts.push({
+          playerId: player.id,
+          amount: collectedPot.amount,
+        });
+      }
+
+      continue;
+    }
 
     if (forcedBet !== null) {
       const player = players.find(
@@ -691,6 +822,15 @@ export function parsePluribusHand(
 
   const gameFormat: GameFormat = "cash";
 
+  const showdown =
+    showdownPlayers.length > 0 ||
+    showdownPayouts.length > 0
+      ? {
+        players: showdownPlayers,
+        payouts: showdownPayouts,
+      }
+      : undefined;
+
   return {
     id: header.id,
     gameFormat,
@@ -700,5 +840,8 @@ export function parsePluribusHand(
     players: hydratedPlayers,
     forcedBets,
     streets,
+    ...(showdown === undefined
+      ? {}
+      : { showdown }),
   };
 }

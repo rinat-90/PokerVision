@@ -74,6 +74,21 @@ export interface HandReviewDecision {
   state?: HandReviewDecisionState;
 }
 
+export interface HandReviewShowdownPlayer {
+  playerId: string;
+  cards: [Card, Card];
+}
+
+export interface HandReviewPayout {
+  playerId: string;
+  amount: number;
+}
+
+export interface HandReviewShowdown {
+  players: HandReviewShowdownPlayer[];
+  payouts: HandReviewPayout[];
+}
+
 export interface HandReview {
   id: string;
 
@@ -97,6 +112,8 @@ export interface HandReview {
     skippedDecisionPoints: number;
     callDecisions: number;
   };
+
+  showdown?: HandReviewShowdown;
 
   startedAt?: number;
   completedAt?: number;

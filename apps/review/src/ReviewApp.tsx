@@ -123,6 +123,10 @@ import {
 } from "./io/review-session-storage";
 
 import {
+  ShowdownTable,
+} from "./components/ShowdownTable";
+
+import {
   formatGameFormat,
 } from "./utils/format";
 
@@ -269,6 +273,26 @@ export function ReviewApp({
   ] = useState(
     allActions[0]?.actionIndex ?? 0,
   );
+
+  const [
+    showdownSelected,
+    setShowdownSelected,
+  ] = useState(false);
+
+  const selectAction = (
+    actionIndex: number,
+  ) => {
+    setShowdownSelected(false);
+    setActiveActionIndex(actionIndex);
+  };
+
+  const selectShowdown = () => {
+    if (review.showdown === undefined) {
+      return;
+    }
+
+    setShowdownSelected(true);
+  };
 
   const activeAction =
     allActions.find(
@@ -744,7 +768,12 @@ export function ReviewApp({
           {activeAction !== undefined ? (
             <>
               <div className="review-grid">
-                {activeState !== undefined ? (
+                {showdownSelected ? (
+                  <ShowdownTable
+                    review={review}
+                    hero={hero}
+                  />
+                ) : activeState !== undefined ? (
                   <PokerTable
                     action={activeAction}
                     state={activeState}
@@ -753,15 +782,17 @@ export function ReviewApp({
                   />
                 ) : null}
 
-                <AnalysisPanel
-                  decision={activeDecision}
-                  playerName={
-                    activePlayer?.name ??
-                    activeAction.playerId
-                  }
-                  action={activeAction.type}
-                  amount={activeAction.amount}
-                />
+                {!showdownSelected ? (
+                  <AnalysisPanel
+                    decision={activeDecision}
+                    playerName={
+                      activePlayer?.name ??
+                      activeAction.playerId
+                    }
+                    action={activeAction.type}
+                    amount={activeAction.amount}
+                  />
+                ) : null}
               </div>
 
               <ActionTimeline
@@ -769,11 +800,17 @@ export function ReviewApp({
                 activeActionIndex={
                   activeActionIndex
                 }
+                showdownSelected={
+                  showdownSelected
+                }
                 visibleActionIndexes={
                   visibleActionIndexes
                 }
                 onSelectAction={
-                  setActiveActionIndex
+                  selectAction
+                }
+                onSelectShowdown={
+                  selectShowdown
                 }
               />
             </>

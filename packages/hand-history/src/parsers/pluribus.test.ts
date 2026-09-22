@@ -141,6 +141,42 @@ describe(
             street: "river"
           }
         ]);
+        expect(hand.showdown).toEqual({
+          players: [
+            {
+              playerId: "MrBlue",
+              cards: [
+                {
+                  rank: "5",
+                  suit: "diamonds",
+                },
+                {
+                  rank: "5",
+                  suit: "clubs",
+                },
+              ],
+            },
+            {
+              playerId: "Pluribus",
+              cards: [
+                {
+                  rank: "A",
+                  suit: "spades",
+                },
+                {
+                  rank: "A",
+                  suit: "hearts",
+                },
+              ],
+            },
+          ],
+          payouts: [
+            {
+              playerId: "MrBlue",
+              amount: 21350,
+            },
+          ],
+        });
       }
     );
   }

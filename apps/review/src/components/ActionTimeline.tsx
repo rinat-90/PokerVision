@@ -14,17 +14,23 @@ import {
 interface ActionTimelineProps {
   review: HandReview;
   activeActionIndex: number;
+  showdownSelected?: boolean;
   visibleActionIndexes?: Set<number>;
+
   onSelectAction: (
     actionIndex: number,
   ) => void;
+
+  onSelectShowdown?: () => void;
 }
 
 export function ActionTimeline({
                                  review,
                                  activeActionIndex,
+                                 showdownSelected = false,
                                  visibleActionIndexes,
                                  onSelectAction,
+                                 onSelectShowdown,
                                }: ActionTimelineProps) {
   const isVisible = (
     actionIndex: number,
@@ -47,6 +53,9 @@ export function ActionTimeline({
           ),
       );
 
+  const hasShowdown =
+    review.showdown !== undefined;
+
   const activeActionPosition =
     allActions.findIndex(
       (action) =>
@@ -55,15 +64,46 @@ export function ActionTimeline({
     );
 
   const hasPreviousAction =
-    activeActionPosition > 0;
+    showdownSelected
+      ? allActions.length > 0
+      : activeActionPosition > 0;
 
   const hasNextAction =
-    activeActionPosition >= 0 &&
-    activeActionPosition <
-    allActions.length - 1;
+    showdownSelected
+      ? false
+      : activeActionPosition >= 0 &&
+      (
+        activeActionPosition <
+        allActions.length - 1 ||
+        hasShowdown
+      );
+
+  const totalSteps =
+    allActions.length +
+    (hasShowdown ? 1 : 0);
+
+  const activeStepPosition =
+    showdownSelected
+      ? totalSteps
+      : activeActionPosition >= 0
+        ? activeActionPosition + 1
+        : 0;
 
   const selectPreviousAction = () => {
     if (!hasPreviousAction) {
+      return;
+    }
+
+    if (showdownSelected) {
+      const lastAction =
+        allActions.at(-1);
+
+      if (lastAction !== undefined) {
+        onSelectAction(
+          lastAction.actionIndex,
+        );
+      }
+
       return;
     }
 
@@ -84,15 +124,24 @@ export function ActionTimeline({
       return;
     }
 
-    const action =
+    const nextAction =
       allActions[
       activeActionPosition + 1
         ];
 
-    if (action !== undefined) {
+    if (nextAction !== undefined) {
       onSelectAction(
-        action.actionIndex,
+        nextAction.actionIndex,
       );
+
+      return;
+    }
+
+    if (
+      hasShowdown &&
+      onSelectShowdown !== undefined
+    ) {
+      onSelectShowdown();
     }
   };
 
@@ -120,9 +169,9 @@ export function ActionTimeline({
           </button>
 
           <span>
-            {allActions.length === 0
+            {totalSteps === 0
               ? "0 / 0"
-              : `${activeActionPosition + 1} / ${allActions.length}`}
+              : `${activeStepPosition} / ${totalSteps}`}
           </span>
 
           <button
@@ -198,6 +247,7 @@ export function ActionTimeline({
                         );
 
                       const isActive =
+                        !showdownSelected &&
                         action.actionIndex ===
                         activeActionIndex;
 
@@ -264,6 +314,49 @@ export function ActionTimeline({
             );
           },
         )}
+
+        {hasShowdown ? (
+          <div className="timeline-street">
+            <div className="timeline-street-header">
+              <strong>
+                SHOWDOWN
+              </strong>
+            </div>
+
+            <div className="timeline-street-actions">
+              <button
+                type="button"
+                className={[
+                  "timeline-action",
+                  showdownSelected
+                    ? "timeline-action-active"
+                    : "",
+                ]
+                  .filter(Boolean)
+                  .join(" ")}
+                onClick={
+                  onSelectShowdown
+                }
+              >
+                <span className="timeline-index">
+                  {allActions.length + 1}
+                </span>
+
+                <span className="timeline-player">
+                  Showdown
+                </span>
+
+                <strong>
+                  SHOW CARDS
+                </strong>
+
+                <span className="timeline-amount">
+                  —
+                </span>
+              </button>
+            </div>
+          </div>
+        ) : null}
       </div>
     </section>
   );
