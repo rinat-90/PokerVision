@@ -73,3 +73,53 @@ export function getSelectedSessionHand(
     ) ?? null
   );
 }
+
+export function selectPreviousSessionHand(
+  session: ReviewSession,
+): ReviewSession {
+  const currentIndex =
+    session.hands.findIndex(
+      (hand) =>
+        hand.id ===
+        session.selectedHandId,
+    );
+
+  if (currentIndex <= 0) {
+    return session;
+  }
+
+  return {
+    ...session,
+    selectedHandId:
+    session.hands[
+    currentIndex - 1
+      ]!.id,
+  };
+}
+
+export function selectNextSessionHand(
+  session: ReviewSession,
+): ReviewSession {
+  const currentIndex =
+    session.hands.findIndex(
+      (hand) =>
+        hand.id ===
+        session.selectedHandId,
+    );
+
+  if (
+    currentIndex === -1 ||
+    currentIndex >=
+    session.hands.length - 1
+  ) {
+    return session;
+  }
+
+  return {
+    ...session,
+    selectedHandId:
+    session.hands[
+    currentIndex + 1
+      ]!.id,
+  };
+}

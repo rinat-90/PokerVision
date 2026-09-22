@@ -38,6 +38,8 @@ interface ReviewAppProps {
   onSelectHand: (
     handId: string,
   ) => void;
+  onPreviousHand: () => void;
+  onNextHand: () => void;
 }
 
 export function ReviewApp({
@@ -45,6 +47,8 @@ export function ReviewApp({
                             hands,
                             onOpenHand,
                             onSelectHand,
+                            onPreviousHand,
+                            onNextHand,
                           }: ReviewAppProps) {
   const allActions =
     review.streets.flatMap(
@@ -127,6 +131,8 @@ export function ReviewApp({
           hands={hands}
           selectedHandId={review.id}
           onSelectHand={onSelectHand}
+          onPreviousHand={onPreviousHand}
+          onNextHand={onNextHand}
         />
 
         <div className="topbar-actions">

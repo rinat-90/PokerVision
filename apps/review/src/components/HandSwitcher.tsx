@@ -8,12 +8,16 @@ interface HandSwitcherProps {
   onSelectHand: (
     handId: string,
   ) => void;
+  onPreviousHand: () => void;
+  onNextHand: () => void;
 }
 
 export function HandSwitcher({
                                hands,
                                selectedHandId,
                                onSelectHand,
+                               onPreviousHand,
+                               onNextHand,
                              }: HandSwitcherProps) {
   if (hands.length <= 1) {
     return null;
@@ -25,8 +29,26 @@ export function HandSwitcher({
         hand.id === selectedHandId,
     );
 
+  const hasPrevious =
+    selectedIndex > 0;
+
+  const hasNext =
+    selectedIndex !== -1 &&
+    selectedIndex <
+    hands.length - 1;
+
   return (
     <div className="hand-switcher">
+      <button
+        type="button"
+        className="secondary-button"
+        disabled={!hasPrevious}
+        aria-label="Previous hand"
+        onClick={onPreviousHand}
+      >
+        ←
+      </button>
+
       <span className="hand-switcher-count">
         Hand {selectedIndex + 1} of{" "}
         {hands.length}
@@ -60,6 +82,16 @@ export function HandSwitcher({
           },
         )}
       </div>
+
+      <button
+        type="button"
+        className="secondary-button"
+        disabled={!hasNext}
+        aria-label="Next hand"
+        onClick={onNextHand}
+      >
+        →
+      </button>
     </div>
   );
 }

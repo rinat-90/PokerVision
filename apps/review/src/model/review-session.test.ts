@@ -12,6 +12,8 @@ import {
   addHandToSession,
   createReviewSession,
   getSelectedSessionHand,
+  selectNextSessionHand,
+  selectPreviousSessionHand,
   selectSessionHand,
 } from "./review-session";
 
@@ -181,5 +183,62 @@ describe("ReviewSession", () => {
       );
 
     expect(result).toBe(session);
+  });
+  it("selects previous hand", () => {
+    let session =
+      createReviewSession();
+
+    session =
+      addHandToSession(
+        session,
+        createHand("100000"),
+      );
+
+    session =
+      addHandToSession(
+        session,
+        createHand("100001"),
+      );
+
+    session =
+      selectPreviousSessionHand(
+        session,
+      );
+
+    expect(
+      session.selectedHandId,
+    ).toBe("100000");
+  });
+
+  it("selects next hand", () => {
+    let session =
+      createReviewSession();
+
+    session =
+      addHandToSession(
+        session,
+        createHand("100000"),
+      );
+
+    session =
+      addHandToSession(
+        session,
+        createHand("100001"),
+      );
+
+    session =
+      selectSessionHand(
+        session,
+        "100000",
+      );
+
+    session =
+      selectNextSessionHand(
+        session,
+      );
+
+    expect(
+      session.selectedHandId,
+    ).toBe("100001");
   });
 });

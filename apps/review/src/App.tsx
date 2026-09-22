@@ -15,6 +15,8 @@ import {
   addHandToSession,
   createReviewSession,
   getSelectedSessionHand,
+  selectNextSessionHand,
+  selectPreviousSessionHand,
   selectSessionHand,
 } from "./model/review-session";
 
@@ -108,6 +110,24 @@ function App() {
     );
   };
 
+  const selectPreviousHand = () => {
+    setSession(
+      (currentSession) =>
+        selectPreviousSessionHand(
+          currentSession,
+        ),
+    );
+  };
+
+  const selectNextHand = () => {
+    setSession(
+      (currentSession) =>
+        selectNextSessionHand(
+          currentSession,
+        ),
+    );
+  };
+
   return (
     <>
       <input
@@ -125,6 +145,12 @@ function App() {
           hands={session.hands}
           onOpenHand={openHand}
           onSelectHand={selectHand}
+          onPreviousHand={
+            selectPreviousHand
+          }
+          onNextHand={
+            selectNextHand
+          }
         />
       ) : (
         <main className="app-empty">
