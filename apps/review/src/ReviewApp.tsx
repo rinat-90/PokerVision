@@ -4,6 +4,10 @@ import {
 } from "react";
 
 import type {
+  KeyboardEvent,
+} from "react";
+
+import type {
   HandReview,
 } from "@poker-vision/hand-review";
 
@@ -102,6 +106,61 @@ export function ReviewApp({
       )
       : undefined;
 
+  const activeActionPosition =
+    allActions.findIndex(
+      (action) =>
+        action.actionIndex ===
+        activeActionIndex,
+    );
+
+  const handleKeyDown = (
+    event: KeyboardEvent<HTMLDivElement>,
+  ) => {
+    if (event.shiftKey) {
+      if (event.key === "ArrowLeft") {
+        event.preventDefault();
+        onPreviousHand();
+      }
+
+      if (event.key === "ArrowRight") {
+        event.preventDefault();
+        onNextHand();
+      }
+
+      return;
+    }
+
+    if (event.key === "ArrowLeft") {
+      const previousAction =
+        allActions[
+        activeActionPosition - 1
+          ];
+
+      if (previousAction !== undefined) {
+        event.preventDefault();
+
+        setActiveActionIndex(
+          previousAction.actionIndex,
+        );
+      }
+    }
+
+    if (event.key === "ArrowRight") {
+      const nextAction =
+        allActions[
+        activeActionPosition + 1
+          ];
+
+      if (nextAction !== undefined) {
+        event.preventDefault();
+
+        setActiveActionIndex(
+          nextAction.actionIndex,
+        );
+      }
+    }
+  };
+
   useEffect(() => {
     setActiveActionIndex(
       allActions[0]?.actionIndex ?? 0,
@@ -109,7 +168,11 @@ export function ReviewApp({
   }, [review.id]);
 
   return (
-    <div className="app">
+    <div
+      className="app"
+      tabIndex={0}
+      onKeyDown={handleKeyDown}
+    >
       <header className="topbar">
         <div className="brand">
           <div className="brand-mark">
