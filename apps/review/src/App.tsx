@@ -1,4 +1,5 @@
 import {
+  useEffect,
   useRef,
   useState,
 } from "react";
@@ -10,6 +11,11 @@ import type {
 import {
   loadHandReviews,
 } from "./io/load-hand-review";
+
+import {
+  loadReviewSession,
+  saveReviewSession,
+} from "./io/review-session-storage";
 
 import {
   addHandToSession,
@@ -31,7 +37,9 @@ function App() {
     session,
     setSession,
   ] = useState(
-    createReviewSession,
+    () =>
+      loadReviewSession() ??
+      createReviewSession(),
   );
 
   const [
@@ -50,6 +58,12 @@ function App() {
     getSelectedSessionHand(
       session,
     );
+
+  useEffect(() => {
+    saveReviewSession(
+      session,
+    );
+  }, [session]);
 
   const openHand = () => {
     fileInputRef.current?.click();
