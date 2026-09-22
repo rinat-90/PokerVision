@@ -1,77 +1,89 @@
 import {
-  useState
+  useEffect,
+  useState,
 } from "react";
 
 import type {
-  HandReview
+  HandReview,
 } from "@poker-vision/hand-review";
 
 import {
-  ActionTimeline
+  ActionTimeline,
 } from "./components/ActionTimeline";
 
 import {
-  AnalysisPanel
+  AnalysisPanel,
 } from "./components/AnalysisPanel";
 
 import {
-  HandSidebar
+  HandSidebar,
 } from "./components/HandSidebar";
 
 import {
-  PokerTable
+  HandSwitcher,
+} from "./components/HandSwitcher";
+
+import {
+  PokerTable,
 } from "./components/PokerTable";
 
 import {
-  formatGameFormat
+  formatGameFormat,
 } from "./utils/format";
 
 interface ReviewAppProps {
   review: HandReview;
+  hands: HandReview[];
   onOpenHand: () => void;
+  onSelectHand: (
+    handId: string,
+  ) => void;
 }
 
 export function ReviewApp({
                             review,
-                            onOpenHand
+                            hands,
+                            onOpenHand,
+                            onSelectHand,
                           }: ReviewAppProps) {
   const allActions =
     review.streets.flatMap(
-      street => street.actions
+      (street) =>
+        street.actions,
     );
 
   const [
     activeActionIndex,
-    setActiveActionIndex
+    setActiveActionIndex,
   ] = useState(
-    allActions[0]?.actionIndex ?? 0
+    allActions[0]?.actionIndex ?? 0,
   );
 
   const activeAction =
     allActions.find(
-      action =>
+      (action) =>
         action.actionIndex ===
-        activeActionIndex
+        activeActionIndex,
     );
 
   const activeDecision =
     review.decisions.find(
-      decision =>
+      (decision) =>
         decision.actionIndex ===
-        activeActionIndex
+        activeActionIndex,
     );
 
   const hero =
     review.players.find(
-      player =>
-        player.holeCards !== undefined
+      (player) =>
+        player.holeCards !== undefined,
     ) ??
     review.players[0];
 
   const opponent =
     review.players.find(
-      player =>
-        player.id !== hero?.id
+      (player) =>
+        player.id !== hero?.id,
     );
 
   const activeState =
@@ -80,11 +92,17 @@ export function ReviewApp({
   const activePlayer =
     activeAction !== undefined
       ? review.players.find(
-        player =>
+        (player) =>
           player.id ===
-          activeAction.playerId
+          activeAction.playerId,
       )
       : undefined;
+
+  useEffect(() => {
+    setActiveActionIndex(
+      allActions[0]?.actionIndex ?? 0,
+    );
+  }, [review.id]);
 
   return (
     <div className="app">
@@ -104,6 +122,12 @@ export function ReviewApp({
             </div>
           </div>
         </div>
+
+        <HandSwitcher
+          hands={hands}
+          selectedHandId={review.id}
+          onSelectHand={onSelectHand}
+        />
 
         <div className="topbar-actions">
           <span className="status">
@@ -153,7 +177,7 @@ export function ReviewApp({
 
                 <strong>
                   {formatGameFormat(
-                    review.gameFormat
+                    review.gameFormat,
                   )}
                 </strong>
               </div>

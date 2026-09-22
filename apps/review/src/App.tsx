@@ -1,44 +1,52 @@
 import {
   useRef,
-  useState
+  useState,
 } from "react";
 
 import type {
-  ChangeEvent
+  ChangeEvent,
 } from "react";
-
-import type {
-  HandReview
-} from "@poker-vision/hand-review";
 
 import {
-  loadHandReview
+  loadHandReview,
 } from "./io/load-hand-review";
 
 import {
-  ReviewApp
+  addHandToSession,
+  createReviewSession,
+  getSelectedSessionHand,
+  selectSessionHand,
+} from "./model/review-session";
+
+import {
+  ReviewApp,
 } from "./ReviewApp";
 
 import "./App.css";
 
 function App() {
   const [
-    review,
-    setReview
-  ] = useState<HandReview | null>(
-    null
+    session,
+    setSession,
+  ] = useState(
+    createReviewSession,
   );
 
   const [
     error,
-    setError
+    setError,
   ] = useState<string | null>(
-    null
+    null,
   );
 
   const fileInputRef =
     useRef<HTMLInputElement>(
-      null
+      null,
+    );
+
+  const review =
+    getSelectedSessionHand(
+      session,
     );
 
   const openHand = () => {
@@ -46,7 +54,7 @@ function App() {
   };
 
   const handleFileChange = async (
-    event: ChangeEvent<HTMLInputElement>
+    event: ChangeEvent<HTMLInputElement>,
   ) => {
     const file =
       event.target.files?.[0];
@@ -57,19 +65,40 @@ function App() {
 
     try {
       const loadedReview =
-        await loadHandReview(file);
+        await loadHandReview(
+          file,
+        );
 
-      setReview(loadedReview);
+      setSession(
+        (currentSession) =>
+          addHandToSession(
+            currentSession,
+            loadedReview,
+          ),
+      );
+
       setError(null);
     } catch (caughtError) {
       setError(
         caughtError instanceof Error
           ? caughtError.message
-          : "Failed to open hand"
+          : "Failed to open hand",
       );
     } finally {
       event.target.value = "";
     }
+  };
+
+  const selectHand = (
+    handId: string,
+  ) => {
+    setSession(
+      (currentSession) =>
+        selectSessionHand(
+          currentSession,
+          handId,
+        ),
+    );
   };
 
   return (
@@ -85,7 +114,9 @@ function App() {
       {review !== null ? (
         <ReviewApp
           review={review}
+          hands={session.hands}
           onOpenHand={openHand}
+          onSelectHand={selectHand}
         />
       ) : (
         <main className="app-empty">
