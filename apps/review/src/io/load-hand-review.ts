@@ -26,3 +26,14 @@ export async function loadHandReview(
 
   return value as HandReview;
 }
+
+export async function loadHandReviews(
+  files: FileList | File[],
+): Promise<HandReview[]> {
+  return Promise.all(
+    Array.from(files).map(
+      (file) =>
+        loadHandReview(file),
+    ),
+  );
+}

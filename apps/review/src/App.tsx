@@ -8,7 +8,7 @@ import type {
 } from "react";
 
 import {
-  loadHandReview,
+  loadHandReviews,
 } from "./io/load-hand-review";
 
 import {
@@ -56,24 +56,31 @@ function App() {
   const handleFileChange = async (
     event: ChangeEvent<HTMLInputElement>,
   ) => {
-    const file =
-      event.target.files?.[0];
+    const files =
+      event.target.files;
 
-    if (file === undefined) {
+    if (
+      files === null ||
+      files.length === 0
+    ) {
       return;
     }
 
     try {
-      const loadedReview =
-        await loadHandReview(
-          file,
+      const loadedReviews =
+        await loadHandReviews(
+          files,
         );
 
       setSession(
         (currentSession) =>
-          addHandToSession(
+          loadedReviews.reduce(
+            (nextSession, loadedReview) =>
+              addHandToSession(
+                nextSession,
+                loadedReview,
+              ),
             currentSession,
-            loadedReview,
           ),
       );
 
@@ -82,7 +89,7 @@ function App() {
       setError(
         caughtError instanceof Error
           ? caughtError.message
-          : "Failed to open hand",
+          : "Failed to open hands",
       );
     } finally {
       event.target.value = "";
@@ -107,6 +114,7 @@ function App() {
         ref={fileInputRef}
         type="file"
         accept=".json,application/json"
+        multiple
         hidden
         onChange={handleFileChange}
       />
@@ -130,8 +138,8 @@ function App() {
             </h1>
 
             <p>
-              Open a reconstructed hand
-              to review its actions and
+              Open reconstructed hands
+              to review their actions and
               decision analysis.
             </p>
 
@@ -140,7 +148,7 @@ function App() {
               type="button"
               onClick={openHand}
             >
-              Open hand
+              Open hands
             </button>
 
             {error !== null ? (
