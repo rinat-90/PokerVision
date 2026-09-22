@@ -123,3 +123,44 @@ export function selectNextSessionHand(
       ]!.id,
   };
 }
+
+export function removeHandFromSession(
+  session: ReviewSession,
+  handId: string,
+): ReviewSession {
+  const index =
+    session.hands.findIndex(
+      (hand) =>
+        hand.id === handId,
+    );
+
+  if (index === -1) {
+    return session;
+  }
+
+  const hands =
+    session.hands.filter(
+      (hand) =>
+        hand.id !== handId,
+    );
+
+  if (
+    session.selectedHandId !== handId
+  ) {
+    return {
+      ...session,
+      hands,
+    };
+  }
+
+  const nextSelectedHand =
+    hands[index] ??
+    hands[index - 1] ??
+    null;
+
+  return {
+    hands,
+    selectedHandId:
+      nextSelectedHand?.id ?? null,
+  };
+}

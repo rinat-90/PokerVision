@@ -44,6 +44,10 @@ interface ReviewAppProps {
   ) => void;
   onPreviousHand: () => void;
   onNextHand: () => void;
+  onRemoveHand: (
+    handId: string,
+  ) => void;
+  onClearSession: () => void;
 }
 
 export function ReviewApp({
@@ -53,6 +57,8 @@ export function ReviewApp({
                             onSelectHand,
                             onPreviousHand,
                             onNextHand,
+                            onRemoveHand,
+                            onClearSession,
                           }: ReviewAppProps) {
   const allActions =
     review.streets.flatMap(
@@ -196,6 +202,7 @@ export function ReviewApp({
           onSelectHand={onSelectHand}
           onPreviousHand={onPreviousHand}
           onNextHand={onNextHand}
+          onRemoveHand={onRemoveHand}
         />
 
         <div className="topbar-actions">
@@ -206,6 +213,14 @@ export function ReviewApp({
             }{" "}
             analyzed
           </span>
+
+          <button
+            className="secondary-button"
+            type="button"
+            onClick={onClearSession}
+          >
+            Clear session
+          </button>
 
           <button
             className="primary-button"

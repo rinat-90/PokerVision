@@ -11,7 +11,7 @@ import type {
 import {
   addHandToSession,
   createReviewSession,
-  getSelectedSessionHand,
+  getSelectedSessionHand, removeHandFromSession,
   selectNextSessionHand,
   selectPreviousSessionHand,
   selectSessionHand,
@@ -240,5 +240,92 @@ describe("ReviewSession", () => {
     expect(
       session.selectedHandId,
     ).toBe("100001");
+  });
+  it("removes the selected hand and selects the next hand", () => {
+    let session =
+      createReviewSession();
+
+    session =
+      addHandToSession(
+        session,
+        createHand("100000"),
+      );
+
+    session =
+      addHandToSession(
+        session,
+        createHand("100001"),
+      );
+
+    session =
+      selectSessionHand(
+        session,
+        "100000",
+      );
+
+    session =
+      removeHandFromSession(
+        session,
+        "100000",
+      );
+
+    expect(
+      session.hands.map(
+        (hand) => hand.id,
+      ),
+    ).toEqual(["100001"]);
+
+    expect(
+      session.selectedHandId,
+    ).toBe("100001");
+  });
+
+  it("selects the previous hand when removing the last selected hand", () => {
+    let session =
+      createReviewSession();
+
+    session =
+      addHandToSession(
+        session,
+        createHand("100000"),
+      );
+
+    session =
+      addHandToSession(
+        session,
+        createHand("100001"),
+      );
+
+    session =
+      removeHandFromSession(
+        session,
+        "100001",
+      );
+
+    expect(
+      session.selectedHandId,
+    ).toBe("100000");
+  });
+
+  it("becomes empty when removing the only hand", () => {
+    let session =
+      createReviewSession();
+
+    session =
+      addHandToSession(
+        session,
+        createHand("100000"),
+      );
+
+    session =
+      removeHandFromSession(
+        session,
+        "100000",
+      );
+
+    expect(session.hands).toEqual([]);
+    expect(
+      session.selectedHandId,
+    ).toBeNull();
   });
 });

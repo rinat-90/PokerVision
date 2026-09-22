@@ -21,6 +21,7 @@ import {
   addHandToSession,
   createReviewSession,
   getSelectedSessionHand,
+  removeHandFromSession,
   selectNextSessionHand,
   selectPreviousSessionHand,
   selectSessionHand,
@@ -142,6 +143,24 @@ function App() {
     );
   };
 
+  const removeHand = (
+    handId: string,
+  ) => {
+    setSession(
+      (currentSession) =>
+        removeHandFromSession(
+          currentSession,
+          handId,
+        ),
+    );
+  };
+
+  const clearSession = () => {
+    setSession(
+      createReviewSession(),
+    );
+  };
+
   return (
     <>
       <input
@@ -164,6 +183,12 @@ function App() {
           }
           onNextHand={
             selectNextHand
+          }
+          onRemoveHand={
+            removeHand
+          }
+          onClearSession={
+            clearSession
           }
         />
       ) : (

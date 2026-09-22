@@ -10,6 +10,9 @@ interface HandSwitcherProps {
   ) => void;
   onPreviousHand: () => void;
   onNextHand: () => void;
+  onRemoveHand: (
+    handId: string,
+  ) => void;
 }
 
 export function HandSwitcher({
@@ -18,11 +21,8 @@ export function HandSwitcher({
                                onSelectHand,
                                onPreviousHand,
                                onNextHand,
+                               onRemoveHand,
                              }: HandSwitcherProps) {
-  if (hands.length <= 1) {
-    return null;
-  }
-
   const selectedIndex =
     hands.findIndex(
       (hand) =>
@@ -39,15 +39,17 @@ export function HandSwitcher({
 
   return (
     <div className="hand-switcher">
-      <button
-        type="button"
-        className="secondary-button"
-        disabled={!hasPrevious}
-        aria-label="Previous hand"
-        onClick={onPreviousHand}
-      >
-        ←
-      </button>
+      {hands.length > 1 ? (
+        <button
+          type="button"
+          className="secondary-button"
+          disabled={!hasPrevious}
+          aria-label="Previous hand"
+          onClick={onPreviousHand}
+        >
+          ←
+        </button>
+      ) : null}
 
       <span className="hand-switcher-count">
         Hand {selectedIndex + 1} of{" "}
@@ -61,37 +63,58 @@ export function HandSwitcher({
               hand.id === selectedHandId;
 
             return (
-              <button
+              <div
                 key={hand.id}
-                type="button"
                 className={
                   isActive
-                    ? "hand-switcher-item active"
-                    : "hand-switcher-item"
-                }
-                aria-pressed={isActive}
-                onClick={() =>
-                  onSelectHand(
-                    hand.id,
-                  )
+                    ? "hand-switcher-entry active"
+                    : "hand-switcher-entry"
                 }
               >
-                #{hand.id}
-              </button>
+                <button
+                  type="button"
+                  className="hand-switcher-item"
+                  aria-pressed={isActive}
+                  onClick={() =>
+                    onSelectHand(
+                      hand.id,
+                    )
+                  }
+                >
+                  #{hand.id}
+                </button>
+
+                <button
+                  type="button"
+                  className="hand-switcher-remove"
+                  aria-label={
+                    `Remove hand ${hand.id}`
+                  }
+                  onClick={() =>
+                    onRemoveHand(
+                      hand.id,
+                    )
+                  }
+                >
+                  ×
+                </button>
+              </div>
             );
           },
         )}
       </div>
 
-      <button
-        type="button"
-        className="secondary-button"
-        disabled={!hasNext}
-        aria-label="Next hand"
-        onClick={onNextHand}
-      >
-        →
-      </button>
+      {hands.length > 1 ? (
+        <button
+          type="button"
+          className="secondary-button"
+          disabled={!hasNext}
+          aria-label="Next hand"
+          onClick={onNextHand}
+        >
+          →
+        </button>
+      ) : null}
     </div>
   );
 }
