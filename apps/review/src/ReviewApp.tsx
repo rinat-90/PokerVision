@@ -11,6 +11,10 @@ import type {
   HandReview,
 } from "@poker-vision/hand-review";
 
+import type {
+  ReviewSessionSummary,
+} from "./model/review-session-summary";
+
 import {
   ActionTimeline,
 } from "./components/ActionTimeline";
@@ -32,12 +36,17 @@ import {
 } from "./components/PokerTable";
 
 import {
+  SessionSummary,
+} from "./components/SessionSummary";
+
+import {
   formatGameFormat,
 } from "./utils/format";
 
 interface ReviewAppProps {
   review: HandReview;
   hands: HandReview[];
+  sessionSummary: ReviewSessionSummary;
   onOpenHand: () => void;
   onSelectHand: (
     handId: string,
@@ -53,6 +62,7 @@ interface ReviewAppProps {
 export function ReviewApp({
                             review,
                             hands,
+                            sessionSummary,
                             onOpenHand,
                             onSelectHand,
                             onPreviousHand,
@@ -239,6 +249,10 @@ export function ReviewApp({
         />
 
         <section className="review">
+          <SessionSummary
+            summary={sessionSummary}
+          />
+
           <div className="review-header">
             <div>
               <div className="eyebrow">

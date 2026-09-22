@@ -28,6 +28,10 @@ import {
 } from "./model/review-session";
 
 import {
+  createReviewSessionSummary,
+} from "./model/review-session-summary";
+
+import {
   ReviewApp,
 } from "./ReviewApp";
 
@@ -57,6 +61,11 @@ function App() {
 
   const review =
     getSelectedSessionHand(
+      session,
+    );
+
+  const sessionSummary =
+    createReviewSessionSummary(
       session,
     );
 
@@ -176,6 +185,9 @@ function App() {
         <ReviewApp
           review={review}
           hands={session.hands}
+          sessionSummary={
+            sessionSummary
+          }
           onOpenHand={openHand}
           onSelectHand={selectHand}
           onPreviousHand={

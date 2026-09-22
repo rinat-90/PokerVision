@@ -696,8 +696,67 @@
   color: inherit;
 }
 
-.hand-switcher-item.active {
+.hand-switcher-entry {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  border: 1px solid transparent;
+  border-radius: 7px;
+  overflow: hidden;
+}
+
+.hand-switcher-entry.active {
   border-color: var(--border);
   background: rgba(255, 255, 255, 0.08);
+}
+
+.hand-switcher-entry.active .hand-switcher-item {
   color: inherit;
+}
+
+.hand-switcher-remove {
+  border: 0;
+  padding: 6px 7px;
+  background: transparent;
+  color: var(--muted);
+  font: inherit;
+  font-size: 14px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.hand-switcher-remove:hover {
+  background: rgba(255, 255, 255, 0.06);
+  color: inherit;
+}
+
+.session-summary {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.session-summary-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-width: 0;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 10px 12px;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.session-summary-item span {
+  font-size: 11px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.session-summary-item strong {
+  font-size: 16px;
+  font-weight: 600;
 }
