@@ -23,6 +23,10 @@ import {
   getDecisionReviewState,
 } from "../model/decision-review-state";
 
+import type {
+  SessionReviewFilter,
+} from "../model/session-review-filter";
+
 import {
   formatAction,
   formatStreet,
@@ -35,6 +39,7 @@ interface SessionDecisionBrowserProps {
   sort: SessionDecisionSort;
   evSummary: DecisionEvSummary;
   evBucket: DecisionEvBucket;
+  reviewFilter: SessionReviewFilter;
   comparisonActionIndexes: Set<string>;
   decisionReviewState: DecisionReviewStateMap;
   onEvBucketChange: (
@@ -49,6 +54,9 @@ interface SessionDecisionBrowserProps {
   ) => void;
   onToggleComparison: (
     decision: SessionDecision,
+  ) => void;
+  onReviewFilterChange: (
+    filter: SessionReviewFilter,
   ) => void;
 }
 
@@ -89,6 +97,8 @@ export function SessionDecisionBrowser({
                                          onSelectDecision,
                                          onToggleComparison,
                                          decisionReviewState,
+                                         reviewFilter,
+                                         onReviewFilterChange,
                                        }: SessionDecisionBrowserProps) {
   return (
     <section className="panel session-decision-browser">
@@ -204,6 +214,54 @@ export function SessionDecisionBrowser({
           }
         >
           No EV {evSummary.unavailable}
+        </button>
+      </div>
+
+      <div className="decision-review-filters">
+        <button
+          type="button"
+          className={
+            reviewFilter === "all"
+              ? "active"
+              : undefined
+          }
+          onClick={() =>
+            onReviewFilterChange("all")
+          }
+        >
+          All
+        </button>
+
+        <button
+          type="button"
+          className={
+            reviewFilter === "unreviewed"
+              ? "active"
+              : undefined
+          }
+          onClick={() =>
+            onReviewFilterChange(
+              "unreviewed",
+            )
+          }
+        >
+          Unreviewed
+        </button>
+
+        <button
+          type="button"
+          className={
+            reviewFilter === "reviewed"
+              ? "active"
+              : undefined
+          }
+          onClick={() =>
+            onReviewFilterChange(
+              "reviewed",
+            )
+          }
+        >
+          Reviewed
         </button>
       </div>
 

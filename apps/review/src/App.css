@@ -1950,3 +1950,37 @@
     width: 100%;
   }
 }
+
+.decision-review-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.decision-review-filters button {
+  padding: 6px 10px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+}
+
+.decision-review-filters button:hover {
+  color: inherit;
+}
+
+.decision-review-filters button.active {
+  color: inherit;
+  border-color: currentColor;
+}
+
+@media (max-width: 800px) {
+  .decision-review-filters {
+    width: 100%;
+  }
+
+  .decision-review-filters button {
+    flex: 1;
+  }
+}

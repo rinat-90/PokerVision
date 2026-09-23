@@ -151,6 +151,14 @@ import {
   SessionReviewCompletion,
 } from "./components/SessionReviewCompletion";
 
+import type {
+  SessionReviewFilter,
+} from "./model/session-review-filter";
+
+import {
+  filterSessionDecisionsByReview,
+} from "./model/session-review-filter";
+
 import {
   formatGameFormat,
 } from "./utils/format";
@@ -212,6 +220,13 @@ export function ReviewApp({
   );
 
   const [
+    sessionReviewFilter,
+    setSessionReviewFilter,
+  ] = useState<SessionReviewFilter>(
+    "all",
+  );
+
+  const [
     decisionComparison,
     setDecisionComparison,
   ] = useState<DecisionComparison>(
@@ -254,9 +269,16 @@ export function ReviewApp({
       decisionEvBucket,
     );
 
+  const reviewFilteredSessionDecisions =
+    filterSessionDecisionsByReview(
+      evFilteredSessionDecisions,
+      decisionReviewState,
+      sessionReviewFilter,
+    );
+
   const sortedSessionDecisions =
     sortSessionDecisions(
-      evFilteredSessionDecisions,
+      reviewFilteredSessionDecisions,
       sessionDecisionSort,
     );
 
@@ -733,6 +755,12 @@ export function ReviewApp({
             activeHandId={review.id}
             activeActionIndex={
               activeActionIndex
+            }
+            reviewFilter={
+              sessionReviewFilter
+            }
+            onReviewFilterChange={
+              setSessionReviewFilter
             }
             onSelectDecision={
               selectSessionDecision
