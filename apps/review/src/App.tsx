@@ -13,7 +13,9 @@ import {
 } from "./io/load-hand-review";
 
 import {
+  loadDecisionReviewState,
   loadReviewSession,
+  saveDecisionReviewState,
   saveReviewSession,
 } from "./io/review-session-storage";
 
@@ -47,6 +49,14 @@ import {
   createSessionResults,
 } from "./model/session-results";
 
+import type {
+  DecisionReviewStateMap,
+} from "./model/decision-review-state";
+
+import {
+  loadSessionReviewExport,
+} from "./io/load-session-review-export";
+
 import {
   ReviewApp,
 } from "./ReviewApp";
@@ -65,6 +75,13 @@ function App() {
   );
 
   const [
+    decisionReviewState,
+    setDecisionReviewState,
+  ] = useState<DecisionReviewStateMap>(
+    loadDecisionReviewState,
+  );
+
+  const [
     error,
     setError,
   ] = useState<string | null>(
@@ -72,6 +89,11 @@ function App() {
   );
 
   const fileInputRef =
+    useRef<HTMLInputElement>(
+      null,
+    );
+
+  const sessionInputRef =
     useRef<HTMLInputElement>(
       null,
     );
@@ -112,8 +134,54 @@ function App() {
     );
   }, [session]);
 
+  useEffect(() => {
+    saveDecisionReviewState(
+      decisionReviewState,
+    );
+  }, [decisionReviewState]);
+
   const openHand = () => {
     fileInputRef.current?.click();
+  };
+
+  const importSession = () => {
+    sessionInputRef.current?.click();
+  };
+
+  const handleSessionFileChange = async (
+    event: ChangeEvent<HTMLInputElement>,
+  ) => {
+    const file =
+      event.target.files?.[0];
+
+    if (file === undefined) {
+      return;
+    }
+
+    try {
+      const imported =
+        await loadSessionReviewExport(
+          file,
+        );
+
+      setSession(
+        imported.session,
+      );
+
+      setDecisionReviewState(
+        imported.decisionReviewState,
+      );
+
+      setError(null);
+    } catch (caughtError) {
+      setError(
+        caughtError instanceof Error
+          ? caughtError.message
+          : "Failed to import session",
+      );
+    } finally {
+      event.target.value = "";
+    }
   };
 
   const handleFileChange = async (
@@ -218,11 +286,22 @@ function App() {
         onChange={handleFileChange}
       />
 
+      <input
+        ref={sessionInputRef}
+        type="file"
+        accept=".json,application/json"
+        hidden
+        onChange={handleSessionFileChange}
+      />
+
       {review !== null ? (
         <ReviewApp
           review={review}
           hands={session.hands}
           session={session}
+          onImportSession={
+            importSession
+          }
           sessionSummary={
             sessionSummary
           }
@@ -237,6 +316,12 @@ function App() {
           }
           sessionResults={
             sessionResults
+          }
+          decisionReviewState={
+            decisionReviewState
+          }
+          setDecisionReviewState={
+            setDecisionReviewState
           }
           onOpenHand={openHand}
           onSelectHand={selectHand}

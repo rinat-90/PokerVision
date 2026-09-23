@@ -4,7 +4,9 @@ import {
 } from "react";
 
 import type {
+  Dispatch,
   KeyboardEvent,
+  SetStateAction,
 } from "react";
 
 import type {
@@ -118,11 +120,6 @@ import {
 } from "./model/decision-review-state";
 
 import {
-  loadDecisionReviewState,
-  saveDecisionReviewState,
-} from "./io/review-session-storage";
-
-import {
   ShowdownTable,
 } from "./components/ShowdownTable";
 
@@ -189,6 +186,11 @@ interface ReviewAppProps {
   sessionDecisions: SessionDecision[];
   sessionResults: SessionHandResult[];
   session: ReviewSession;
+  onImportSession: () => void;
+  decisionReviewState: DecisionReviewStateMap;
+  setDecisionReviewState: Dispatch<
+    SetStateAction<DecisionReviewStateMap>
+  >;
   onOpenHand: () => void;
   onSelectHand: (
     handId: string,
@@ -205,6 +207,8 @@ export function ReviewApp({
                             review,
                             session,
                             hands,
+                            decisionReviewState,
+                            setDecisionReviewState,
                             sessionSummary,
                             sessionInsights,
                             decisionQuality,
@@ -216,6 +220,7 @@ export function ReviewApp({
                             onNextHand,
                             onRemoveHand,
                             onClearSession,
+                            onImportSession,
                           }: ReviewAppProps) {
   const [
     decisionFilter,
@@ -250,13 +255,6 @@ export function ReviewApp({
     setDecisionComparison,
   ] = useState<DecisionComparison>(
     createDecisionComparison,
-  );
-
-  const [
-    decisionReviewState,
-    setDecisionReviewState,
-  ] = useState<DecisionReviewStateMap>(
-    loadDecisionReviewState,
   );
 
   const allActions =
@@ -594,14 +592,7 @@ export function ReviewApp({
     }
   };
 
-  useEffect(
-    () => {
-      saveDecisionReviewState(
-        decisionReviewState,
-      );
-    },
-    [decisionReviewState],
-  );
+
 
   useEffect(() => {
     const pendingActionIndex =
@@ -706,8 +697,8 @@ export function ReviewApp({
     anchor.href = url;
     anchor.download =
       `pokervision-session-${new Date()
-        .toISOString()
-        .slice(0, 10)}.review.json`;
+  .toISOString()
+  .slice(0, 10)}.review.json`;
 
     anchor.click();
 
@@ -754,6 +745,14 @@ export function ReviewApp({
             }{" "}
             analyzed
           </span>
+
+          <button
+            className="secondary-button"
+            type="button"
+            onClick={onImportSession}
+          >
+            Import session
+          </button>
 
           <button
             className="secondary-button"
