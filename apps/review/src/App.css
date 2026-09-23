@@ -1815,3 +1815,50 @@
 .session-result-trend-point-marker {
   stroke-width: 6;
 }
+
+.session-result-filters {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.session-result-filter {
+  padding: 7px 12px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--muted);
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.session-result-filter:hover {
+  color: var(--text);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.session-result-filter-active {
+  color: var(--text);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.session-results-empty {
+  padding: 16px 12px;
+  border: 1px dashed var(--border);
+  border-radius: 8px;
+  color: var(--muted);
+  font-size: 12px;
+  text-align: center;
+}
+
+@media (max-width: 800px) {
+  .session-result-filters {
+    width: 100%;
+  }
+
+  .session-result-filter {
+    flex: 1;
+    text-align: center;
+  }
+}
