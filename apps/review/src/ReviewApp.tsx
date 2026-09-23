@@ -143,6 +143,15 @@ import {
 } from "./components/SessionResults";
 
 import {
+  createSessionReviewCompletion,
+  getNextUnreviewedDecision,
+} from "./model/session-review-completion";
+
+import {
+  SessionReviewCompletion,
+} from "./components/SessionReviewCompletion";
+
+import {
   formatGameFormat,
 } from "./utils/format";
 
@@ -466,6 +475,30 @@ export function ReviewApp({
     );
   };
 
+  const reviewCompletion =
+    createSessionReviewCompletion(
+      sessionDecisions,
+      decisionReviewState,
+    );
+
+  const handleNextUnreviewed = () => {
+    const nextDecision =
+      getNextUnreviewedDecision(
+        sessionDecisions,
+        decisionReviewState,
+        activeSessionDecision ?? null,
+      );
+
+    if (nextDecision === null) {
+      return;
+    }
+
+    selectSessionDecision(
+      nextDecision.handId,
+      nextDecision.decision.actionIndex,
+    );
+  };
+
   const handleKeyDown = (
     event: KeyboardEvent<HTMLDivElement>,
   ) => {
@@ -675,6 +708,13 @@ export function ReviewApp({
 
           <DecisionQualitySummary
             quality={decisionQuality}
+          />
+
+          <SessionReviewCompletion
+            completion={reviewCompletion}
+            onNextUnreviewed={
+              handleNextUnreviewed
+            }
           />
 
           <SessionDecisionBrowser
