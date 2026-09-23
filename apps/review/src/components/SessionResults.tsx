@@ -18,6 +18,14 @@ import {
   SessionResultTrend,
 } from "./SessionResultTrend";
 
+import {
+  createSessionResultStatistics,
+} from "../model/session-result-statistics";
+
+import {
+  SessionResultStatistics,
+} from "./SessionResultStatistics";
+
 interface SessionResultsProps {
   results: SessionHandResult[];
   activeHandId: string;
@@ -77,6 +85,11 @@ export function SessionResults({
       filter,
     );
 
+  const statistics =
+    createSessionResultStatistics(
+      results,
+    );
+
   return (
     <section className="session-results">
       <div className="session-results-header">
@@ -96,6 +109,10 @@ export function SessionResults({
         results={results}
         activeHandId={activeHandId}
         onSelectHand={onSelectHand}
+      />
+
+      <SessionResultStatistics
+        statistics={statistics}
       />
 
       <div
