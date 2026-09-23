@@ -44,6 +44,10 @@ import {
 } from "./model/session-decisions";
 
 import {
+  createSessionResults,
+} from "./model/session-results";
+
+import {
   ReviewApp,
 } from "./ReviewApp";
 
@@ -94,6 +98,11 @@ function App() {
 
   const sessionDecisions =
     getSessionDecisions(
+      session,
+    );
+
+  const sessionResults =
+    createSessionResults(
       session,
     );
 
@@ -224,6 +233,9 @@ function App() {
           }
           sessionDecisions={
             sessionDecisions
+          }
+          sessionResults={
+            sessionResults
           }
           onOpenHand={openHand}
           onSelectHand={selectHand}

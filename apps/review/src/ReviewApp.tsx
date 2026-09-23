@@ -134,6 +134,14 @@ import {
   createHandResult,
 } from "./model/hand-result";
 
+import type {
+  SessionHandResult,
+} from "./model/session-results";
+
+import {
+  SessionResults,
+} from "./components/SessionResults";
+
 import {
   formatGameFormat,
 } from "./utils/format";
@@ -145,6 +153,7 @@ interface ReviewAppProps {
   sessionInsights: ReviewSessionInsights;
   decisionQuality: ReviewDecisionQuality;
   sessionDecisions: SessionDecision[];
+  sessionResults: SessionHandResult[];
   onOpenHand: () => void;
   onSelectHand: (
     handId: string,
@@ -164,6 +173,7 @@ export function ReviewApp({
                             sessionInsights,
                             decisionQuality,
                             sessionDecisions,
+                            sessionResults,
                             onOpenHand,
                             onSelectHand,
                             onPreviousHand,
@@ -651,6 +661,12 @@ export function ReviewApp({
         <section className="review">
           <SessionSummary
             summary={sessionSummary}
+          />
+
+          <SessionResults
+            results={sessionResults}
+            activeHandId={review.id}
+            onSelectHand={onSelectHand}
           />
 
           <SessionInsights
