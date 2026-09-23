@@ -160,6 +160,14 @@ import {
 } from "./model/session-review-filter";
 
 import {
+  createSessionReviewNotes,
+} from "./model/session-review-notes";
+
+import {
+  SessionReviewNotes,
+} from "./components/SessionReviewNotes";
+
+import {
   formatGameFormat,
 } from "./utils/format";
 
@@ -503,6 +511,12 @@ export function ReviewApp({
       decisionReviewState,
     );
 
+  const reviewNotes =
+    createSessionReviewNotes(
+      sessionDecisions,
+      decisionReviewState,
+    );
+
   const handleNextUnreviewed = () => {
     const nextDecision =
       getNextUnreviewedDecision(
@@ -736,6 +750,13 @@ export function ReviewApp({
             completion={reviewCompletion}
             onNextUnreviewed={
               handleNextUnreviewed
+            }
+          />
+
+          <SessionReviewNotes
+            notes={reviewNotes}
+            onSelectDecision={
+              selectSessionDecision
             }
           />
 
