@@ -1520,12 +1520,46 @@
 
 .hand-result-player {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 12px;
+  min-width: 0;
   padding: 12px;
   border: 1px solid var(--border);
   border-radius: 12px;
+}
+
+.hand-result-player-main {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-width: 0;
+}
+
+.hand-result-player-metrics {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.hand-result-player-metrics > div {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+  text-align: left;
+}
+
+.hand-result-player-metrics span {
+  font-size: 10px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.hand-result-player-metrics strong {
+  font-size: 13px;
+  white-space: nowrap;
 }
 
 .hand-result-player-name {
@@ -1554,5 +1588,25 @@
 
   .hand-result-players {
     grid-template-columns: 1fr;
+  }
+
+  .hand-result-player {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .hand-result-player-main {
+    justify-content: space-between;
+  }
+
+  .hand-result-player-metrics {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .hand-result-player-metrics > div {
+    text-align: left;
   }
 }

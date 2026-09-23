@@ -10,6 +10,16 @@ interface HandResultSummaryProps {
   result: HandResult;
 }
 
+function formatNetResult(
+  value: number,
+): string {
+  if (value > 0) {
+    return `+${value}`;
+  }
+
+  return String(value);
+}
+
 export function HandResultSummary({
                                     result,
                                   }: HandResultSummaryProps) {
@@ -55,38 +65,68 @@ export function HandResultSummary({
                   .filter(Boolean)
                   .join(" ")}
               >
-                <div className="hand-result-player-name">
-                  <strong>
-                    {player.name}
-                  </strong>
+                <div className="hand-result-player-main">
+                  <div className="hand-result-player-name">
+                    <strong>
+                      {player.name}
+                    </strong>
 
-                  {player.isWinner ? (
-                    <span>
-                      Winner +{player.payout}
-                    </span>
-                  ) : player.cards !== undefined ? (
-                    <span>
-                      Showdown
-                    </span>
-                  ) : (
-                    <span>
-                      No cards shown
-                    </span>
+                    {player.isWinner ? (
+                      <span>
+                        Winner
+                      </span>
+                    ) : player.cards !== undefined ? (
+                      <span>
+                        Showdown
+                      </span>
+                    ) : (
+                      <span>
+                        No cards shown
+                      </span>
+                    )}
+                  </div>
+
+                  {player.cards !== undefined && (
+                    <div className="hand-result-cards">
+                      {player.cards.map(
+                        (card, index) => (
+                          <CardView
+                            key={`${card.rank}-${card.suit}-${index}`}
+                            card={card}
+                          />
+                        ),
+                      )}
+                    </div>
                   )}
                 </div>
 
-                {player.cards !== undefined && (
-                  <div className="hand-result-cards">
-                    {player.cards.map(
-                      (card, index) => (
-                        <CardView
-                          key={`${card.rank}-${card.suit}-${index}`}
-                          card={card}
-                        />
-                      ),
-                    )}
+                <div className="hand-result-player-metrics">
+                  <div>
+                    <span>Invested</span>
+
+                    <strong>
+                      {player.contribution}
+                    </strong>
                   </div>
-                )}
+
+                  <div>
+                    <span>Payout</span>
+
+                    <strong>
+                      {player.payout}
+                    </strong>
+                  </div>
+
+                  <div>
+                    <span>Net</span>
+
+                    <strong>
+                      {formatNetResult(
+                        player.netResult,
+                      )}
+                    </strong>
+                  </div>
+                </div>
               </div>
             ),
           )}
