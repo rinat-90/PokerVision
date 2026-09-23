@@ -2,6 +2,10 @@ import type {
   SessionHandResult,
 } from "../model/session-results";
 
+import {
+  SessionResultTrend,
+} from "./SessionResultTrend";
+
 interface SessionResultsProps {
   results: SessionHandResult[];
   activeHandId: string;
@@ -43,6 +47,12 @@ export function SessionResults({
             : "hands"}
         </span>
       </div>
+
+      <SessionResultTrend
+        results={results}
+        activeHandId={activeHandId}
+        onSelectHand={onSelectHand}
+      />
 
       <div className="session-results-columns">
         <span>Hand</span>
