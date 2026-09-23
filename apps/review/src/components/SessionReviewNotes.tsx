@@ -3,6 +3,14 @@ import type {
 } from "../model/session-review-notes";
 
 import {
+  useState,
+} from "react";
+
+import {
+  searchSessionReviewNotes,
+} from "../model/session-review-note-search";
+
+import {
   formatAction,
   formatStreet,
 } from "../utils/format";
@@ -19,6 +27,18 @@ export function SessionReviewNotes({
                                      notes,
                                      onSelectDecision,
                                    }: SessionReviewNotesProps) {
+
+  const [
+    searchQuery,
+    setSearchQuery,
+  ] = useState("");
+
+  const visibleNotes =
+    searchSessionReviewNotes(
+      notes,
+      searchQuery,
+    );
+
   if (notes.length === 0) {
     return null;
   }
@@ -42,8 +62,21 @@ export function SessionReviewNotes({
         </span>
       </div>
 
+      <input
+        className="session-review-note-search"
+        type="search"
+        value={searchQuery}
+        placeholder="Search notes..."
+        aria-label="Search review notes"
+        onChange={(event) =>
+          setSearchQuery(
+            event.target.value,
+          )
+        }
+      />
+
       <div className="session-review-note-list">
-        {notes.map(
+        {visibleNotes.map(
           ({
              handId,
              decision,
@@ -83,6 +116,12 @@ export function SessionReviewNotes({
           ),
         )}
       </div>
+
+      {visibleNotes.length === 0 && (
+        <div className="session-review-note-empty">
+          No notes match your search.
+        </div>
+      )}
     </section>
   );
 }

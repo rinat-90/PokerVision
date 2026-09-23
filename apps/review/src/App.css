@@ -2032,3 +2032,31 @@
     padding: 10px;
   }
 }
+
+.session-review-note-search {
+  width: 100%;
+  padding: 9px 11px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+}
+
+.session-review-note-search::placeholder {
+  color: var(--muted);
+}
+
+.session-review-note-search:focus {
+  outline: none;
+  border-color: currentColor;
+}
+
+.session-review-note-empty {
+  padding: 14px;
+  border: 1px dashed var(--border);
+  border-radius: 8px;
+  color: var(--muted);
+  font-size: 13px;
+  text-align: center;
+}
