@@ -222,6 +222,7 @@ function App() {
         <ReviewApp
           review={review}
           hands={session.hands}
+          session={session}
           sessionSummary={
             sessionSummary
           }

@@ -167,6 +167,15 @@ import {
   SessionReviewNotes,
 } from "./components/SessionReviewNotes";
 
+import type {
+  ReviewSession,
+} from "./model/review-session";
+
+import {
+  createSessionReviewExport,
+  serializeSessionReviewExport,
+} from "./model/session-review-export";
+
 import {
   formatGameFormat,
 } from "./utils/format";
@@ -179,6 +188,7 @@ interface ReviewAppProps {
   decisionQuality: ReviewDecisionQuality;
   sessionDecisions: SessionDecision[];
   sessionResults: SessionHandResult[];
+  session: ReviewSession;
   onOpenHand: () => void;
   onSelectHand: (
     handId: string,
@@ -193,6 +203,7 @@ interface ReviewAppProps {
 
 export function ReviewApp({
                             review,
+                            session,
                             hands,
                             sessionSummary,
                             sessionInsights,
@@ -666,6 +677,43 @@ export function ReviewApp({
       )
       : undefined;
 
+  const exportSession = () => {
+    const reviewExport =
+      createSessionReviewExport(
+        session,
+        decisionReviewState,
+        new Date().toISOString(),
+      );
+
+    const json =
+      serializeSessionReviewExport(
+        reviewExport,
+      );
+
+    const blob = new Blob(
+      [json],
+      {
+        type: "application/json",
+      },
+    );
+
+    const url =
+      URL.createObjectURL(blob);
+
+    const anchor =
+      document.createElement("a");
+
+    anchor.href = url;
+    anchor.download =
+      `pokervision-session-${new Date()
+        .toISOString()
+        .slice(0, 10)}.review.json`;
+
+    anchor.click();
+
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <div
       className="app"
@@ -706,6 +754,14 @@ export function ReviewApp({
             }{" "}
             analyzed
           </span>
+
+          <button
+            className="secondary-button"
+            type="button"
+            onClick={exportSession}
+          >
+            Export session
+          </button>
 
           <button
             className="secondary-button"
